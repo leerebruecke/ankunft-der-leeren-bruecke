@@ -6,35 +6,41 @@
 <title>leerebruecke</title>
 
 <style>
-/* Grundlayout */
+/* Grundfarben und Schrift */
+:root {
+  --bg-light: #eae7df;
+  --text-light: #1a1812;
+  --bg-dark: #1a1812;
+  --text-dark: #d4d1c9; /* milderes Weiß */
+}
+
 body {
   margin: 0;
   font-family: 'Cormorant Garamond', serif;
-  background-color: var(--bg);
-  color: var(--text);
-  transition: background-color 0.6s, color 0.6s;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.5s, color 0.5s;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-:root {
-  --bg: #f0ebe3;
-  --text: #1a1812;
-  --accent: #1a1812;
-}
-
+/* Nachtmodus */
 body.dark {
-  --bg: #1a1812;
-  --text: #eae7e1;
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
 }
 
 /* Logo */
+header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px 40px;
+}
 header img {
-  display: block;
-  margin: 40px auto 20px;
-  width: 300px; /* +50% vergrößert */
-  max-width: 80%;
+  width: 220px;
+  max-width: 40%;
 }
 
 /* Menü */
@@ -43,77 +49,78 @@ nav {
   margin-bottom: 40px;
 }
 nav ul {
-  display: inline-block;
   list-style: none;
   padding: 0;
   margin: 0;
-  text-align: left; /* Punkt 1: Zeilen linksbündig */
+  display: inline-block;
+  text-align: left;
 }
 nav ul li {
   margin: 8px 0;
 }
 nav ul li a {
-  color: var(--text);
   text-decoration: none;
+  color: inherit;
   font-size: 1.1em;
+  transition: color 0.2s ease;
 }
 nav ul li a:hover {
-  text-decoration: underline;
+  color: rgba(0,0,0,0.5); /* zarte visuelle Veränderung statt Unterstrich */
+}
+body.dark nav ul li a:hover {
+  color: rgba(255,255,255,0.6);
 }
 
-/* Schriftstücke Dropdown */
+/* Schriftstücke Unterpunkte */
 .submenu {
   display: none;
-  margin-top: 10px;
-  animation: fadeIn 0.6s ease;
+  animation: fadeIn 0.4s ease;
 }
 nav ul li.show .submenu {
   display: block;
 }
-
 @keyframes fadeIn {
-  from {opacity: 0; transform: translateY(-5px);}
+  from {opacity: 0; transform: translateY(-3px);}
   to {opacity: 1; transform: translateY(0);}
 }
 
-/* Schriftstück-Inhalt */
-#content {
+/* Hauptinhalt */
+main {
   flex: 1;
-  text-align: left;
   padding: 0 20px;
   max-width: 750px;
   margin: 0 auto;
-  animation: fadeIn 0.6s ease;
-}
-#content h2 {
-  font-weight: bold;
 }
 
-/* Footer fixiert */
+/* Footer */
 footer {
   text-align: center;
   font-size: 0.8em;
-  padding: 20px;
-  margin-top: auto;
+  padding: 15px 10px;
   position: relative;
+  bottom: 0;
+  margin-top: auto;
+}
+footer p {
+  line-height: 1.6;
+  margin: 0;
 }
 
-/* Tag/Nachtmodus Button */
+/* Tag-/Nachtmodus-Schalter */
 #modeToggle {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.9em;
+  top: 10px;
+  right: 15px;
   background: none;
-  border: 1px solid var(--text);
-  color: var(--text);
-  padding: 6px 12px;
+  border: none;
+  color: inherit;
+  font-size: 0.8em;
   cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s;
 }
 #modeToggle:hover {
-  background: var(--text);
-  color: var(--bg);
+  opacity: 1;
 }
 </style>
 </head>
@@ -143,7 +150,7 @@ footer {
 <main id="content"></main>
 
 <footer>
-  <p>© leerebruecke<br>Eine schöpfende Ordensgemeinschaft der Leere</p>
+  <p>© leerebruecke<br>Über • Unter<br>Eine schöpfende Ordensgemeinschaft der Leere</p>
 </footer>
 
 <script>
@@ -177,12 +184,10 @@ function goBack() {
   document.getElementById("content").innerHTML = "";
 }
 
-/* Dropdown toggle */
 document.getElementById("schriftstuecke").addEventListener("click", function() {
   this.classList.toggle("show");
 });
 
-/* Nachtmodus Toggle */
 const modeButton = document.getElementById("modeToggle");
 modeButton.addEventListener("click", () => {
   document.body.classList.toggle("dark");
