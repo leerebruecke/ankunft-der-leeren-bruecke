@@ -7,29 +7,27 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text&display=swap');
 
+:root {
+  --bg-color: #1a1812;
+  --text-color: #e8e5df;
+  --bg-light: #24211a;
+  --text-light: #1a1812;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #1a1812;
-  color: #e8e5df;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   font-family: 'Libre Caslon Text', serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   min-height: 100vh;
-  box-sizing: border-box;
+  transition: background-color 0.4s, color 0.4s;
 }
 
-/* Tagmodus leicht heller */
-@media (prefers-color-scheme: light) {
-  body {
-    background-color: #24211a;
-    color: #1a1812;
-  }
-}
-
-/* Logo fix oben links */
+/* Logo */
 header img {
   position: fixed;
   top: 2vh;
@@ -39,6 +37,24 @@ header img {
   z-index: 10;
 }
 
+/* Nachtmodus-Button */
+#mode-toggle {
+  position: fixed;
+  top: 2vh;
+  right: 2vw;
+  font-size: 0.9em;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+#mode-toggle:hover {
+  opacity: 1;
+}
+
+/* Hauptinhalt */
 main {
   margin-top: 15vh;
   text-align: left;
@@ -64,10 +80,9 @@ nav a:hover {
   opacity: 0.6;
 }
 
-/* Schriftstücke */
-#schriftstuecke-list {
+/* Schriftstücke-Seite */
+#schriftstuecke-page {
   display: none;
-  margin-top: 1em;
 }
 
 .schrift-item {
@@ -77,22 +92,31 @@ nav a:hover {
 .schrift-title {
   font-weight: bold;
   cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.schrift-title:hover {
-  opacity: 0.7;
+  margin-bottom: 0.5em;
 }
 
 .schrift-content {
   display: none;
-  margin-top: 0.5em;
   line-height: 1.6em;
 }
 
+#zurueck {
+  display: inline-block;
+  margin-bottom: 1.5em;
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
+#zurueck:hover {
+  opacity: 1;
+}
+
+/* Footer */
 footer {
   width: 90%;
-  margin-bottom: 4vh;
+  margin-top: auto;
+  margin-bottom: 3vh;
   font-size: 0.9em;
   opacity: 0.85;
   line-height: 1.4em;
@@ -100,11 +124,11 @@ footer {
   justify-content: space-between;
 }
 
-footer div.left {
+footer .left {
   text-align: left;
 }
 
-footer div.right {
+footer .right {
   text-align: right;
 }
 
@@ -120,10 +144,11 @@ footer div.right {
 <body>
 
 <header>
-  <img src="titel_s.png" alt="leerebruecke Logo">
+  <img src="bilder/titel_s.png" alt="">
+  <button id="mode-toggle">Tagmodus</button>
 </header>
 
-<main>
+<main id="main-nav">
   <nav>
     <a href="#">Klangwerke</a>
     <a id="schriftstuecke-link">Schriftstücke</a>
@@ -131,30 +156,33 @@ footer div.right {
     <a href="#">Geisterjäger</a>
     <a href="#">Unterstützung</a>
   </nav>
+</main>
 
-  <section id="schriftstuecke-list">
-    <div class="schrift-item">
-      <div class="schrift-title">Der Junge mit der Maske</div>
-      <div class="schrift-content">
-        <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.<br>
-        Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-        <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.<br>
-        Die Augen krankhaft aufgequollen.</p>
-        <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten. Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-      </div>
-    </div>
+<main id="schriftstuecke-page">
+  <div id="zurueck">‹ Zurück</div>
+  <h2>Schriftstücke</h2>
 
-    <div class="schrift-item">
-      <div class="schrift-title">Socken</div>
-      <div class="schrift-content">
-        <p>Heute verdiene ich keine sauberen Socken.<br>
-        Nein, heute verdiene ich keine sauberen Socken.</p>
-        <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.<br>
-        Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
-        <p><em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em></p>
-      </div>
+  <div class="schrift-item">
+    <div class="schrift-title">Der Junge mit der Maske</div>
+    <div class="schrift-content">
+      <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.<br>
+      Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
+      <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.<br>
+      Die Augen krankhaft aufgequollen.</p>
+      <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten. Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
     </div>
-  </section>
+  </div>
+
+  <div class="schrift-item">
+    <div class="schrift-title">Socken</div>
+    <div class="schrift-content">
+      <p>Heute verdiene ich keine sauberen Socken.<br>
+      Nein, heute verdiene ich keine sauberen Socken.</p>
+      <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.<br>
+      Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
+      <p><em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em></p>
+    </div>
+  </div>
 </main>
 
 <footer>
@@ -168,9 +196,21 @@ footer div.right {
 </footer>
 
 <script>
-document.getElementById('schriftstuecke-link').addEventListener('click', function() {
-  const list = document.getElementById('schriftstuecke-list');
-  list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+const schriftLink = document.getElementById('schriftstuecke-link');
+const mainNav = document.getElementById('main-nav');
+const schriftPage = document.getElementById('schriftstuecke-page');
+const backBtn = document.getElementById('zurueck');
+const toggleBtn = document.getElementById('mode-toggle');
+let isNight = true;
+
+schriftLink.addEventListener('click', () => {
+  mainNav.style.display = 'none';
+  schriftPage.style.display = 'block';
+});
+
+backBtn.addEventListener('click', () => {
+  schriftPage.style.display = 'none';
+  mainNav.style.display = 'block';
 });
 
 document.querySelectorAll('.schrift-title').forEach(title => {
@@ -178,6 +218,19 @@ document.querySelectorAll('.schrift-title').forEach(title => {
     const content = this.nextElementSibling;
     content.style.display = (content.style.display === 'block') ? 'none' : 'block';
   });
+});
+
+toggleBtn.addEventListener('click', () => {
+  if (isNight) {
+    document.body.style.backgroundColor = 'var(--bg-light)';
+    document.body.style.color = 'var(--text-light)';
+    toggleBtn.textContent = 'Nachtmodus';
+  } else {
+    document.body.style.backgroundColor = 'var(--bg-color)';
+    document.body.style.color = 'var(--text-color)';
+    toggleBtn.textContent = 'Tagmodus';
+  }
+  isNight = !isNight;
 });
 </script>
 
