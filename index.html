@@ -4,220 +4,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>leerebruecke</title>
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap');
-
-:root {
-  --night-bg: #1a1812;
-  --night-text: #e8e5df;
-  --day-bg: #e8e5df;
-  --day-text: #1a1812;
-}
-
+/* Grundlayout */
 body {
   margin: 0;
-  padding: 0;
-  background-color: var(--night-bg);
-  color: var(--night-text);
   font-family: 'Cormorant Garamond', serif;
+  background-color: var(--bg);
+  color: var(--text);
   transition: background-color 0.6s, color 0.6s;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
+:root {
+  --bg: #f0ebe3;
+  --text: #1a1812;
+  --accent: #1a1812;
+}
+
+body.dark {
+  --bg: #1a1812;
+  --text: #eae7e1;
+}
+
 /* Logo */
 header img {
-  position: fixed;
-  top: 2vh;
-  left: 2vw;
-  width: 150px;
-  height: auto;
-  z-index: 10;
+  display: block;
+  margin: 40px auto 20px;
+  width: 300px; /* +50% vergrößert */
+  max-width: 80%;
 }
 
-/* Modus-Button */
-#mode-toggle {
-  position: fixed;
-  top: 2vh;
-  right: 2vw;
-  font-size: 0.85em;
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s;
-}
-#mode-toggle:hover {
-  opacity: 1;
-}
-
-/* Zentriertes Menü */
-main#main-nav {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+/* Menü */
 nav {
-  display: flex;
-  flex-direction: column;
   text-align: center;
-  gap: 0.5em;
+  margin-bottom: 40px;
 }
-
-nav a {
-  color: inherit;
+nav ul {
+  display: inline-block;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left; /* Punkt 1: Zeilen linksbündig */
+}
+nav ul li {
+  margin: 8px 0;
+}
+nav ul li a {
+  color: var(--text);
   text-decoration: none;
-  transition: opacity 0.3s;
-  cursor: pointer;
   font-size: 1.1em;
 }
-
-nav a:hover {
-  opacity: 0.6;
+nav ul li a:hover {
+  text-decoration: underline;
 }
 
-/* Schriftstücke-Seite */
-#schriftstuecke-page {
+/* Schriftstücke Dropdown */
+.submenu {
   display: none;
-  width: 80%;
-  max-width: 700px;
-  margin: 10vh auto 0 auto;
+  margin-top: 10px;
+  animation: fadeIn 0.6s ease;
+}
+nav ul li.show .submenu {
+  display: block;
 }
 
-.schrift-item {
-  margin-bottom: 1.5em;
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-5px);}
+  to {opacity: 1; transform: translateY(0);}
 }
 
-.schrift-title {
-  font-weight: 500;
-  cursor: pointer;
-  margin-bottom: 0.5em;
+/* Schriftstück-Inhalt */
+#content {
+  flex: 1;
+  text-align: left;
+  padding: 0 20px;
+  max-width: 750px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease;
+}
+#content h2 {
+  font-weight: bold;
 }
 
-.schrift-content {
-  display: none;
-  line-height: 1.7em;
-}
-
-#zurueck {
-  display: inline-block;
-  margin-bottom: 1.5em;
-  cursor: pointer;
-  opacity: 0.7;
-  font-size: 0.9em;
-}
-
-#zurueck:hover {
-  opacity: 1;
-}
-
-/* Footer */
+/* Footer fixiert */
 footer {
   text-align: center;
-  margin-bottom: 2vh;
-  font-size: 0.75em;
-  opacity: 0.7;
-  line-height: 1.4em;
+  font-size: 0.8em;
+  padding: 20px;
+  margin-top: auto;
+  position: relative;
 }
-footer a {
-  color: inherit;
-  text-decoration: none;
-  margin: 0 0.3em;
+
+/* Tag/Nachtmodus Button */
+#modeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9em;
+  background: none;
+  border: 1px solid var(--text);
+  color: var(--text);
+  padding: 6px 12px;
+  cursor: pointer;
 }
-footer a:hover {
-  opacity: 0.6;
+#modeToggle:hover {
+  background: var(--text);
+  color: var(--bg);
 }
 </style>
 </head>
 <body>
+<button id="modeToggle">Nachtmodus</button>
 
 <header>
-  <img src="bilder/titel_s.png" alt="">
-  <button id="mode-toggle">Tagmodus</button>
+  <img src="bilder/titel_s.png" alt="leerebruecke Logo">
 </header>
 
-<main id="main-nav">
-  <nav>
-    <a href="#">Klangwerke</a>
-    <a id="schriftstuecke-link">Schriftstücke</a>
-    <a href="#">Gemälde</a>
-    <a href="#">Geisterjäger</a>
-    <a href="#">Unterstützung</a>
-  </nav>
-</main>
+<nav>
+  <ul>
+    <li><a href="#">Klangwerke</a></li>
+    <li id="schriftstuecke">
+      <a href="#">Schriftstücke</a>
+      <ul class="submenu">
+        <li><a href="#" onclick="openText('Der Junge mit der Maske')">Der Junge mit der Maske</a></li>
+        <li><a href="#" onclick="openText('Socken')">Socken</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Gemälde</a></li>
+    <li><a href="#">Geisterjäger</a></li>
+    <li><a href="#">Unterstützung</a></li>
+  </ul>
+</nav>
 
-<main id="schriftstuecke-page">
-  <div id="zurueck">‹ Zurück</div>
-  <h2>Schriftstücke</h2>
-
-  <div class="schrift-item">
-    <div class="schrift-title">Der Junge mit der Maske</div>
-    <div class="schrift-content">
-      <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.<br>
-      Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-      <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.<br>
-      Die Augen krankhaft aufgequollen.</p>
-      <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten. Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-    </div>
-  </div>
-
-  <div class="schrift-item">
-    <div class="schrift-title">Socken</div>
-    <div class="schrift-content">
-      <p>Heute verdiene ich keine sauberen Socken.<br>
-      Nein, heute verdiene ich keine sauberen Socken.</p>
-      <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.<br>
-      Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
-      <p><em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em></p>
-    </div>
-  </div>
-</main>
+<main id="content"></main>
 
 <footer>
-  © leerebruecke · <a href="#">Über</a> · <a href="#">Unter</a><br>
-  <em>Eine schöpfende Ordensgemeinschaft der Leere</em>
+  <p>© leerebruecke<br>Eine schöpfende Ordensgemeinschaft der Leere</p>
 </footer>
 
 <script>
-const schriftLink = document.getElementById('schriftstuecke-link');
-const mainNav = document.getElementById('main-nav');
-const schriftPage = document.getElementById('schriftstuecke-page');
-const backBtn = document.getElementById('zurueck');
-const toggleBtn = document.getElementById('mode-toggle');
-let isNight = true;
+const texts = {
+  "Der Junge mit der Maske": `
+  <h2>Der Junge mit der Maske</h2>
+  <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.
+  Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
+  <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.
+  Die Augen krankhaft aufgequollen.</p>
+  <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten.
+  Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
+  <a href="#" onclick="goBack()">← zurück</a>`,
 
-schriftLink.addEventListener('click', () => {
-  mainNav.style.display = 'none';
-  schriftPage.style.display = 'block';
+  "Socken": `
+  <h2>Socken</h2>
+  <p>Heute verdiene ich keine sauberen Socken.
+  Nein, heute verdiene ich keine sauberen Socken.</p>
+  <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.
+  Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
+  <em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em>
+  <a href="#" onclick="goBack()">← zurück</a>`
+};
+
+function openText(title) {
+  document.querySelector("nav").style.display = "none";
+  document.getElementById("content").innerHTML = texts[title];
+}
+function goBack() {
+  document.querySelector("nav").style.display = "block";
+  document.getElementById("content").innerHTML = "";
+}
+
+/* Dropdown toggle */
+document.getElementById("schriftstuecke").addEventListener("click", function() {
+  this.classList.toggle("show");
 });
 
-backBtn.addEventListener('click', () => {
-  schriftPage.style.display = 'none';
-  mainNav.style.display = 'flex';
-});
-
-document.querySelectorAll('.schrift-title').forEach(title => {
-  title.addEventListener('click', function() {
-    const content = this.nextElementSibling;
-    content.style.display = (content.style.display === 'block') ? 'none' : 'block';
-  });
-});
-
-toggleBtn.addEventListener('click', () => {
-  if (isNight) {
-    document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--day-bg');
-    document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--day-text');
-    toggleBtn.textContent = 'Nachtmodus';
-  } else {
-    document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--night-bg');
-    document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--night-text');
-    toggleBtn.textContent = 'Tagmodus';
-  }
-  isNight = !isNight;
+/* Nachtmodus Toggle */
+const modeButton = document.getElementById("modeToggle");
+modeButton.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  modeButton.textContent = document.body.classList.contains("dark") ? "Tagmodus" : "Nachtmodus";
 });
 </script>
 
