@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>leerebruecke</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+
+    :root {
+      --bg-color: #0f0e0c;
+      --text-color: #dcdcdc;
+      --link-color: #bcbcbc;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Libre Baskerville', serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    header {
+      margin-bottom: 3rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      font-weight: normal;
+      text-transform: lowercase;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    a {
+      text-decoration: none;
+      color: var(--link-color);
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: white;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 1.5rem;
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    /* Nachtmodus Umschalter */
+    .toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle" onclick="toggleMode()">nachtmodus</div>
+
+  <header>
+    <h1>leere brücke</h1>
+  </header>
+
+  <nav>
+    <a href="#">musik</a>
+    <a href="#">texte</a>
+    <a href="#">über</a>
+    <a href="#">unterstützen</a>
+  </nav>
+
+  <footer>
+    © leere brücke
+  </footer>
+
+  <script>
+    function toggleMode() {
+      const r = document.querySelector(':root');
+      const dark = getComputedStyle(r).getPropertyValue('--bg-color').trim() === '#0f0e0c';
+      if (dark) {
+        r.style.setProperty('--bg-color', '#f7f6f2');
+        r.style.setProperty('--text-color', '#141414');
+        r.style.setProperty('--link-color', '#383838');
+      } else {
+        r.style.setProperty('--bg-color', '#0f0e0c');
+        r.style.setProperty('--text-color', '#dcdcdc');
+        r.style.setProperty('--link-color', '#bcbcbc');
+      }
+    }
+  </script>
+</body>
+</html>
 
