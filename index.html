@@ -1,112 +1,185 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>leerebruecke</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>leerebruecke</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text&display=swap');
 
-    :root {
-      --bg-color: #0f0e0c;
-      --text-color: #dcdcdc;
-      --link-color: #bcbcbc;
-    }
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1a1812;
+  color: #e8e5df;
+  font-family: 'Libre Caslon Text', serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Libre Baskerville', serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
+/* Tagmodus leicht heller */
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: #24211a;
+    color: #1a1812;
+  }
+}
 
-    header {
-      margin-bottom: 3rem;
-    }
+/* Logo fix oben links */
+header img {
+  position: fixed;
+  top: 2vh;
+  left: 2vw;
+  width: 160px;
+  height: auto;
+  z-index: 10;
+}
 
-    h1 {
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-      font-weight: normal;
-      text-transform: lowercase;
-    }
+main {
+  margin-top: 15vh;
+  text-align: left;
+  width: 80%;
+  max-width: 700px;
+}
 
-    nav {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
+/* Navigation */
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
 
-    a {
-      text-decoration: none;
-      color: var(--link-color);
-      font-size: 1rem;
-      transition: color 0.2s ease;
-    }
+nav a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
 
-    a:hover {
-      color: white;
-    }
+nav a:hover {
+  opacity: 0.6;
+}
 
-    footer {
-      position: absolute;
-      bottom: 1.5rem;
-      font-size: 0.8rem;
-      opacity: 0.6;
-    }
+/* Schriftstücke */
+#schriftstuecke-list {
+  display: none;
+  margin-top: 1em;
+}
 
-    /* Nachtmodus Umschalter */
-    .toggle {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-  </style>
+.schrift-item {
+  margin-bottom: 1.5em;
+}
+
+.schrift-title {
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.schrift-title:hover {
+  opacity: 0.7;
+}
+
+.schrift-content {
+  display: none;
+  margin-top: 0.5em;
+  line-height: 1.6em;
+}
+
+footer {
+  width: 90%;
+  margin-bottom: 4vh;
+  font-size: 0.9em;
+  opacity: 0.85;
+  line-height: 1.4em;
+  display: flex;
+  justify-content: space-between;
+}
+
+footer div.left {
+  text-align: left;
+}
+
+footer div.right {
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  header img {
+    width: 120px;
+    top: 1.5vh;
+    left: 1.5vw;
+  }
+}
+</style>
 </head>
 <body>
-  <div class="toggle" onclick="toggleMode()">nachtmodus</div>
 
-  <header>
-    <h1>leere brücke</h1>
-  </header>
+<header>
+  <img src="titel_s.png" alt="leerebruecke Logo">
+</header>
 
+<main>
   <nav>
-    <a href="#">musik</a>
-    <a href="#">texte</a>
-    <a href="#">über</a>
-    <a href="#">unterstützen</a>
+    <a href="#">Klangwerke</a>
+    <a id="schriftstuecke-link">Schriftstücke</a>
+    <a href="#">Gemälde</a>
+    <a href="#">Geisterjäger</a>
+    <a href="#">Unterstützung</a>
   </nav>
 
-  <footer>
-    © leere brücke
-  </footer>
+  <section id="schriftstuecke-list">
+    <div class="schrift-item">
+      <div class="schrift-title">Der Junge mit der Maske</div>
+      <div class="schrift-content">
+        <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.<br>
+        Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
+        <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.<br>
+        Die Augen krankhaft aufgequollen.</p>
+        <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten. Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
+      </div>
+    </div>
 
-  <script>
-    function toggleMode() {
-      const r = document.querySelector(':root');
-      const dark = getComputedStyle(r).getPropertyValue('--bg-color').trim() === '#0f0e0c';
-      if (dark) {
-        r.style.setProperty('--bg-color', '#f7f6f2');
-        r.style.setProperty('--text-color', '#141414');
-        r.style.setProperty('--link-color', '#383838');
-      } else {
-        r.style.setProperty('--bg-color', '#0f0e0c');
-        r.style.setProperty('--text-color', '#dcdcdc');
-        r.style.setProperty('--link-color', '#bcbcbc');
-      }
-    }
-  </script>
+    <div class="schrift-item">
+      <div class="schrift-title">Socken</div>
+      <div class="schrift-content">
+        <p>Heute verdiene ich keine sauberen Socken.<br>
+        Nein, heute verdiene ich keine sauberen Socken.</p>
+        <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.<br>
+        Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
+        <p><em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="left">
+    © leerebruecke<br>
+    <em>Eine schöpfende Ordensgemeinschaft der Leere</em>
+  </div>
+  <div class="right">
+    <a href="#">Über</a> · <a href="#">Unter</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('schriftstuecke-link').addEventListener('click', function() {
+  const list = document.getElementById('schriftstuecke-list');
+  list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+});
+
+document.querySelectorAll('.schrift-title').forEach(title => {
+  title.addEventListener('click', function() {
+    const content = this.nextElementSibling;
+    content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+  });
+});
+</script>
+
 </body>
 </html>
-
