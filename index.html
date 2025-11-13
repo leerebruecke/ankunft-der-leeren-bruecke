@@ -5,26 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>leerebruecke</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap');
 
 :root {
-  --bg-color: #1a1812;
-  --text-color: #e8e5df;
-  --bg-light: #24211a;
-  --text-light: #1a1812;
+  --night-bg: #1a1812;
+  --night-text: #e8e5df;
+  --day-bg: #e8e5df;
+  --day-text: #1a1812;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: 'Libre Caslon Text', serif;
+  background-color: var(--night-bg);
+  color: var(--night-text);
+  font-family: 'Cormorant Garamond', serif;
+  transition: background-color 0.6s, color 0.6s;
   display: flex;
   flex-direction: column;
-  align-items: center;
   min-height: 100vh;
-  transition: background-color 0.4s, color 0.4s;
 }
 
 /* Logo */
@@ -32,48 +31,49 @@ header img {
   position: fixed;
   top: 2vh;
   left: 2vw;
-  width: 160px;
+  width: 150px;
   height: auto;
   z-index: 10;
 }
 
-/* Nachtmodus-Button */
+/* Modus-Button */
 #mode-toggle {
   position: fixed;
   top: 2vh;
   right: 2vw;
-  font-size: 0.9em;
+  font-size: 0.85em;
   background: none;
   border: none;
   color: inherit;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.7;
   transition: opacity 0.3s;
 }
 #mode-toggle:hover {
   opacity: 1;
 }
 
-/* Hauptinhalt */
-main {
-  margin-top: 15vh;
-  text-align: left;
-  width: 80%;
-  max-width: 700px;
+/* Zentriertes Menü */
+main#main-nav {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Navigation */
 nav {
   display: flex;
   flex-direction: column;
+  text-align: center;
   gap: 0.5em;
 }
 
 nav a {
   color: inherit;
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s;
   cursor: pointer;
+  font-size: 1.1em;
 }
 
 nav a:hover {
@@ -83,6 +83,9 @@ nav a:hover {
 /* Schriftstücke-Seite */
 #schriftstuecke-page {
   display: none;
+  width: 80%;
+  max-width: 700px;
+  margin: 10vh auto 0 auto;
 }
 
 .schrift-item {
@@ -90,14 +93,14 @@ nav a:hover {
 }
 
 .schrift-title {
-  font-weight: bold;
+  font-weight: 500;
   cursor: pointer;
   margin-bottom: 0.5em;
 }
 
 .schrift-content {
   display: none;
-  line-height: 1.6em;
+  line-height: 1.7em;
 }
 
 #zurueck {
@@ -114,30 +117,19 @@ nav a:hover {
 
 /* Footer */
 footer {
-  width: 90%;
-  margin-top: auto;
-  margin-bottom: 3vh;
-  font-size: 0.9em;
-  opacity: 0.85;
+  text-align: center;
+  margin-bottom: 2vh;
+  font-size: 0.75em;
+  opacity: 0.7;
   line-height: 1.4em;
-  display: flex;
-  justify-content: space-between;
 }
-
-footer .left {
-  text-align: left;
+footer a {
+  color: inherit;
+  text-decoration: none;
+  margin: 0 0.3em;
 }
-
-footer .right {
-  text-align: right;
-}
-
-@media (max-width: 600px) {
-  header img {
-    width: 120px;
-    top: 1.5vh;
-    left: 1.5vw;
-  }
+footer a:hover {
+  opacity: 0.6;
 }
 </style>
 </head>
@@ -186,13 +178,8 @@ footer .right {
 </main>
 
 <footer>
-  <div class="left">
-    © leerebruecke<br>
-    <em>Eine schöpfende Ordensgemeinschaft der Leere</em>
-  </div>
-  <div class="right">
-    <a href="#">Über</a> · <a href="#">Unter</a>
-  </div>
+  © leerebruecke · <a href="#">Über</a> · <a href="#">Unter</a><br>
+  <em>Eine schöpfende Ordensgemeinschaft der Leere</em>
 </footer>
 
 <script>
@@ -210,7 +197,7 @@ schriftLink.addEventListener('click', () => {
 
 backBtn.addEventListener('click', () => {
   schriftPage.style.display = 'none';
-  mainNav.style.display = 'block';
+  mainNav.style.display = 'flex';
 });
 
 document.querySelectorAll('.schrift-title').forEach(title => {
@@ -222,12 +209,12 @@ document.querySelectorAll('.schrift-title').forEach(title => {
 
 toggleBtn.addEventListener('click', () => {
   if (isNight) {
-    document.body.style.backgroundColor = 'var(--bg-light)';
-    document.body.style.color = 'var(--text-light)';
+    document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--day-bg');
+    document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--day-text');
     toggleBtn.textContent = 'Nachtmodus';
   } else {
-    document.body.style.backgroundColor = 'var(--bg-color)';
-    document.body.style.color = 'var(--text-color)';
+    document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--night-bg');
+    document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--night-text');
     toggleBtn.textContent = 'Tagmodus';
   }
   isNight = !isNight;
