@@ -3,31 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leerebruecke</title>
-  <link href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap" rel="stylesheet">
+  <title>leerebruecke</title>
   <style>
-    :root {
-      --white: #e7e5e4;
-      --black: #0c0c0c;
-      --gray: #1a1816;
-      --midgray: #2b2927;
-    }
-
-    * {
-      box-sizing: border-box;
+    body {
+      background-color: #1a1812;
+      color: #D9D5CE;
+      font-family: 'Times New Roman', serif;
+      font-size: 120%;
       margin: 0;
       padding: 0;
-    }
-
-    body {
-      background-color: var(--black);
-      color: var(--white);
-      font-family: 'Jacquard 24', serif;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      line-height: 1.6;
-      letter-spacing: 0.03em;
     }
 
     header {
@@ -35,92 +24,67 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4rem 2rem 2rem;
+      margin-top: 2rem;
     }
 
     header img {
       width: 300px;
-      max-width: 90%;
-      opacity: 0.95;
+      height: auto;
     }
 
     nav {
-      margin-top: 3rem;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      font-size: 1.5rem;
-      text-align: left;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
     }
 
     nav a {
-      color: var(--white);
       text-decoration: none;
-      padding: 0.2rem 0;
-      transition: color 0.3s ease;
-      align-self: flex-start;
-      width: 100%;
-      max-width: 200px;
+      color: #D9D5CE;
+      transition: opacity 0.3s;
     }
 
     nav a:hover {
-      color: #bbb;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem 2rem;
-      text-align: center;
-    }
-
-    main p {
-      color: #ccc;
-      max-width: 600px;
-      margin-top: 1rem;
-      font-size: 1rem;
+      opacity: 0.7;
     }
 
     footer {
-      border-top: 1px solid var(--midgray);
+      font-family: 'Jacquard 24', cursive;
       text-align: center;
-      padding: 1.5rem;
-      font-size: 0.8rem;
-      color: #aaa;
+      margin-top: auto;
+      margin-bottom: 1rem;
+      font-size: 0.9em;
+      color: #D9D5CE;
     }
 
-    footer span {
-      display: block;
-      margin-top: 0.5rem;
-      font-size: 0.75rem;
-      color: #666;
+    footer a {
+      text-decoration: none;
+      color: #D9D5CE;
+      margin: 0 0.5rem;
     }
 
+    footer a:hover {
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
   <header>
-    <img src="Grafiken/leerebruecke.png" alt="Leerebruecke Logo" />
-    <nav>
-      <a href="#Klangwerke">Klangwerke</a>
-      <a href="#Schriftstuecke">Schriftstücke</a>
-      <a href="#Gemaelde">Gemälde</a>
-      <a href="#Orden">Orden</a>
-      <a href="#Unter">Unter</a>
-    </nav>
+    <img src="Grafiken/leerebruecke.png" alt="leerebruecke Logo" />
   </header>
 
-  <main>
-    <p>Eine schöpfende Ordensgemeinschaft der Leere<br>zwischen Dunkelheit und Licht — formend, was bleibt.</p>
-  </main>
+  <nav>
+    <a href="#">Musik</a>
+    <a href="#">Schriftstücke</a>
+    <a href="#">Gemälde</a>
+    <a href="#">Unterstützung</a>
+  </nav>
 
   <footer>
-    © Leerebruecke — Über | Unter
-    <span>In stiller Ehrfurcht vor der Wahrheit</span>
+    <a href="#">Unter</a>
+    <a href="#">Über</a><br />
+    leerebruecke — eine schöpfende Ordensgemeinschaft der Leere
   </footer>
 </body>
 </html>
