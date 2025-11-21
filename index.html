@@ -4,150 +4,148 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>leerebruecke</title>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&family=Cinzel:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --night-bg: #0f0d0b;
-      --night-text: #d4cdbf;
-      --accent: #8e7f56;
-      --highlight: #a69b7b;
+      --black: #0a0908;
+      --ink: #dcd6c8;
+      --veil: #1a1812;
+      --metal: #8f8775;
     }
 
-    * {
-      box-sizing: border-box;
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--black);
+      color: var(--ink);
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: hidden;
     }
 
     body {
-      margin: 0;
-      background-color: var(--night-bg);
-      color: var(--night-text);
-      font-family: 'EB Garamond', serif;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      transition: background-color 1s ease, color 0.6s ease;
-      letter-spacing: 0.03em;
+      min-height: 100vh;
     }
 
     header {
-      display: flex;
-      justify-content: flex-start;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      padding: 1.5rem 2rem 0.5rem 2rem;
+      padding: 1.5rem 2rem;
+      background: linear-gradient(90deg, transparent 0%, var(--veil) 50%, transparent 100%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     header img {
-      width: 260px;
-      height: auto;
+      height: 42px;
+      opacity: 0.85;
+      transform: rotate(-1deg);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    header img:hover {
+      opacity: 1;
+      transform: rotate(0deg) scale(1.02);
     }
 
     nav {
       display: flex;
-      justify-content: center;
-      gap: 2rem;
-      font-family: 'Cinzel', serif;
-      text-transform: uppercase;
-      font-size: 1rem;
-      border-top: 1px solid var(--accent);
-      border-bottom: 1px solid var(--accent);
-      padding: 1rem 0;
-      margin-bottom: 2rem;
-      width: 90%;
-      max-width: 900px;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+      font-family: 'Syne Mono', monospace;
+      text-transform: lowercase;
+      margin-left: auto;
     }
 
     nav a {
+      color: var(--ink);
       text-decoration: none;
-      color: var(--night-text);
-      transition: color 0.4s ease;
+      transition: color 0.4s, letter-spacing 0.4s;
     }
 
     nav a:hover {
-      color: var(--highlight);
+      color: var(--metal);
+      letter-spacing: 0.05em;
     }
 
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      padding: 8rem 2rem 4rem;
       text-align: center;
-      max-width: 800px;
-      padding: 0 2rem;
     }
 
-    main h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 1.5rem;
-      letter-spacing: 0.06em;
-      margin-bottom: 1rem;
-      color: var(--highlight);
+    h1 {
+      font-family: 'Syne Mono', monospace;
+      font-size: clamp(2.5rem, 6vw, 6rem);
+      letter-spacing: -0.03em;
+      text-shadow: 0 0 10px var(--veil);
+      animation: pulse 10s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.9; letter-spacing: -0.02em; }
+      50% { opacity: 1; letter-spacing: 0.05em; }
+      100% { opacity: 0.9; letter-spacing: -0.02em; }
+    }
+
+    section {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background-color: rgba(255,255,255,0.02);
+      border: 1px solid var(--veil);
+      border-radius: 2px;
+      transform: rotate(-0.3deg);
+    }
+
+    section:hover {
+      background-color: rgba(255,255,255,0.04);
+      transform: rotate(0deg);
     }
 
     footer {
       text-align: center;
-      font-size: 0.85rem;
-      opacity: 0.7;
-      padding: 1rem;
-      width: 100%;
-      border-top: 1px solid var(--accent);
-      margin-top: 2rem;
-    }
-
-    footer:hover {
-      opacity: 1;
-    }
-
-    .ornament {
-      width: 40px;
-      height: 2px;
-      background-color: var(--accent);
-      margin: 1rem auto;
-    }
-
-    a.btn {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      margin-top: 1rem;
-      background-color: transparent;
-      border: 1px solid var(--accent);
-      color: var(--highlight);
-      text-decoration: none;
-      transition: all 0.4s ease;
-      font-family: 'Cinzel', serif;
-    }
-
-    a.btn:hover {
-      background-color: var(--accent);
-      color: var(--night-bg);
+      padding: 1.2rem;
+      font-size: 0.8rem;
+      color: var(--metal);
+      border-top: 1px solid var(--veil);
+      font-family: 'Syne Mono', monospace;
+      letter-spacing: 0.04em;
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="Grafiken/leerebruecke.png" alt="leerebruecke Logo" />
+    <img src="Grafiken/leerebruecke.png" alt="leerebruecke Logo">
+    <nav>
+      <a href="#klangwerke">klangwerke</a>
+      <a href="#schriftstuecke">schriftstücke</a>
+      <a href="#gemaelde">gemälde</a>
+      <a href="#orden">orden</a>
+      <a href="#unter">unter</a>
+    </nav>
   </header>
 
-  <nav>
-    <a href="#klangwerke">Klangwerke</a>
-    <a href="#schriftstuecke">Schriftstücke</a>
-    <a href="#gemaelde">Gemälde</a>
-    <a href="#geisterjaeger">Geisterjäger</a>
-    <a href="#unterstuetzung">Unterstützung</a>
-  </nav>
-
   <main>
-    <h2>Eine schöpfende Ordensgemeinschaft der Leere</h2>
-    <div class="ornament"></div>
-    <p>Hier ruht der Ursprung des Werkes, in Stille, Dunkelheit und Klang. Jede Brücke führt in die Leere, und aus ihr wird geschaffen.</p>
-    <a class="btn" href="#entdecken">Eintreten</a>
+    <h1>leerebruecke</h1>
+    <section>
+      <p>eine schöpfende ordensgemeinschaft der leere. <br> wo worte, klänge und formen wie geister zurückkehren – als zeugen des ungesagten.</p>
+    </section>
   </main>
 
   <footer>
-    <p>© leerebruecke — Über | Unter</p>
+    <p>© leerebruecke — über | unter</p>
   </footer>
 </body>
 </html>
