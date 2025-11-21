@@ -1,151 +1,165 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>leerebruecke</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --black: #0a0908;
-      --ink: #dcd6c8;
-      --veil: #1a1812;
-      --metal: #8f8775;
+      --void: #0a0a09;
+      --ember: #dcd1b4;
+      --dust: #b3a57b;
+      --shadow: #1a1814;
+      --pulse: #241f1b;
     }
-
-    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
       padding: 0;
-      background-color: var(--black);
-      color: var(--ink);
-      font-family: 'JetBrains Mono', monospace;
+      background: radial-gradient(circle at 50% 40%, var(--shadow) 0%, var(--void) 80%);
+      color: var(--ember);
+      font-family: 'IBM Plex Mono', monospace;
       overflow-x: hidden;
+      min-height: 100vh;
+      letter-spacing: 0.03em;
     }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('Grafiken/leerebruecke.png') center/20% no-repeat;
+      opacity: 0.03;
+      filter: blur(2px);
+      pointer-events: none;
+      animation: drift 60s infinite linear;
+    }
+
+    @keyframes drift {
+      0% { background-position: 50% 40%; }
+      50% { background-position: 48% 43%; }
+      100% { background-position: 50% 40%; }
     }
 
     header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: 1.5rem 2rem;
-      background: linear-gradient(90deg, transparent 0%, var(--veil) 50%, transparent 100%);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    header img {
-      height: 42px;
-      opacity: 0.85;
-      transform: rotate(-1deg);
-      transition: opacity 0.4s, transform 0.4s;
-    }
-
-    header img:hover {
-      opacity: 1;
-      transform: rotate(0deg) scale(1.02);
+      text-align: center;
+      padding-top: 4rem;
+      font-family: 'UnifrakturCook', cursive;
+      font-size: clamp(3rem, 6vw, 6rem);
+      color: var(--ember);
+      text-shadow: 0 0 15px var(--pulse), 0 0 30px var(--shadow);
+      transform: rotate(-0.5deg);
     }
 
     nav {
       display: flex;
-      gap: 1.6rem;
-      flex-wrap: wrap;
-      font-family: 'Syne Mono', monospace;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--dust);
+      border-bottom: 1px solid var(--dust);
+      padding: 1rem 0;
       text-transform: lowercase;
-      margin-left: auto;
+      font-size: 1rem;
     }
 
     nav a {
-      color: var(--ink);
+      color: var(--ember);
       text-decoration: none;
-      transition: color 0.4s, letter-spacing 0.4s;
+      transition: all 0.4s ease;
     }
 
     nav a:hover {
-      color: var(--metal);
-      letter-spacing: 0.05em;
+      color: var(--dust);
+      letter-spacing: 0.08em;
     }
 
     main {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      padding: 8rem 2rem 4rem;
       text-align: center;
+      margin-top: 4rem;
+      padding: 0 2rem;
     }
 
-    h1 {
-      font-family: 'Syne Mono', monospace;
-      font-size: clamp(2.5rem, 6vw, 6rem);
-      letter-spacing: -0.03em;
-      text-shadow: 0 0 10px var(--veil);
-      animation: pulse 10s infinite alternate ease-in-out;
+    h2 {
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--dust);
     }
 
-    @keyframes pulse {
-      0% { opacity: 0.9; letter-spacing: -0.02em; }
-      50% { opacity: 1; letter-spacing: 0.05em; }
-      100% { opacity: 0.9; letter-spacing: -0.02em; }
+    p {
+      max-width: 700px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--ember);
     }
 
-    section {
-      max-width: 900px;
-      margin: 4rem auto;
-      padding: 2rem;
-      background-color: rgba(255,255,255,0.02);
-      border: 1px solid var(--veil);
-      border-radius: 2px;
-      transform: rotate(-0.3deg);
+    .sigil {
+      margin-top: 3rem;
+      width: 120px;
+      height: 120px;
+      border: 1px solid var(--dust);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: breathe 8s infinite ease-in-out;
     }
 
-    section:hover {
-      background-color: rgba(255,255,255,0.04);
-      transform: rotate(0deg);
+    .sigil::before {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 60%;
+      border: 1px dashed var(--dust);
+      border-radius: 50%;
+      animation: spin 20s linear infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     footer {
       text-align: center;
-      padding: 1.2rem;
+      padding: 2rem;
       font-size: 0.8rem;
-      color: var(--metal);
-      border-top: 1px solid var(--veil);
-      font-family: 'Syne Mono', monospace;
-      letter-spacing: 0.04em;
+      color: var(--dust);
+      border-top: 1px solid var(--pulse);
+      margin-top: 4rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="Grafiken/leerebruecke.png" alt="leerebruecke Logo">
-    <nav>
-      <a href="#klangwerke">klangwerke</a>
-      <a href="#schriftstuecke">schriftstücke</a>
-      <a href="#gemaelde">gemälde</a>
-      <a href="#orden">orden</a>
-      <a href="#unter">unter</a>
-    </nav>
-  </header>
+  <header>leerebruecke</header>
+
+  <nav>
+    <a href="#klangwerke">klangwerke</a>
+    <a href="#schriftstuecke">schriftstücke</a>
+    <a href="#gemaelde">gemälde</a>
+    <a href="#orden">orden</a>
+    <a href="#unter">unter</a>
+  </nav>
 
   <main>
-    <h1>leerebruecke</h1>
-    <section>
-      <p>eine schöpfende ordensgemeinschaft der leere. <br> wo worte, klänge und formen wie geister zurückkehren – als zeugen des ungesagten.</p>
-    </section>
+    <h2>eine schöpfende ordensgemeinschaft der leere</h2>
+    <p>inmitten der ruinen von bedeutung, webt der geist neue brücken aus klang, asche und erinnerung. was vergeht, formt, was bleibt.</p>
+    <div class="sigil"><span>∞</span></div>
   </main>
 
   <footer>
-    <p>© leerebruecke — über | unter</p>
+    © leerebruecke — über | unter
   </footer>
 </body>
 </html>
