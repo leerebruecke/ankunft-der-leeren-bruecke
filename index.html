@@ -1,199 +1,169 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>leerebruecke</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>leerebruecke</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-day: #e9e5dc;
+      --bg-night: #15130f;
+      --text-day: #1a1812;
+      --text-night: #d5d2ca;
+      --accent: #a89772;
+    }
 
-<style>
-/* Grundfarben und Schrift */
-:root {
-  --bg-light: #eae7df;
-  --text-light: #1a1812;
-  --bg-dark: #1a1812;
-  --text-dark: #d4d1c9; /* milderes Weiß */
-}
+    * {
+      box-sizing: border-box;
+    }
 
-body {
-  margin: 0;
-  font-family: 'Cormorant Garamond', serif;
-  background-color: var(--bg-light);
-  color: var(--text-light);
-  transition: background-color 0.5s, color 0.5s;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+    body {
+      margin: 0;
+      font-family: 'EB Garamond', serif;
+      background-color: var(--bg-day);
+      color: var(--text-day);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background-color 0.6s ease, color 0.6s ease;
+    }
 
-/* Nachtmodus */
-body.dark {
-  background-color: var(--bg-dark);
-  color: var(--text-dark);
-}
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 1.5rem 2rem 0.5rem 2rem;
+    }
 
-/* Logo */
-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 20px 40px;
-}
-header img {
-  width: 220px;
-  max-width: 40%;
-}
+    header img {
+      width: 260px;
+      height: auto;
+    }
 
-/* Menü */
-nav {
-  text-align: center;
-  margin-bottom: 40px;
-}
-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: inline-block;
-  text-align: left;
-}
-nav ul li {
-  margin: 8px 0;
-}
-nav ul li a {
-  text-decoration: none;
-  color: inherit;
-  font-size: 1.1em;
-  transition: color 0.2s ease;
-}
-nav ul li a:hover {
-  color: rgba(0,0,0,0.5); /* zarte visuelle Veränderung statt Unterstrich */
-}
-body.dark nav ul li a:hover {
-  color: rgba(255,255,255,0.6);
-}
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 2.2rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
 
-/* Schriftstücke Unterpunkte */
-.submenu {
-  display: none;
-  animation: fadeIn 0.4s ease;
-}
-nav ul li.show .submenu {
-  display: block;
-}
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(-3px);}
-  to {opacity: 1; transform: translateY(0);}
-}
+    nav a {
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      transition: color 0.3s ease;
+    }
 
-/* Hauptinhalt */
-main {
-  flex: 1;
-  padding: 0 20px;
-  max-width: 750px;
-  margin: 0 auto;
-}
+    nav a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      width: 0%;
+      height: 1px;
+      background-color: currentColor;
+      transition: width 0.3s ease;
+    }
 
-/* Footer */
-footer {
-  text-align: center;
-  font-size: 0.8em;
-  padding: 15px 10px;
-  position: relative;
-  bottom: 0;
-  margin-top: auto;
-}
-footer p {
-  line-height: 1.6;
-  margin: 0;
-}
+    nav a:hover::after {
+      width: 100%;
+    }
 
-/* Tag-/Nachtmodus-Schalter */
-#modeToggle {
-  position: fixed;
-  top: 10px;
-  right: 15px;
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 0.8em;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s;
-}
-#modeToggle:hover {
-  opacity: 1;
-}
-</style>
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1, h2, p {
+      margin: 0.6rem 0;
+    }
+
+    h2 {
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      padding: 1rem 0 1.2rem 0;
+      transition: opacity 0.3s ease;
+    }
+
+    footer:hover {
+      opacity: 1;
+    }
+
+    .toggle-mode {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .toggle-mode:hover {
+      opacity: 1;
+    }
+
+    body.night {
+      background-color: var(--bg-night);
+      color: var(--text-night);
+    }
+
+    body.night nav a::after {
+      background-color: var(--text-night);
+    }
+  </style>
 </head>
 <body>
-<button id="modeToggle">Nachtmodus</button>
+  <button class="toggle-mode" onclick="toggleMode()">Nachtmodus</button>
 
-<header>
-  <img src="bilder/titel_s.png" alt="leerebruecke Logo">
-</header>
+  <header>
+    <img src="bilder/titel_s.png" alt="leerebruecke logo" />
+  </header>
 
-<nav>
-  <ul>
-    <li><a href="#">Klangwerke</a></li>
-    <li id="schriftstuecke">
-      <a href="#">Schriftstücke</a>
-      <ul class="submenu">
-        <li><a href="#" onclick="openText('Der Junge mit der Maske')">Der Junge mit der Maske</a></li>
-        <li><a href="#" onclick="openText('Socken')">Socken</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Gemälde</a></li>
-    <li><a href="#">Geisterjäger</a></li>
-    <li><a href="#">Unterstützung</a></li>
-  </ul>
-</nav>
+  <nav>
+    <a href="#klangwerke">Klangwerke</a>
+    <a href="#schriftstuecke">Schriftstücke</a>
+    <a href="#gemaelde">Gemälde</a>
+    <a href="#geisterjaeger">Geisterjäger</a>
+    <a href="#unterstuetzung">Unterstützung</a>
+  </nav>
 
-<main id="content"></main>
+  <main>
+    <h2>Eine schöpfende Ordensgemeinschaft der Leere</h2>
+    <p>Willkommen bei leerebruecke.</p>
+  </main>
 
-<footer>
-  <p>© leerebruecke<br>Über • Unter<br>Eine schöpfende Ordensgemeinschaft der Leere</p>
-</footer>
+  <footer>
+    <p>© leerebruecke — Über | Unter</p>
+  </footer>
 
-<script>
-const texts = {
-  "Der Junge mit der Maske": `
-  <h2>Der Junge mit der Maske</h2>
-  <p>Er sitzt an der Kirchenmauer und betrachtet Insekten.
-  Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-  <p>Seine Maske, Zeugin verschluckender Dunkelheit — lächelt breit und hemmungslos.
-  Die Augen krankhaft aufgequollen.</p>
-  <p>Und doch sitzt er da, an seiner Mauer und betrachtet mit einer ausserweltlichen Zärtlichkeit Insekten.
-  Wie sie sich in nahegelegenes Unkraut stürzen, Gesteinsbrocken erklimmen und nach Liebe suchen.</p>
-  <a href="#" onclick="goBack()">← zurück</a>`,
-
-  "Socken": `
-  <h2>Socken</h2>
-  <p>Heute verdiene ich keine sauberen Socken.
-  Nein, heute verdiene ich keine sauberen Socken.</p>
-  <p>Gestern habe ich sie vielleicht noch verdient aber nicht heute.
-  Es kann sein, dass ich sie wann anders verdient hätte aber heute nicht, heute bin ich nicht würdevoll genug.</p>
-  <em>Und so zog er sich dreckige Socken an und verbrachte den Tag.</em>
-  <a href="#" onclick="goBack()">← zurück</a>`
-};
-
-function openText(title) {
-  document.querySelector("nav").style.display = "none";
-  document.getElementById("content").innerHTML = texts[title];
-}
-function goBack() {
-  document.querySelector("nav").style.display = "block";
-  document.getElementById("content").innerHTML = "";
-}
-
-document.getElementById("schriftstuecke").addEventListener("click", function() {
-  this.classList.toggle("show");
-});
-
-const modeButton = document.getElementById("modeToggle");
-modeButton.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  modeButton.textContent = document.body.classList.contains("dark") ? "Tagmodus" : "Nachtmodus";
-});
-</script>
-
+  <script>
+    function toggleMode() {
+      const body = document.body;
+      const button = document.querySelector('.toggle-mode');
+      body.classList.toggle('night');
+      button.textContent = body.classList.contains('night') ? 'Tagmodus' : 'Nachtmodus';
+    }
+  </script>
 </body>
 </html>
