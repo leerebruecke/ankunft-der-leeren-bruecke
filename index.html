@@ -1,165 +1,125 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>leerebruecke</title>
-  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --void: #0a0a09;
-      --ember: #dcd1b4;
-      --dust: #b3a57b;
-      --shadow: #1a1814;
-      --pulse: #241f1b;
+      --white: #e7e5e4;
+      --black: #0c0c0c;
+      --gray: #1a1816;
+      --midgray: #2b2927;
     }
 
-    html, body {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at 50% 40%, var(--shadow) 0%, var(--void) 80%);
-      color: var(--ember);
-      font-family: 'IBM Plex Mono', monospace;
-      overflow-x: hidden;
+    }
+
+    body {
+      background-color: var(--black);
+      color: var(--white);
+      font-family: 'IBM Plex Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
-      letter-spacing: 0.03em;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: url('Grafiken/leerebruecke.png') center/20% no-repeat;
-      opacity: 0.03;
-      filter: blur(2px);
-      pointer-events: none;
-      animation: drift 60s infinite linear;
-    }
-
-    @keyframes drift {
-      0% { background-position: 50% 40%; }
-      50% { background-position: 48% 43%; }
-      100% { background-position: 50% 40%; }
+      line-height: 1.6;
+      letter-spacing: 0.02em;
     }
 
     header {
-      text-align: center;
-      padding-top: 4rem;
-      font-family: 'UnifrakturCook', cursive;
-      font-size: clamp(3rem, 6vw, 6rem);
-      color: var(--ember);
-      text-shadow: 0 0 15px var(--pulse), 0 0 30px var(--shadow);
-      transform: rotate(-0.5deg);
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 2rem;
-      border-top: 1px solid var(--dust);
-      border-bottom: 1px solid var(--dust);
-      padding: 1rem 0;
-      text-transform: lowercase;
-      font-size: 1rem;
-    }
-
-    nav a {
-      color: var(--ember);
-      text-decoration: none;
-      transition: all 0.4s ease;
-    }
-
-    nav a:hover {
-      color: var(--dust);
-      letter-spacing: 0.08em;
-    }
-
-    main {
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
-      margin-top: 4rem;
-      padding: 0 2rem;
+      justify-content: center;
+      padding: 4rem 2rem 2rem;
     }
 
-    h2 {
-      font-family: 'UnifrakturCook', cursive;
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: var(--dust);
+    header img {
+      width: 180px;
+      max-width: 90%;
+      opacity: 0.95;
     }
 
-    p {
-      max-width: 700px;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--ember);
-    }
-
-    .sigil {
-      margin-top: 3rem;
-      width: 120px;
-      height: 120px;
-      border: 1px solid var(--dust);
-      border-radius: 50%;
+    nav {
+      margin-top: 2rem;
       display: flex;
+      gap: 2.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+    }
+
+    nav a {
+      color: var(--white);
+      text-decoration: none;
+      text-transform: lowercase;
+      padding: 0.2rem 0;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #bbb;
+      border-color: var(--gray);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
-      animation: breathe 8s infinite ease-in-out;
+      padding: 4rem 2rem;
+      text-align: center;
     }
 
-    .sigil::before {
-      content: '';
-      position: absolute;
-      width: 60%;
-      height: 60%;
-      border: 1px dashed var(--dust);
-      border-radius: 50%;
-      animation: spin 20s linear infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; }
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    main p {
+      color: #ccc;
+      max-width: 600px;
+      margin-top: 1rem;
+      font-size: 1rem;
     }
 
     footer {
+      border-top: 1px solid var(--midgray);
       text-align: center;
-      padding: 2rem;
+      padding: 1.5rem;
       font-size: 0.8rem;
-      color: var(--dust);
-      border-top: 1px solid var(--pulse);
-      margin-top: 4rem;
+      color: #aaa;
     }
+
+    footer span {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #666;
+    }
+
   </style>
 </head>
 <body>
-  <header>leerebruecke</header>
-
-  <nav>
-    <a href="#klangwerke">klangwerke</a>
-    <a href="#schriftstuecke">schriftstücke</a>
-    <a href="#gemaelde">gemälde</a>
-    <a href="#orden">orden</a>
-    <a href="#unter">unter</a>
-  </nav>
+  <header>
+    <img src="Grafiken/leerebruecke.png" alt="leerebruecke logo" />
+    <nav>
+      <a href="#klangwerke">klangwerke</a>
+      <a href="#schriftstuecke">schriftstücke</a>
+      <a href="#gemaelde">gemälde</a>
+      <a href="#orden">orden</a>
+      <a href="#unter">unter</a>
+    </nav>
+  </header>
 
   <main>
-    <h2>eine schöpfende ordensgemeinschaft der leere</h2>
-    <p>inmitten der ruinen von bedeutung, webt der geist neue brücken aus klang, asche und erinnerung. was vergeht, formt, was bleibt.</p>
-    <div class="sigil"><span>∞</span></div>
+    <p>eine schöpfende ordensgemeinschaft der leere<br>zwischen dunkelheit und licht — formend, was bleibt.</p>
   </main>
 
   <footer>
     © leerebruecke — über | unter
+    <span>in stiller ehrfurcht vor der wahrheit</span>
   </footer>
 </body>
 </html>
