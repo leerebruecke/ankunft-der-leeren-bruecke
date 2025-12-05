@@ -7,140 +7,188 @@
 <title>leerebruecke</title>
 
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: black;
-    }
+/* === Grundlayout === */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #1A1218;
+}
 
-    img {
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-    }
+/* Bild-Schutz */
+img {
+    user-drag: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
 
-    #bg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        top: 0;
-        left: 0;
-        z-index: 1;
-    }
+/* === Maximale Fläche der Seite (für Desktop wichtig) === */
+#frame {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    max-width: 1080px;
+    max-height: 1920px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+}
 
-    #title {
-        position: absolute;
-        top: 3vh;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60%;
-        z-index: 3;
-        image-rendering: pixelated;
-    }
+/* === Hintergrundgrafik === */
+#bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    position: absolute;
+}
 
-    @font-face {
-        font-family: "Jaquard12";
-        src: url("Grafiken/Jaquard12.ttf") format("truetype");
-    }
+/* === Überschrift === */
+#title {
+    position: absolute;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 65%;
+    z-index: 4;
+}
 
-    #menu {
-        position: absolute;
-        top: 20vh;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-        opacity: 0;
-        transition: opacity 1.2s ease;
-        z-index: 4;
-    }
+/* === Font === */
+@font-face {
+    font-family: "Jaquard12";
+    src: url("Grafiken/Jaquard12.ttf") format("truetype");
+}
 
-    .menu-item {
-        font-family: "Jaquard12", monospace;
-        color: #e6e6e6;
-        font-size: 3.6vh;
-        margin: 2.2vh 0;
-        cursor: pointer;
-        user-select: none;
-        transition: opacity 0.4s ease, transform 1.0s ease;
-    }
+/* === Menüblock === */
+#menu {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+}
 
-    /* Bereich für späteren Text */
-    #content {
-        position: absolute;
-        top: 40vh;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        color: #dcdcdc;
-        font-family: "Jaquard12", monospace;
-        font-size: 2.4vh;
-        text-align: center;
-        opacity: 0;
-        transition: opacity 1s ease;
-        z-index: 4;
-    }
+.menu-item {
+    font-family: "Jaquard12", monospace;
+    color: #E6E6E6;
+    font-size: 3.4vh;
+    margin: 2vh 0;
+    opacity: 0;
+    transform: translateY(-4vh);
+    user-select: none;
+    cursor: pointer;
+    transition: opacity 1.2s ease, transform 1.2s ease;
+}
+
+/* === Content === */
+#content {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    color: #DCDCDC;
+    font-family: "Jaquard12";
+    font-size: 2.4vh;
+    text-align: center;
+    opacity: 0;
+    z-index: 5;
+    transition: opacity 1s ease;
+}
+
+/* === Zurück === */
+#back {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-family: "Jaquard12";
+    color: #B8B8B8;
+    font-size: 2.7vh;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.6s ease;
+    user-select: none;
+}
 </style>
 
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-<img id="bg" src="Grafiken/Brücke.png">
-<img id="title" src="Grafiken/leerebruecke.png">
+<div id="frame">
 
-<div id="menu">
-    <div class="menu-item" onclick="choose(this, 'musik')">Musik</div>
-    <div class="menu-item" onclick="choose(this, 'gemaelde')">Gemälde</div>
-    <div class="menu-item" onclick="choose(this, 'unterstuetzung')">Unterstützung</div>
+    <img id="bg" src="Grafiken/Brücke.png">
+    <img id="title" src="Grafiken/leerebruecke.png">
+
+    <div id="back" onclick="resetMenu()">— zurück</div>
+
+    <div id="menu">
+        <div class="menu-item" id="m1" onclick="choose(this, 'musik')">Musik</div>
+        <div class="menu-item" id="m2" onclick="choose(this, 'gemaelde')">Gemälde</div>
+        <div class="menu-item" id="m3" onclick="choose(this, 'unterstuetzung')">Unterstützung</div>
+    </div>
+
+    <div id="content"></div>
+
 </div>
 
-<div id="content"></div>
-
 <script>
-    /* Menü sanft einblenden */
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById("menu").style.opacity = 1;
-        }, 900);
-    };
+/* Einzelnes, verzögertes Reingleiten */
+window.onload = () => {
+    setTimeout(() => { document.getElementById("m1").style.opacity = 1; document.getElementById("m1").style.transform = "translateY(0)"; }, 300);
+    setTimeout(() => { document.getElementById("m2").style.opacity = 1; document.getElementById("m2").style.transform = "translateY(0)"; }, 800);
+    setTimeout(() => { document.getElementById("m3").style.opacity = 1; document.getElementById("m3").style.transform = "translateY(0)"; }, 1300);
+};
 
-    function choose(clickedItem, section) {
-        const menu = document.getElementById("menu");
-        const items = document.querySelectorAll(".menu-item");
+/* Menüauswahl */
+function choose(item, section) {
+    const all = document.querySelectorAll(".menu-item");
 
-        /* Andere Punkte ausblenden */
-        items.forEach(item => {
-            if (item !== clickedItem) {
-                item.style.opacity = 0;
-            }
-        });
-
-        /* Gewählten Punkt nach oben ziehen */
-        clickedItem.style.transform = "translateY(-12vh)";
-
-        /* Wenn er oben angekommen ist, Content zeigen */
-        setTimeout(() => {
-            showContent(section);
-        }, 900);
-    }
-
-    function showContent(section) {
-        const content = document.getElementById("content");
-
-        let text = "";
-        if (section === "musik") {
-            text = "Hier entsteht der Pfad zur Musik.";
-        } else if (section === "gemaelde") {
-            text = "Hier entsteht der Pfad zu den Gemälden.";
-        } else if (section === "unterstuetzung") {
-            text = "Hier entsteht der Pfad zur Unterstützung.";
+    all.forEach(m => {
+        if (m !== item) {
+            m.style.opacity = 0;
         }
+    });
 
-        content.innerText = text;
-        content.style.opacity = 1;
-    }
+    item.style.transform = "translateY(-10vh)";
+    document.getElementById("back").style.opacity = 1;
+
+    setTimeout(() => { showContent(section); }, 1200);
+}
+
+function showContent(section) {
+    const c = document.getElementById("content");
+    let text = "";
+
+    if (section === "musik") text = "Hier entsteht der Pfad zur Musik.";
+    if (section === "gemaelde") text = "Hier entsteht der Pfad zu den Gemälden.";
+    if (section === "unterstuetzung") text = "Hier entsteht der Pfad zur Unterstützung.";
+
+    c.innerText = text;
+    c.style.opacity = 1;
+}
+
+/* Zurück */
+function resetMenu() {
+    const items = document.querySelectorAll(".menu-item");
+    const c = document.getElementById("content");
+
+    c.style.opacity = 0;
+    document.getElementById("back").style.opacity = 0;
+
+    items.forEach((m, i) => {
+        setTimeout(() => {
+            m.style.opacity = 1;
+            m.style.transform = "translateY(0)";
+        }, 200 + i * 300);
+    });
+}
 </script>
 
 </body>
