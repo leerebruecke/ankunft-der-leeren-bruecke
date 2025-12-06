@@ -13,11 +13,7 @@
 
 /* RESET */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   height: 100%;
@@ -28,11 +24,7 @@ html, body {
   overflow: hidden;
 }
 
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+body { display: flex; align-items: center; justify-content: center; }
 
 /* FRAME */
 
@@ -75,25 +67,25 @@ body {
   .logo-img { margin-top: 10%; }
 }
 
-/* ------------------------ VIEWPORT-SLOT ------------------------ */
+/* ----------------------------- SLOT ----------------------------- */
 
 .slot-window {
   position: relative;
   width: 55%;
-  height: 85px; /* genug für Geister-Previews */
+  height: 65px; /* B-Auswahl: perfekt kompakt */
   overflow: hidden;
 
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0,0,0,0.9) 15%,
+    rgba(0,0,0,0.85) 22%,
     black 50%,
-    rgba(0,0,0,0.9) 85%,
+    rgba(0,0,0,0.85) 78%,
     transparent 100%
   );
 }
 
-/* LISTE (triple reel) */
+/* TRIPLE LIST – ENDLOS */
 
 .slot-list {
   position: absolute;
@@ -102,7 +94,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: top 180ms cubic-bezier(.32,.72,.23,1);
+  transition: top 170ms cubic-bezier(.32,.72,.23,1);
 }
 
 /* ITEMS */
@@ -115,8 +107,8 @@ body {
   align-items: center;
   justify-content: center;
 
-  opacity: 0.22;           /* Geister */
-  transform: scale(0.85);  /* leichte Tiefenwirkung */
+  opacity: 0.20;         /* Geister-Preview */
+  transform: scale(0.85);
   transition: opacity 150ms, transform 150ms;
 }
 
@@ -125,7 +117,7 @@ body {
   transform: scale(1.05);
 }
 
-/* PFEILE */
+/* ARROWS */
 
 .arrow {
   width: 0; height: 0;
@@ -169,38 +161,45 @@ body {
   <div class="page-background"></div>
 
   <div class="page-content">
-    <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false"/>
+
+    <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
     <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <!-- Slot-Fenster -->
+    <!-- VIEWPORT -->
     <div class="slot-window">
       <div class="slot-list" id="slot-list">
-        <!-- TRIPLE-LIST (Endlosmechanik) -->
+
+        <!-- BLOCK 1 -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
 
+        <!-- BLOCK 2 (sichtbarer Hauptblock) -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
 
+        <!-- BLOCK 3 -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
+
       </div>
     </div>
 
     <div class="arrow arrow-down" id="arrow-down"></div>
 
     <div class="section-area" id="section-area"></div>
+
   </div>
 </div>
 
 <script>
-/* EINTRÄGE */
 
-const baseItems = ["Musik", "Gemälde", "Unterstützung"];
+/* BASIS */
+
+const baseItems = ["Musik","Gemälde","Unterstützung"];
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
   Gemälde: "Dies ist ein Testtext für Gemälde.",
@@ -211,13 +210,10 @@ const list = document.getElementById("slot-list");
 const items = [...document.querySelectorAll(".slot-item")];
 const out = document.getElementById("section-area");
 
-let index = 1;           // wir starten im mittleren Block
-let visualIndex = 1;     // für die Sichtbarkeit
-let topPos = -42 * 1;    // Anfangsposition im 2. Block
-
+let visualIndex = 4;              // START-POSITION (Block 2 – mittig)
+let topPos = -(42 * (visualIndex - 1));
 const ITEM_HEIGHT = 42;
 
-/* Initialposition setzen */
 list.style.top = topPos + "px";
 
 /* UPDATE */
@@ -226,55 +222,53 @@ function update() {
   items.forEach(i => i.classList.remove("active"));
   items[visualIndex].classList.add("active");
 
-  const real = baseItems[ (visualIndex % 3 + 3) % 3 ];
+  const real = baseItems[(visualIndex % 3 + 3) % 3];
 
   out.classList.remove("visible");
   setTimeout(() => {
     out.textContent = texts[real];
     out.classList.add("visible");
-  }, 100);
+  }, 80);
 }
 
 /* MOVE */
 
 function moveDown() {
+  visualIndex++;
   topPos -= ITEM_HEIGHT;
   list.style.top = topPos + "px";
 
-  visualIndex++;
-
   setTimeout(() => {
-    if (visualIndex >= 6) {
-      visualIndex = 3;
-      topPos = -(ITEM_HEIGHT * 3);
+    if (visualIndex >= 7) {
+      visualIndex = 4;
+      topPos = -(42 * 3);
       list.style.top = topPos + "px";
     }
     update();
-  }, 180);
+  }, 170);
 }
 
 function moveUp() {
+  visualIndex--;
   topPos += ITEM_HEIGHT;
   list.style.top = topPos + "px";
 
-  visualIndex--;
-
   setTimeout(() => {
-    if (visualIndex < 3) {
-      visualIndex = 5;
-      topPos = -(ITEM_HEIGHT * 5);
+    if (visualIndex <= 1) {
+      visualIndex = 4;
+      topPos = -(42 * 3);
       list.style.top = topPos + "px";
     }
     update();
-  }, 180);
+  }, 170);
 }
 
-/* PFEILE */
+/* EVENTS */
 
 document.getElementById("arrow-up").onclick = moveUp;
 document.getElementById("arrow-down").onclick = moveDown;
 
-/* MOBILE */
+/* TOUCH */
 
 let startY = 0;
 
@@ -288,9 +282,10 @@ list.addEventListener("touchend", e => {
   if (diff < -40) moveDown();
 });
 
-/* START */
+/* INIT */
 
 update();
+
 </script>
 
 </body>
