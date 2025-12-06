@@ -33,34 +33,28 @@
       justify-content: center;
     }
 
-    /* -------------------------------------------------- */
-    /* PAGE FRAME (125%)                                  */
-    /* -------------------------------------------------- */
+    /* FRAME mit 120% */
 
     .page-frame {
       position: relative;
 
-      /* Basisgröße */
       --base: min(100vh, 1200px);
 
-      /* 125% Skalierung */
-      height: calc(var(--base) * 1.25);
-      width: calc(var(--base) * 1.25 * 9/16);
+      height: calc(var(--base) * 1.20);
+      width: calc(var(--base) * 1.20 * 9/16);
 
       max-width: 100vw;
       overflow: hidden;
       transform-origin: center;
     }
 
-    /* -------------------------------------------------- */
-    /* BACKGROUND (fix auf 100%)                          */
-    /* -------------------------------------------------- */
+    /* Hintergrund bleibt bei 100% */
 
     .page-background {
       position: absolute;
       inset: 0;
       background-image: url("Grafiken/Br%C3%BCcke.png");
-      background-size: 100% 100%; /* 100%, keine automatische Skalierung */
+      background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
       image-rendering: pixelated;
@@ -68,30 +62,29 @@
       pointer-events: none;
     }
 
-    /* -------------------------------------------------- */
-    /* CONTENT                                            */
-    /* -------------------------------------------------- */
+    /* CONTENT */
 
     .page-content {
       position: absolute;
       inset: 0;
-      padding: 1.8rem 1.1rem;
+      padding: 1.1rem 1.1rem; /* etwas kleinerer Padding, damit oben Platz entsteht */
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* Logo verkleinert + ganz oben ausgerichtet */
+
     .logo-img {
-      width: 95%;
+      width: 70%;          /* vorher 95% – jetzt kleiner */
       height: auto;
+      margin-top: 0.2rem;  /* praktisch ganz oben */
       margin-bottom: 0.4rem;
       image-rendering: pixelated;
       pointer-events: none;
     }
 
-    /* -------------------------------------------------- */
-    /* MENU                                               */
-    /* -------------------------------------------------- */
+    /* MENU */
 
     .menu-list {
       list-style: none;
@@ -123,9 +116,7 @@
       transform: translateY(0);
     }
 
-    /* -------------------------------------------------- */
-    /* CURRENT LABEL + BACK                               */
-    /* -------------------------------------------------- */
+    /* CURRENT LABEL + BACK */
 
     .current-label {
       margin-top: 0.4rem;
@@ -158,9 +149,7 @@
       transform: translateY(0);
     }
 
-    /* -------------------------------------------------- */
-    /* SECTIONS                                           */
-    /* -------------------------------------------------- */
+    /* SECTIONS */
 
     .sections {
       margin-top: 1rem;
