@@ -28,7 +28,11 @@ html, body {
   overflow: hidden;
 }
 
-body { display: flex; align-items: center; justify-content: center; }
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* FRAME */
 
@@ -71,38 +75,54 @@ body { display: flex; align-items: center; justify-content: center; }
   .logo-img { margin-top: 10%; }
 }
 
-/* ------------------------ HARD VIEWPORT SLOT ------------------------ */
+/* ------------------------ VIEWPORT-SLOT ------------------------ */
 
 .slot-window {
-  width: 55%;
-  height: 38px;    /* nur EINE Zeile sichtbar */
-  overflow: hidden; /* harte Kante */
   position: relative;
+  width: 55%;
+  height: 85px; /* genug für Geister-Previews */
+  overflow: hidden;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.9) 15%,
+    black 50%,
+    rgba(0,0,0,0.9) 85%,
+    transparent 100%
+  );
 }
 
+/* LISTE (triple reel) */
+
 .slot-list {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   transition: top 180ms cubic-bezier(.32,.72,.23,1);
 }
 
+/* ITEMS */
+
 .slot-item {
-  height: 38px;
-  font-size: 0.82rem;
+  height: 42px;
+  font-size: 0.86rem;
   letter-spacing: 0.1em;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.22;
+
+  opacity: 0.22;           /* Geister */
+  transform: scale(0.85);  /* leichte Tiefenwirkung */
+  transition: opacity 150ms, transform 150ms;
 }
 
 .slot-item.active {
   opacity: 1;
+  transform: scale(1.05);
 }
 
 /* PFEILE */
@@ -118,8 +138,15 @@ body { display: flex; align-items: center; justify-content: center; }
 
 .arrow:hover { opacity: 1; }
 
-.arrow-up   { border-bottom: 14px solid var(--text-main); margin-bottom: 4px; }
-.arrow-down { border-top: 14px solid var(--text-main);   margin-top: 4px;  }
+.arrow-up {
+  border-bottom: 14px solid var(--text-main);
+  margin-bottom: 4px;
+}
+
+.arrow-down {
+  border-top: 14px solid var(--text-main);
+  margin-top: 4px;
+}
 
 /* TEXT */
 
@@ -129,7 +156,10 @@ body { display: flex; align-items: center; justify-content: center; }
   opacity: 0;
   transition: opacity 260ms ease-out;
 }
-.section-area.visible { opacity: 1; }
+
+.section-area.visible {
+  opacity: 1;
+}
 
 </style>
 </head>
@@ -139,15 +169,18 @@ body { display: flex; align-items: center; justify-content: center; }
   <div class="page-background"></div>
 
   <div class="page-content">
-
-    <img src="Grafiken/leerebruecke.png" class="logo-img"/>
+    <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false"/>
 
     <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <!-- HARD VIEWPORT -->
+    <!-- Slot-Fenster -->
     <div class="slot-window">
       <div class="slot-list" id="slot-list">
-        <!-- DUPLIERT FÜR REEL -->
+        <!-- TRIPLE-LIST (Endlosmechanik) -->
+        <div class="slot-item">Musik</div>
+        <div class="slot-item">Gemälde</div>
+        <div class="slot-item">Unterstützung</div>
+
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
@@ -161,73 +194,99 @@ body { display: flex; align-items: center; justify-content: center; }
     <div class="arrow arrow-down" id="arrow-down"></div>
 
     <div class="section-area" id="section-area"></div>
-
   </div>
 </div>
 
 <script>
-const items = ["Musik","Gemälde","Unterstützung"];
+/* EINTRÄGE */
+
+const baseItems = ["Musik", "Gemälde", "Unterstützung"];
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
   Gemälde: "Dies ist ein Testtext für Gemälde.",
   Unterstützung: "Dies ist ein Testtext für Unterstützung."
 };
 
-const slot = document.getElementById("slot-list");
-const els = [...document.querySelectorAll(".slot-item")];
-const textOut = document.getElementById("section-area");
+const list = document.getElementById("slot-list");
+const items = [...document.querySelectorAll(".slot-item")];
+const out = document.getElementById("section-area");
 
-let index = 0;
-let topPos = 0;
-const ITEM_HEIGHT = 38;
-const SEGMENT = ITEM_HEIGHT;
-const MAX = els.length;
+let index = 1;           // wir starten im mittleren Block
+let visualIndex = 1;     // für die Sichtbarkeit
+let topPos = -42 * 1;    // Anfangsposition im 2. Block
+
+const ITEM_HEIGHT = 42;
+
+/* Initialposition setzen */
+list.style.top = topPos + "px";
 
 /* UPDATE */
 
 function update() {
-  els.forEach(e => e.classList.remove("active"));
-  els[index].classList.add("active");
+  items.forEach(i => i.classList.remove("active"));
+  items[visualIndex].classList.add("active");
 
-  textOut.classList.remove("visible");
+  const real = baseItems[ (visualIndex % 3 + 3) % 3 ];
+
+  out.classList.remove("visible");
   setTimeout(() => {
-    textOut.textContent = texts[items[index % 3]];
-    textOut.classList.add("visible");
-  }, 120);
+    out.textContent = texts[real];
+    out.classList.add("visible");
+  }, 100);
 }
 
 /* MOVE */
 
-function moveDown(){
-  topPos -= SEGMENT;
-  slot.style.top = topPos + "px";
+function moveDown() {
+  topPos -= ITEM_HEIGHT;
+  list.style.top = topPos + "px";
 
-  setTimeout(()=>{
-    index = (index + 1) % 3;
-    if(topPos <= -SEGMENT*3){
-      topPos = 0;
-      slot.style.top = "0px";
+  visualIndex++;
+
+  setTimeout(() => {
+    if (visualIndex >= 6) {
+      visualIndex = 3;
+      topPos = -(ITEM_HEIGHT * 3);
+      list.style.top = topPos + "px";
     }
     update();
-  },180);
+  }, 180);
 }
 
-function moveUp(){
-  topPos += SEGMENT;
-  slot.style.top = topPos + "px";
+function moveUp() {
+  topPos += ITEM_HEIGHT;
+  list.style.top = topPos + "px";
 
-  setTimeout(()=>{
-    index = (index - 1 + 3) % 3;
-    if(topPos > 0){
-      topPos = -SEGMENT*2;
-      slot.style.top = topPos + "px";
+  visualIndex--;
+
+  setTimeout(() => {
+    if (visualIndex < 3) {
+      visualIndex = 5;
+      topPos = -(ITEM_HEIGHT * 5);
+      list.style.top = topPos + "px";
     }
     update();
-  },180);
+  }, 180);
 }
+
+/* PFEILE */
 
 document.getElementById("arrow-up").onclick = moveUp;
 document.getElementById("arrow-down").onclick = moveDown;
+
+/* MOBILE */
+
+let startY = 0;
+
+list.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+
+list.addEventListener("touchend", e => {
+  const diff = e.changedTouches[0].clientY - startY;
+  if (diff > 40) moveUp();
+  if (diff < -40) moveDown();
+});
 
 /* START */
 
