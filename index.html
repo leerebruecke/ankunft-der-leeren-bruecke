@@ -4,46 +4,42 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>leerebruecke</title>
-
-  <!-- Grundfarbe -->
+ 
   <style>
     :root {
       --bg-root: #1a1218;
       --text-main: #f5f0e8;
       --text-muted: #c6beb3;
     }
-
+ 
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
-
+ 
     html, body {
       height: 100%;
       background: var(--bg-root);
       color: var(--text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: monospace;
+      user-select: none;
     }
-
+ 
     body {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
-    /* Der zentrale Rahmen im 9:16-Format */
+ 
     .page-frame {
       position: relative;
-      height: min(100vh, 1200px);
-      width: calc(min(100vh, 1200px) * 9 / 16);
+      height: min(100vh,1200px);
+      width: calc(min(100vh,1200px) * 9/16);
       max-width: 100vw;
-      border-radius: 0;
       overflow: hidden;
-      user-select: none;
     }
-
-    /* Hintergrundzeichnung */
+ 
     .page-background {
       position: absolute;
       inset: 0;
@@ -52,412 +48,172 @@
       background-position: center;
       background-repeat: no-repeat;
       image-rendering: pixelated;
+      opacity: 1;
       pointer-events: none;
     }
-
-    /* Halbtransparenter Schleier oben drüber, damit Text etwas mehr Kontrast hat */
-    .page-overlay {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 20% 5%, rgba(0,0,0,0.4) 0, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.9) 100%);
-      pointer-events: none;
-    }
-
+ 
     .page-content {
       position: absolute;
       inset: 0;
-      padding: 2.4rem 1.6rem 2.0rem;
+      padding: 2rem 1.2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      pointer-events: none; /* wird für interaktive Elemente wieder aktiviert */
     }
-
-    .page-inner {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.2rem;
-      pointer-events: none;
-    }
-
-    /* Logo */
-    .logo-wrap {
-      pointer-events: none;
-    }
-
+ 
     .logo-img {
-      display: block;
-      max-width: min(88%, 520px);
+      max-width: 90%;
       height: auto;
-      margin: 0 auto;
       image-rendering: pixelated;
-      filter: drop-shadow(0 0 4px rgba(0,0,0,0.85));
-      pointer-events: none;
     }
-
-    /* Menübereich */
+ 
     .menu-wrapper {
-      margin-top: 0.6rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.45rem;
+      margin-top: 0.8rem;
       pointer-events: auto;
     }
-
+ 
     .menu-list {
       list-style: none;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.25rem;
     }
-
+ 
     .menu-button {
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.22);
-      padding: 0.16rem 0.9rem 0.22rem;
-      font-size: 0.85rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
+      background: transparent;
+      border: none;
       color: var(--text-main);
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
       cursor: pointer;
-      image-rendering: pixelated;
-      transition: opacity 210ms ease-out, transform 210ms ease-out, border-color 150ms ease-out, background 150ms ease-out;
       opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: auto;
-      white-space: nowrap;
+      transform: translateY(-12px);
+      transition: opacity 300ms ease-out, transform 300ms ease-out;
     }
-
+ 
     .menu-button.visible {
       opacity: 1;
       transform: translateY(0);
     }
-
-    .menu-button:hover,
-    .menu-button:focus-visible {
-      outline: none;
-      border-color: rgba(255,255,255,0.6);
-      background: rgba(0,0,0,0.8);
-    }
-
-    .menu-button:active {
-      transform: translateY(1px);
-    }
-
-    /* Wenn eine Sektion geöffnet ist */
-    .page-frame.section-open .menu-wrapper {
-      pointer-events: none;
-    }
-
-    .menu-wrapper.menu-hidden .menu-button {
+ 
+    .current-label, .back-link {
+      margin-top: 0.3rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
       opacity: 0;
-      transform: translateY(8px);
-      pointer-events: none;
+      transform: translateY(-10px);
+      transition: opacity 300ms ease-out, transform 300ms ease-out;
     }
-
-    .current-label {
-      margin-top: 0.1rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      opacity: 0;
-      transform: translateY(-6px);
-      transition: opacity 210ms ease-out, transform 210ms ease-out;
-      pointer-events: none;
-    }
-
-    .current-label.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .back-link {
-      margin-top: 0.15rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(245,240,232,0.7);
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity 200ms ease-out, transform 200ms ease-out;
-      pointer-events: none;
-    }
-
+ 
+    .current-label.visible,
     .back-link.visible {
       opacity: 1;
       transform: translateY(0);
-      pointer-events: auto;
     }
-
-    .back-link:hover,
-    .back-link:focus-visible {
-      outline: none;
-      color: #ffffff;
-    }
-
-    /* Inhaltsbereiche */
+ 
+    .back-link { cursor: pointer; }
+ 
     .sections {
-      margin-top: 1.4rem;
+      margin-top: 1.2rem;
       width: 100%;
       max-width: 480px;
-      flex: 1;
       display: flex;
-      align-items: flex-start;
       justify-content: center;
-      pointer-events: auto;
     }
-
+ 
     .section {
-      width: 100%;
-      font-size: 0.82rem;
-      line-height: 1.4;
-      color: var(--text-main);
       opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 220ms ease-out, transform 220ms ease-out;
-      pointer-events: none;
+      transform: translateY(14px);
+      transition: opacity 300ms ease-out, transform 300ms ease-out;
+      font-size: 0.82rem;
+      line-height: 1.35;
     }
-
+ 
     .section.visible {
       opacity: 1;
       transform: translateY(0);
-      pointer-events: auto;
     }
-
-    .section p + p {
-      margin-top: 0.6rem;
-    }
-
-    .section a {
-      color: var(--text-muted);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(198,190,179,0.45);
-      padding-bottom: 1px;
-    }
-
-    .section a:hover,
-    .section a:focus-visible {
-      outline: none;
-      color: #ffffff;
-      border-bottom-color: #ffffff;
-    }
-
-    .section-heading {
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      margin-bottom: 0.3rem;
-      color: var(--text-muted);
-    }
-
-    /* Fußzeile / kleine Notiz unten – optional später befüllen */
-    .footnote {
-      position: absolute;
-      left: 50%;
-      bottom: 0.5rem;
-      transform: translateX(-50%);
-      font-size: 0.64rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(245,240,232,0.45);
-      pointer-events: none;
-      text-align: center;
-      padding: 0 0.5rem;
-    }
-
-    /* Kleine Anpassungen für sehr kleine Screens */
-    @media (max-width: 480px) {
-      .page-content {
-        padding: 1.8rem 1.1rem 1.6rem;
-      }
-
-      .menu-button {
-        font-size: 0.78rem;
-      }
-
-      .section {
-        font-size: 0.8rem;
-      }
-    }
-  </style>
-
-  <!-- Versuch, die Google-Font-Version von "Jacquard 12" zu laden.
-       Wenn das nicht klappt, greifen die System-Schriften. -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+12&display=swap" />
-  <style>
-    .logo-img,
-    .menu-button,
-    .current-label,
-    .back-link,
-    .section-heading,
-    .footnote {
-      font-family: "Jacquard 12", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+ 
   </style>
 </head>
 <body>
   <div class="page-frame" id="page-frame">
     <div class="page-background"></div>
-    <div class="page-overlay"></div>
-
+ 
     <div class="page-content">
-      <div class="page-inner">
-        <div class="logo-wrap">
-          <img src="Grafiken/leerebruecke.png" alt="leerebruecke" class="logo-img" draggable="false" />
-        </div>
-
-        <div class="menu-wrapper" id="menu-wrapper">
-          <ul class="menu-list" id="menu-list">
-            <li><button class="menu-button" data-section="musik">Musik</button></li>
-            <li><button class="menu-button" data-section="gemaelde">Gem&auml;lde</button></li>
-            <li><button class="menu-button" data-section="unterstuetzung">Unterst&uuml;tzung</button></li>
-          </ul>
-        </div>
-
-        <div class="current-label" id="current-label" aria-live="polite"></div>
-        <div class="back-link" id="back-link">Zur&uuml;ck</div>
-
-        <div class="sections" id="sections">
-          <div class="section" id="section-musik">
-            <div class="section-heading">Musik</div>
-            <p>
-              Hier werden sp&auml;ter die Wege zu deinen Liedern liegen:
-              Streaming, Videos, vielleicht auch Texte.
-            </p>
-            <p>
-              Links und Details erg&auml;nzt du direkt im Code,
-              sobald die ersten Ver&ouml;ffentlichungen stehen.
-            </p>
-          </div>
-
-          <div class="section" id="section-gemaelde">
-            <div class="section-heading">Gem&auml;lde</div>
-            <p>
-              Raum f&uuml;r Bilder, die nicht auf Plattformen verrotten sollen:
-              Ausschnitte, Serien, m&ouml;gliche Verk&auml;ufe auf Anfrage.
-            </p>
-          </div>
-
-          <div class="section" id="section-unterstuetzung">
-            <div class="section-heading">Unterst&uuml;tzung</div>
-            <p>
-              Hier werden sp&auml;ter Patreon, PayPal, vielleicht LemonSqueezy
-              oder andere Wege liegen &mdash; knapp erkl&auml;rt, ohne Kaufmarktsprache.
-            </p>
-          </div>
-        </div>
+      <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false" />
+ 
+      <div class="menu-wrapper" id="menu-wrapper">
+        <ul class="menu-list" id="menu-list">
+          <li><button class="menu-button" data-section="musik">Musik</button></li>
+          <li><button class="menu-button" data-section="gemaelde">Gemälde</button></li>
+          <li><button class="menu-button" data-section="unterstuetzung">Unterstützung</button></li>
+        </ul>
       </div>
-
-      <div class="footnote" id="footnote">
-        <!-- Platz f&uuml;r eine k&uuml;rze Zeile wie z.B. "Ankunft der leeren Br&uuml;cke" -->
+ 
+      <div class="current-label" id="current-label"></div>
+      <div class="back-link" id="back-link">Zurück</div>
+ 
+      <div class="sections" id="sections">
+        <div class="section" id="section-musik">Musik‑Bereich</div>
+        <div class="section" id="section-gemaelde">Gemälde‑Bereich</div>
+        <div class="section" id="section-unterstuetzung">Unterstützung‑Bereich</div>
       </div>
     </div>
   </div>
-
+ 
   <script>
-    // Grund-Referenzen
-    const frame = document.getElementById("page-frame");
-    const menuWrapper = document.getElementById("menu-wrapper");
-    const menuList = document.getElementById("menu-list");
-    const menuButtons = Array.from(document.querySelectorAll(".menu-button"));
-    const currentLabel = document.getElementById("current-label");
-    const backLink = document.getElementById("back-link");
+    const menuButtons = [...document.querySelectorAll('.menu-button')];
+    const currentLabel = document.getElementById('current-label');
+    const backLink = document.getElementById('back-link');
     const sections = {
-      musik: document.getElementById("section-musik"),
-      gemaelde: document.getElementById("section-gemaelde"),
-      unterstuetzung: document.getElementById("section-unterstuetzung"),
+      musik: document.getElementById('section-musik'),
+      gemaelde: document.getElementById('section-gemaelde'),
+      unterstuetzung: document.getElementById('section-unterstuetzung')
     };
-
-    // Menu beim Laden nacheinander sichtbar machen
-    window.addEventListener("load", () => {
-      menuButtons.forEach((btn, index) => {
-        setTimeout(() => {
-          btn.classList.add("visible");
-        }, 420 + index * 130);
+ 
+    window.addEventListener('load', () => {
+      menuButtons.forEach((btn, i) => {
+        setTimeout(() => btn.classList.add('visible'), 350 + i * 180);
       });
     });
-
-    let openKey = null;
-
-    function openSection(key, labelText) {
-      if (!sections[key]) return;
-
-      openKey = key;
-      frame.classList.add("section-open");
-      menuWrapper.classList.add("menu-hidden");
-
-      currentLabel.textContent = labelText;
-      currentLabel.classList.add("visible");
-
-      backLink.classList.add("visible");
-
-      Object.entries(sections).forEach(([k, section]) => {
-        if (k === key) {
-          section.classList.add("visible");
-        } else {
-          section.classList.remove("visible");
-        }
+ 
+    function openSection(key, label) {
+      currentLabel.textContent = label;
+      currentLabel.classList.add('visible');
+      backLink.classList.add('visible');
+ 
+      Object.entries(sections).forEach(([k, sec]) => {
+        if (k === key) sec.classList.add('visible');
+        else sec.classList.remove('visible');
       });
+ 
+      menuButtons.forEach(btn => btn.classList.remove('visible'));
     }
-
+ 
     function closeSection() {
-      openKey = null;
-      frame.classList.remove("section-open");
-      currentLabel.classList.remove("visible");
-      backLink.classList.remove("visible");
-
-      Object.values(sections).forEach(section => section.classList.remove("visible"));
-
-      // Men&uuml; wieder einblenden
-      menuWrapper.classList.remove("menu-hidden");
-      menuButtons.forEach((btn, index) => {
-        setTimeout(() => {
-          btn.classList.add("visible");
-        }, 160 + index * 110);
+      currentLabel.classList.remove('visible');
+      backLink.classList.remove('visible');
+ 
+      Object.values(sections).forEach(sec => sec.classList.remove('visible'));
+ 
+      menuButtons.forEach((btn, i) => {
+        setTimeout(() => btn.classList.add('visible'), 200 + i * 160);
       });
     }
-
-    // Klicks auf Men&uuml;-Punkte
+ 
     menuButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const key = btn.dataset.section;
-        const labelText = btn.textContent.trim();
-        openSection(key, labelText);
+      btn.addEventListener('click', () => {
+        openSection(btn.dataset.section, btn.textContent.trim());
       });
     });
-
-    // Zur&uuml;ck-Link
-    backLink.addEventListener("click", () => {
-      closeSection();
-    });
-
-    backLink.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        closeSection();
-      }
-    });
-
-    // Bilder vor einfachem Drag & Rechtsklick minimal sch&uuml;tzen
-    document.querySelectorAll("img").forEach(img => {
-      img.setAttribute("draggable", "false");
-      img.addEventListener("dragstart", e => e.preventDefault());
-    });
-
-    document.addEventListener("contextmenu", e => {
-      const insideFrame = e.target.closest("#page-frame");
-      if (insideFrame) {
-        e.preventDefault();
-      }
+ 
+    backLink.addEventListener('click', closeSection);
+ 
+    document.addEventListener('contextmenu', e => {
+      if (e.target.closest('#page-frame')) e.preventDefault();
     });
   </script>
 </body>
