@@ -12,7 +12,7 @@
   --text-muted: #c6beb3;
 }
 
-/* ---------------------- RESET ---------------------- */
+/* RESET */
 
 * {
   margin: 0;
@@ -35,7 +35,7 @@ body {
   justify-content: center;
 }
 
-/* ---------------------- FRAME ---------------------- */
+/* FRAME */
 
 .page-frame {
   position: relative;
@@ -56,7 +56,7 @@ body {
   pointer-events: none;
 }
 
-/* ---------------------- CONTENT ---------------------- */
+/* CONTENT */
 
 .page-content {
   position: absolute;
@@ -75,28 +75,27 @@ body {
 }
 
 @media (max-width: 768px) {
-  .logo-img { margin-top: 10%; }
+  .logo-img {
+    margin-top: 10%;
+  }
 }
 
-/* ---------------------- ARCADE REEL ---------------------- */
-
-/* Viewing Window */
+/* ------------------ EXTREM KOMPAKTER ARCADE SLOT ------------------ */
 
 .reel-window {
   position: relative;
-  width: 65%;
-  height: 150px;
+  width: 60%;
+  height: 72px; /* extrem kompakt */
   overflow: hidden;
+
   mask-image: linear-gradient(to bottom,
     transparent 0%,
-    rgba(0,0,0,0.7) 20%,
-    black 50%,
-    rgba(0,0,0,0.7) 80%,
+    rgba(0,0,0,0.8) 28%,
+    rgba(0,0,0,1) 50%,
+    rgba(0,0,0,0.8) 72%,
     transparent 100%
   );
 }
-
-/* Die Liste */
 
 .reel-list {
   position: absolute;
@@ -106,35 +105,39 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 240ms cubic-bezier(.32,.72,.23,1);
+
+  transition: transform 180ms cubic-bezier(.32,.72,.23,1);
 }
 
 .reel-item {
-  height: 45px;
+  height: 36px; /* klein = Slot-Look */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.92rem;
-  letter-spacing: 0.12em;
-  opacity: 0.25;
-  transform: scale(0.75);
-  transition: opacity 200ms, transform 200ms;
+
+  font-size: 0.78rem;
+  letter-spacing: 0.09em;
+
+  opacity: 0.17;         /* in der Schlucht */
+  transform: scale(0.63); /* weiter hinten */
+
+  transition: opacity 160ms ease-out, transform 160ms ease-out;
 }
 
 .reel-item.active {
   opacity: 1;
-  transform: scale(1.05);
+  transform: scale(1.00);
 }
 
-/* Pfeile */
+/* Pfeile enger */
 
 .arrow {
   width: 0;
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  opacity: 0.75;
   cursor: pointer;
+  opacity: 0.75;
   transition: opacity 200ms, transform 80ms;
 }
 
@@ -148,15 +151,15 @@ body {
 
 .arrow-up {
   border-bottom: 14px solid var(--text-main);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .arrow-down {
   border-top: 14px solid var(--text-main);
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
-/* ---------------------- SECTION TEXT ---------------------- */
+/* SECTION TEXT */
 
 .section-area {
   margin-top: 1.2rem;
@@ -186,10 +189,10 @@ body {
 
     <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false"/>
 
-    <!-- Buttons -->
+    <!-- ENG POSITIONIERTE PFEILE -->
     <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <!-- Arcade Slot Window -->
+    <!-- KOMPAKTER SLOT -->
     <div class="reel-window">
       <div class="reel-list" id="reel-list">
         <div class="reel-item">Musik</div>
@@ -200,13 +203,17 @@ body {
 
     <div class="arrow arrow-down" id="arrow-down"></div>
 
+    <!-- Bereich, der Text anzeigt -->
     <div class="section-area" id="section-area"></div>
 
   </div>
 </div>
 
 <script>
+/* ------------------ CONFIG ------------------ */
+
 const items = ["Musik", "Gemälde", "Unterstützung"];
+
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
   Gemälde: "Dies ist ein Testtext für Gemälde.",
@@ -214,28 +221,32 @@ const texts = {
 };
 
 let index = 0;
+const ITEM_HEIGHT = 36;
 
-// Elemente
+/* ELEMENTE */
+
 const reel = document.getElementById("reel-list");
 const reelItems = [...document.querySelectorAll(".reel-item")];
 const sectionArea = document.getElementById("section-area");
 const up = document.getElementById("arrow-up");
 const down = document.getElementById("arrow-down");
 
-/* ---------- UPDATE LOGIK ---------- */
+/* ------------------ UPDATE ------------------ */
 
 function updateReel() {
   reelItems.forEach(i => i.classList.remove("active"));
   reelItems[index].classList.add("active");
 
-  const offset = -45 * index;
-  reel.style.transform = `translate(-50%, calc(-50% + ${offset}px))`;
+  const offset = -ITEM_HEIGHT * index;
+  reel.style.transform =
+    `translate(-50%, calc(-50% + ${offset}px))`;
 
   sectionArea.classList.remove("visible");
+
   setTimeout(() => {
     sectionArea.textContent = texts[items[index]];
     sectionArea.classList.add("visible");
-  }, 140);
+  }, 120);
 }
 
 function moveUp() {
@@ -251,7 +262,7 @@ function moveDown() {
 up.addEventListener("click", moveUp);
 down.addEventListener("click", moveDown);
 
-/* ---------- MOBILE ---------- */
+/* ------------------ MOBILE GESTE ------------------ */
 
 let startY = 0;
 
@@ -266,7 +277,8 @@ reel.addEventListener("touchend", e => {
   if (diff < -40) moveDown();
 });
 
-/* Start */
+/* INIT */
+
 updateReel();
 </script>
 
