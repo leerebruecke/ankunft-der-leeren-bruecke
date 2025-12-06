@@ -1,3 +1,5 @@
+Code 11
+
 <!doctype html>
 <html lang="de">
 <head>
@@ -69,10 +71,11 @@ body { display: flex; align-items: center; justify-content: center; }
 
 /* ----------------------------- SLOT ----------------------------- */
 
+/* Fenster bleibt 65px – wir zentrieren das 42px-Item exakt */
 .slot-window {
   position: relative;
   width: 55%;
-  height: 65px; /* B-Auswahl: perfekt kompakt */
+  height: 65px;
   overflow: hidden;
 
   mask-image: linear-gradient(
@@ -85,16 +88,15 @@ body { display: flex; align-items: center; justify-content: center; }
   );
 }
 
-/* TRIPLE LIST – ENDLOS */
-
+/* Liste bewegt sich über translateY */
 .slot-list {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(0);
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: top 170ms cubic-bezier(.32,.72,.23,1);
+  transition: transform 170ms cubic-bezier(.32,.72,.23,1);
 }
 
 /* ITEMS */
@@ -106,8 +108,7 @@ body { display: flex; align-items: center; justify-content: center; }
   display: flex;
   align-items: center;
   justify-content: center;
-
-  opacity: 0.20;         /* Geister-Preview */
+  opacity: 0.20;
   transform: scale(0.85);
   transition: opacity 150ms, transform 150ms;
 }
@@ -175,7 +176,7 @@ body { display: flex; align-items: center; justify-content: center; }
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
 
-        <!-- BLOCK 2 (sichtbarer Hauptblock) -->
+        <!-- BLOCK 2 (Startblock) -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
@@ -210,11 +211,17 @@ const list = document.getElementById("slot-list");
 const items = [...document.querySelectorAll(".slot-item")];
 const out = document.getElementById("section-area");
 
-let visualIndex = 4;              // START-POSITION (Block 2 – mittig)
-let topPos = -(42 * (visualIndex - 1));
 const ITEM_HEIGHT = 42;
+const WINDOW_HEIGHT = 65;
 
-list.style.top = topPos + "px";
+/* mathematisch korrekte Zentrierung */
+const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* = 11.5px */
+
+/* Startposition = 2. Block, mittleres Item */
+let visualIndex = 4;
+let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
+
+list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
 /* UPDATE */
 
@@ -233,35 +240,31 @@ function update() {
 
 /* MOVE */
 
-function moveDown() {
-  visualIndex++;
-  topPos -= ITEM_HEIGHT;
-  list.style.top = topPos + "px";
+function doMove(dir) {
+  visualIndex += dir;
+  translateY -= dir * ITEM_HEIGHT;
+
+  list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
+  list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
   setTimeout(() => {
-    if (visualIndex >= 7) {
+    if (visualIndex >= 7 || visualIndex <= 1) {
       visualIndex = 4;
-      topPos = -(42 * 3);
-      list.style.top = topPos + "px";
+      translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
+
+      list.style.transition = "none";
+      list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+
+      void list.offsetHeight;
+      list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
     }
+
     update();
   }, 170);
 }
 
-function moveUp() {
-  visualIndex--;
-  topPos += ITEM_HEIGHT;
-  list.style.top = topPos + "px";
-
-  setTimeout(() => {
-    if (visualIndex <= 1) {
-      visualIndex = 4;
-      topPos = -(42 * 3);
-      list.style.top = topPos + "px";
-    }
-    update();
-  }, 170);
-}
+function moveUp() { doMove(-1); }
+function moveDown() { doMove(1); }
 
 /* EVENTS */
 
