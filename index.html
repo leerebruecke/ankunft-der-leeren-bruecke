@@ -1,177 +1,179 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>leerebruecke</title>
 
 <style>
-  :root {
-    --bg-root: #1a1218;
-    --text-main: #f5f0e8;
-    --text-muted: #c6beb3;
-  }
+:root {
+  --bg-root: #1a1218;
+  --text-main: #f5f0e8;
+  --text-muted: #c6beb3;
+}
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+/* ---------------------- RESET ---------------------- */
 
-  html, body {
-    height: 100%;
-    background: var(--bg-root);
-    color: var(--text-main);
-    font-family: 'Lucida Console', monospace;
-    user-select: none;
-    overflow: hidden;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+html, body {
+  height: 100%;
+  background: var(--bg-root);
+  color: var(--text-main);
+  font-family: 'Lucida Console', monospace;
+  user-select: none;
+  overflow: hidden;
+}
 
-  /* FRAME (120%) */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .page-frame {
-    position: relative;
-    --base: min(100vh, 1200px);
-    height: calc(var(--base) * 1.20);
-    width: calc(var(--base) * 1.20 * 9/16);
-    max-width: 100vw;
-    overflow: hidden;
-    transform-origin: center;
-  }
+/* ---------------------- FRAME ---------------------- */
 
-  .page-background {
-    position: absolute;
-    inset: 0;
-    background-image: url("Grafiken/Br%C3%BCcke.png");
-    background-size: 100% 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    image-rendering: pixelated;
-    opacity: 1;
-    pointer-events: none;
-  }
+.page-frame {
+  position: relative;
+  --base: min(100vh, 1200px);
+  height: calc(var(--base) * 1.20);
+  width: calc(var(--base) * 1.20 * 9/16);
+  max-width: 100vw;
+  overflow: hidden;
+}
 
-  /* CONTENT */
+.page-background {
+  position: absolute;
+  inset: 0;
+  background-image: url("Grafiken/Br%C3%BCcke.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
 
-  .page-content {
-    position: absolute;
-    inset: 0;
-    padding: 1.1rem 1.1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+/* ---------------------- CONTENT ---------------------- */
 
-  /* Logo */
+.page-content {
+  position: absolute;
+  inset: 0;
+  padding: 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .logo-img {
-    width: 70%;
-    height: auto;
-    margin-top: 0.2rem;
-    margin-bottom: 0.8rem;
-    image-rendering: pixelated;
-    pointer-events: none;
-    transition: margin-top 260ms;
-  }
+.logo-img {
+  width: 70%;
+  margin-top: 0.2rem;
+  margin-bottom: 1.0rem;
+  image-rendering: pixelated;
+}
 
-  /* Mobile: Logo 10% nach unten */
+@media (max-width: 768px) {
+  .logo-img { margin-top: 10%; }
+}
 
-  @media (max-width: 768px) {
-    .logo-img {
-      margin-top: 10%;
-    }
-  }
+/* ---------------------- ARCADE REEL ---------------------- */
 
-  /* SCROLL REEL */
+/* Viewing Window */
 
-  .reel-container {
-    position: relative;
-    width: 100%;
-    height: 150px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-  }
+.reel-window {
+  position: relative;
+  width: 65%;
+  height: 150px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.7) 20%,
+    black 50%,
+    rgba(0,0,0,0.7) 80%,
+    transparent 100%
+  );
+}
 
-  /* Der vertikale Stack */
+/* Die Liste */
 
-  .reel {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 60%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.reel-list {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 240ms cubic-bezier(.32,.72,.23,1);
+}
 
-  .reel-item {
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    transition: transform 240ms, opacity 240ms;
-    opacity: 0.35;
-    transform: scale(0.75);
-  }
+.reel-item {
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92rem;
+  letter-spacing: 0.12em;
+  opacity: 0.25;
+  transform: scale(0.75);
+  transition: opacity 200ms, transform 200ms;
+}
 
-  .reel-item.active {
-    transform: scale(1);
-    opacity: 1;
-  }
+.reel-item.active {
+  opacity: 1;
+  transform: scale(1.05);
+}
 
-  /* Buttons oben/unten */
+/* Pfeile */
 
-  .arrow {
-    width: 0;
-    height: 0;
-    border-left: 14px solid transparent;
-    border-right: 14px solid transparent;
-    cursor: pointer;
-    opacity: 0.75;
-    transition: opacity 200ms;
-  }
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 200ms, transform 80ms;
+}
 
-  .arrow:hover {
-    opacity: 1;
-  }
+.arrow:hover {
+  opacity: 1;
+}
 
-  .arrow-up {
-    border-bottom: 14px solid var(--text-main);
-    margin-bottom: 10px;
-  }
+.arrow:active {
+  transform: translateY(2px);
+}
 
-  .arrow-down {
-    border-top: 14px solid var(--text-main);
-    margin-top: 10px;
-  }
+.arrow-up {
+  border-bottom: 14px solid var(--text-main);
+  margin-bottom: 8px;
+}
 
-  /* TESTTEXTBEREICH */
+.arrow-down {
+  border-top: 14px solid var(--text-main);
+  margin-top: 8px;
+}
 
-  .section-area {
-    margin-top: 1.2rem;
-    max-width: 430px;
-    text-align: center;
-    font-size: 0.86rem;
-    line-height: 1.33;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 260ms ease-out, transform 260ms ease-out;
-  }
+/* ---------------------- SECTION TEXT ---------------------- */
 
-  .section-area.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.section-area {
+  margin-top: 1.2rem;
+  max-width: 430px;
+  text-align: center;
+  font-size: 0.86rem;
+  line-height: 1.33;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 260ms ease-out, transform 260ms ease-out;
+}
+
+.section-area.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
 </head>
 <body>
@@ -182,13 +184,14 @@
 
   <div class="page-content">
 
-    <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false" />
+    <img src="Grafiken/leerebruecke.png" class="logo-img" draggable="false"/>
 
-    <!-- Scroll Reel -->
+    <!-- Buttons -->
     <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <div class="reel-container" id="reel-container">
-      <div class="reel" id="reel">
+    <!-- Arcade Slot Window -->
+    <div class="reel-window">
+      <div class="reel-list" id="reel-list">
         <div class="reel-item">Musik</div>
         <div class="reel-item">Gemälde</div>
         <div class="reel-item">Unterstützung</div>
@@ -197,76 +200,74 @@
 
     <div class="arrow arrow-down" id="arrow-down"></div>
 
-    <!-- Testtext -->
     <div class="section-area" id="section-area"></div>
 
   </div>
 </div>
 
 <script>
-  const items = ["Musik", "Gemälde", "Unterstützung"];
-  const texts = {
-    Musik: "Dies ist ein Testtext für den Musikbereich.",
-    Gemälde: "Dies ist ein Testtext für den Gemälde-Bereich.",
-    Unterstützung: "Dies ist ein Testtext für Unterstützung."
-  };
+const items = ["Musik", "Gemälde", "Unterstützung"];
+const texts = {
+  Musik: "Dies ist ein Testtext für Musik.",
+  Gemälde: "Dies ist ein Testtext für Gemälde.",
+  Unterstützung: "Dies ist ein Testtext für Unterstützung."
+};
 
-  let index = 0;
+let index = 0;
 
-  const reel = document.getElementById("reel");
-  const reelItems = [...document.querySelectorAll(".reel-item")];
-  const sectionArea = document.getElementById("section-area");
+// Elemente
+const reel = document.getElementById("reel-list");
+const reelItems = [...document.querySelectorAll(".reel-item")];
+const sectionArea = document.getElementById("section-area");
+const up = document.getElementById("arrow-up");
+const down = document.getElementById("arrow-down");
 
-  const arrowUp = document.getElementById("arrow-up");
-  const arrowDown = document.getElementById("arrow-down");
+/* ---------- UPDATE LOGIK ---------- */
 
-  /* Aktualisieren */
+function updateReel() {
+  reelItems.forEach(i => i.classList.remove("active"));
+  reelItems[index].classList.add("active");
 
-  function updateReel() {
-    reelItems.forEach((el, i) => {
-      el.classList.remove("active");
-    });
-    reelItems[index].classList.add("active");
+  const offset = -45 * index;
+  reel.style.transform = `translate(-50%, calc(-50% + ${offset}px))`;
 
-    sectionArea.classList.remove("visible");
+  sectionArea.classList.remove("visible");
+  setTimeout(() => {
+    sectionArea.textContent = texts[items[index]];
+    sectionArea.classList.add("visible");
+  }, 140);
+}
 
-    setTimeout(() => {
-      sectionArea.textContent = texts[items[index]];
-      sectionArea.classList.add("visible");
-    }, 150);
-  }
-
-  function moveUp() {
-    index = (index - 1 + items.length) % items.length;
-    updateReel();
-  }
-
-  function moveDown() {
-    index = (index + 1) % items.length;
-    updateReel();
-  }
-
-  arrowUp.addEventListener("click", moveUp);
-  arrowDown.addEventListener("click", moveDown);
-
-  /* Mobile Scroll */
-
-  let startY = 0;
-
-  reel.addEventListener("touchstart", e => {
-    startY = e.touches[0].clientY;
-  });
-
-  reel.addEventListener("touchend", e => {
-    const endY = e.changedTouches[0].clientY;
-    const diff = endY - startY;
-
-    if (diff > 40) moveUp();
-    if (diff < -40) moveDown();
-  });
-
-  /* Start */
+function moveUp() {
+  index = (index - 1 + items.length) % items.length;
   updateReel();
+}
+
+function moveDown() {
+  index = (index + 1) % items.length;
+  updateReel();
+}
+
+up.addEventListener("click", moveUp);
+down.addEventListener("click", moveDown);
+
+/* ---------- MOBILE ---------- */
+
+let startY = 0;
+
+reel.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+
+reel.addEventListener("touchend", e => {
+  const endY = e.changedTouches[0].clientY;
+  const diff = endY - startY;
+  if (diff > 40) moveUp();
+  if (diff < -40) moveDown();
+});
+
+/* Start */
+updateReel();
 </script>
 
 </body>
