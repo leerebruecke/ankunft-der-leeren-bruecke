@@ -7,133 +7,141 @@
 
 <style>
 :root {
-  --bg-root: #1a1812;
-  --text-main: #f5f0e8;
+  --bg: #1a1812;
+  --tx: #f5f0e8;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
-  height: 100%;
-  background: var(--bg-root);
-  color: var(--text-main);
-  font-family: 'Lucida Console', monospace;
-  user-select: none;
-  overflow: hidden;
+  height:100%;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Lucida Console', monospace;
+  user-select:none;
+  overflow:hidden;
 }
 
-body { display: flex; align-items: center; justify-content: center; }
+body { display:flex; align-items:center; justify-content:center; }
 
 .page-frame {
-  position: relative;
-  --base: min(100vh, 1200px);
-  height: calc(var(--base) * 1.20);
-  width: calc(var(--base) * 1.20 * 9/16);
-  overflow: hidden;
+  position:relative;
+  --b:min(100vh,1200px);
+  height:calc(var(--b)*1.20);
+  width:calc(var(--b)*1.20*9/16);
+  overflow:hidden;
 }
 
 .page-background {
-  position: absolute;
-  inset: 0;
-  background-image: url("Grafiken/Br%C3%BCcke.png");
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
+  position:absolute;
+  inset:0;
+  background:url("Grafiken/Br%C3%BCcke.png") no-repeat;
+  background-size:100% 100%;
+  image-rendering:pixelated;
 }
 
 .page-content {
-  position: absolute;
-  inset: 0;
-  padding: 1.1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position:absolute;
+  inset:0;
+  padding:1.1rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
 .logo-img {
-  width: 70%;
-  margin-top: 0.2rem;
-  margin-bottom: 1rem;
-  image-rendering: pixelated;
+  width:70%;
+  margin:0.2rem 0 1rem 0;
+  image-rendering:pixelated;
 }
 
-@media (max-width: 768px) {
-  .logo-img { margin-top: 10%; }
+@media(max-width:768px) {
+  .logo-img { margin-top:10%; }
 }
 
-/* ----------------------------- SLOT ----------------------------- */
+/* -------------------- SLOT -------------------- */
 
-/* KORREKT: 40px nach oben */
+/* Keine vertikale Verschiebung mehr → Fehlerquelle entfernt */
 .slot-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: translateY(-40px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
-/* KORREKT: window exakt doppelte Höhe des Items */
+/* Höhe wieder auf 65px → Zentrierung korrekt, kein Seitenschnitt */
 .slot-window {
-  position: relative;
-  width: 55%;
-  height: 84px; /* 2 * 42px → perfekte Mitte */
-  overflow: hidden;
+  position:relative;
+  width:55%;
+  height:65px;
+  overflow:hidden;
 
-  mask-image: none;
+  mask-image:linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.85) 22%,
+    black 50%,
+    rgba(0,0,0,0.85) 78%,
+    transparent 100%
+  );
 }
 
 .slot-list {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 170ms cubic-bezier(.32,.72,.23,1);
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transition:transform 170ms cubic-bezier(.32,.72,.23,1);
 }
 
 .slot-item {
-  height: 42px;
-  font-size: 0.86rem;
-  letter-spacing: 0.1em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height:42px;
+  font-size:0.86rem;
+  letter-spacing:0.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-  opacity: 0.20;
-  transform: scale(0.85);
-  transition: opacity 150ms, transform 150ms;
+  /* schützt gegen seitliches Abschneiden */
+  width:100%;
+  padding:0 12px;
+
+  opacity:0.20;
+  transform:scale(0.85);
+  transition:opacity 150ms, transform 150ms;
 }
 
 .slot-item.active {
-  opacity: 1;
-  transform: scale(1.05);
+  opacity:1;
+  transform:scale(1.05);
 }
 
 .arrow {
-  width: 0; height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  opacity: 0.75;
-  cursor: pointer;
-  transition: opacity 200ms;
+  width:0; height:0;
+  opacity:0.75;
+  cursor:pointer;
+  transition:opacity 200ms;
+  border-left:14px solid transparent;
+  border-right:14px solid transparent;
 }
-.arrow:hover { opacity: 1; }
+.arrow:hover { opacity:1; }
 
-.arrow-up { border-bottom: 14px solid var(--text-main); margin-bottom: 4px; }
-.arrow-down { border-top: 14px solid var(--text-main); margin-top: 4px; }
+.arrow-up { border-bottom:14px solid var(--tx); margin-bottom:4px; }
+.arrow-down { border-top:14px solid var(--tx); margin-top:4px; }
 
 .section-area {
-  margin-top: 2.6rem;
-  font-size: 0.86rem;
-  opacity: 0;
-  transition: opacity 260ms ease-out;
+  margin-top:1.3rem;
+  font-size:0.86rem;
+  opacity:0;
+  transition:opacity 260ms ease-out;
 }
 
-.section-area.visible { opacity: 1; }
+.section-area.visible { opacity:1; }
 </style>
 </head>
-<body>
 
+<body>
 <div class="page-frame">
   <div class="page-background"></div>
 
@@ -147,15 +155,12 @@ body { display: flex; align-items: center; justify-content: center; }
 
       <div class="slot-window">
         <div class="slot-list" id="slot-list">
-          <!-- NEU: exakt 3x Wiederholung -->
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
-
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
-
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
@@ -163,113 +168,78 @@ body { display: flex; align-items: center; justify-content: center; }
       </div>
 
       <div class="arrow arrow-down" id="arrow-down"></div>
-
     </div>
 
     <div class="section-area" id="section-area"></div>
-
   </div>
 </div>
 
 <script>
-
 const base = ["Musik","Gemälde","Unterstützung"];
 const texts = {
-  Musik: "Dies ist ein Testtext für Musik.",
-  Gemälde: "Dies ist ein Testtext für Gemälde.",
-  Unterstützung: "Dies ist ein Testtext für Unterstützung."
+  Musik:"Dies ist ein Testtext für Musik.",
+  Gemälde:"Dies ist ein Testtext für Gemälde.",
+  Unterstützung:"Dies ist ein Testtext für Unterstützung."
 };
 
 const list = document.getElementById("slot-list");
 const items = [...document.querySelectorAll(".slot-item")];
 const out = document.getElementById("section-area");
 
-const ITEM = 42;
-const WINDOW = 84;   // doppelte Höhe → perfekte Mitte
-const CENTER = (WINDOW - ITEM) / 2; // = 21
+const ITEM=42, WINDOW=65, CENTER=(WINDOW-ITEM)/2;
 
-/* NEU: Start exakt auf Mitte der zweiten Wiederholung */
-let visual = 3;  
-let y = -(visual * ITEM) + CENTER;
+/* Start exakt in der Mitte des zweiten Blocks */
+let visual=4;
+let y=-(visual*ITEM)+CENTER;
 
-list.style.transform = `translateX(-50%) translateY(${y}px)`;
+list.style.transform=`translateX(-50%) translateY(${y}px)`;
 
-/* ---------------- UPDATE ---------------- */
-
+/* Update sichtbares Item */
 function update() {
-  items.forEach(i => i.classList.remove("active"));
+  items.forEach(i=>i.classList.remove("active"));
   items[visual].classList.add("active");
 
-  const real = base[visual % 3];
+  const real = base[(visual%3+3)%3];
 
   out.classList.remove("visible");
-  requestAnimationFrame(() => {
-    out.textContent = texts[real];
+  requestAnimationFrame(()=>{
+    out.textContent=texts[real];
     out.classList.add("visible");
   });
 }
 
-/* ---------------- MOVE ---------------- */
+/* Bewegung */
+function move(d){
+  visual+=d;
+  y-=d*ITEM;
+  list.style.transition="transform 170ms cubic-bezier(.32,.72,.23,1)";
+  list.style.transform=`translateX(-50%) translateY(${y}px)`;
 
-let locked = false;
-const LOCK = 220;
-
-function move(dir) {
-  if (locked) return;
-  locked = true;
-  setTimeout(() => locked = false, LOCK);
-
-  visual += dir;
-  y -= dir * ITEM;
-
-  list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
-  list.style.transform = `translateX(-50%) translateY(${y}px)`;
-
-  setTimeout(() => {
-    if (visual <= 2) {
-      visual += 3;
-      y += 3 * ITEM;
-      list.style.transition = "none";
-      list.style.transform = `translateX(-50%) translateY(${y}px)`;
+  setTimeout(()=>{
+    if(visual>=7 || visual<=1){
+      visual=4;
+      y=-(visual*ITEM)+CENTER;
+      list.style.transition="none";
+      list.style.transform=`translateX(-50%) translateY(${y}px)`;
       void list.offsetHeight;
-      list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
-    }
-    if (visual >= 6) {
-      visual -= 3;
-      y -= 3 * ITEM;
-      list.style.transition = "none";
-      list.style.transform = `translateX(-50%) translateY(${y}px)`;
-      void list.offsetHeight;
-      list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
+      list.style.transition="transform 170ms cubic-bezier(.32,.72,.23,1)";
     }
     update();
-  }, 170);
+  },170);
 }
 
 document.getElementById("arrow-up").onclick = () => move(-1);
 document.getElementById("arrow-down").onclick = () => move(1);
 
-/* TOUCH */
-let startY = 0;
-
-list.addEventListener("touchstart", e => {
-  startY = e.touches[0].clientY;
-});
-
-list.addEventListener("touchend", e => {
-  const diff = e.changedTouches[0].clientY - startY;
-  if (diff > 40) move(-1);
-  if (diff < -40) move(1);
-});
-
-/* WHEEL */
-window.addEventListener("wheel", e => {
-  if (e.deltaY > 0) move(1);
-  else if (e.deltaY < 0) move(-1);
+let startY=0;
+list.addEventListener("touchstart", e => startY=e.touches[0].clientY);
+list.addEventListener("touchend",   e => {
+  const d=e.changedTouches[0].clientY-startY;
+  if(d>40) move(-1);
+  if(d<-40) move(1);
 });
 
 update();
-
 </script>
 </body>
 </html>
