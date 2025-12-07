@@ -7,7 +7,7 @@
 
 <style>
 :root {
-  --bg-root: #1a1218;
+  --bg-root: #1a1812;     /* korrigierter Farbcode */
   --text-main: #f5f0e8;
 }
 
@@ -63,12 +63,20 @@ body { display: flex; align-items: center; justify-content: center; }
 
 /* ----------------------------- SLOT ----------------------------- */
 
+/* Das Slot-Konstrukt GOES UP – richtig, diesmal global */
+.slot-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -20px;         /* sauberer, echter Shift nach oben */
+}
+
+/* Das Fenster bleibt neutral */
 .slot-window {
   position: relative;
   width: 55%;
   height: 65px;
   overflow: hidden;
-  margin-top: -12px; /* Slot nach oben verschoben */
 
   mask-image: linear-gradient(
     to bottom,
@@ -131,10 +139,10 @@ body { display: flex; align-items: center; justify-content: center; }
   margin-top: 4px;
 }
 
-/* TEXT */
+/* TEXT UNTEN – weiter nach unten versetzt */
 
 .section-area {
-  margin-top: 1.2rem;
+  margin-top: 2.2rem;   /* deutlich mehr Platz */
   font-size: 0.86rem;
   opacity: 0;
   transition: opacity 260ms ease-out;
@@ -155,27 +163,32 @@ body { display: flex; align-items: center; justify-content: center; }
 
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
-    <div class="arrow arrow-up" id="arrow-up"></div>
+    <!-- SLOT-KONSTRUKT -->
+    <div class="slot-area">
 
-    <div class="slot-window">
-      <div class="slot-list" id="slot-list">
+      <div class="arrow arrow-up" id="arrow-up"></div>
 
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+      <div class="slot-window">
+        <div class="slot-list" id="slot-list">
 
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
 
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
 
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
+
+        </div>
       </div>
-    </div>
 
-    <div class="arrow arrow-down" id="arrow-down"></div>
+      <div class="arrow arrow-down" id="arrow-down"></div>
+
+    </div>
 
     <div class="section-area" id="section-area"></div>
 
@@ -198,8 +211,7 @@ const out = document.getElementById("section-area");
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 
-/* Kein Subpixel → kein Code-11-Bug */
-const CENTER_OFFSET = Math.round((WINDOW_HEIGHT - ITEM_HEIGHT) / 2);
+const CENTER_OFFSET = Math.round((WINDOW_HEIGHT - ITEM_HEIGHT) / 2); /* integer → kein Bug */
 
 let visualIndex = 4;
 let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
@@ -223,7 +235,7 @@ function update() {
 
 /* MOVE */
 
-const LOCK_TIME = 400; // 400 ms Hard-Lock
+const LOCK_TIME = 400;
 let locked = false;
 
 function doMove(dir) {
