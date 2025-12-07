@@ -6,123 +6,156 @@
 <title>leerebruecke</title>
 
 <style>
-:root { --bg:#1a1812; --tx:#f5f0e8; }
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
-html,body{
-  height:100%;
-  background:var(--bg);
-  color:var(--tx);
-  font-family:'Lucida Console',monospace;
-  user-select:none;
-  overflow:hidden;
+:root {
+  --bg-root: #1a1218;
+  --text-main: #f5f0e8;
 }
 
-body{display:flex;align-items:center;justify-content:center;}
+/* RESET */
 
-.page-frame{
-  position:relative;
-  --b:min(100vh,1200px);
-  height:calc(var(--b)*1.20);
-  width:calc(var(--b)*1.20*9/16);
-  overflow:hidden;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-root);
+  color: var(--text-main);
+  font-family: 'Lucida Console', monospace;
+  user-select: none;
+  overflow: hidden;
 }
 
-.page-background{
-  position:absolute;inset:0;
-  background:url("Grafiken/Br%C3%BCcke.png") no-repeat;
-  background-size:100% 100%;
-  image-rendering:pixelated;
+body { display: flex; align-items: center; justify-content: center; }
+
+/* FRAME */
+
+.page-frame {
+  position: relative;
+  --base: min(100vh, 1200px);
+  height: calc(var(--base) * 1.20);
+  width: calc(var(--base) * 1.20 * 9/16);
+  overflow: hidden;
 }
 
-.page-content{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;
-  padding:1.1rem;
+.page-background {
+  position: absolute;
+  inset: 0;
+  background-image: url("Grafiken/Br%C3%BCcke.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
 }
 
-.logo-img{
-  width:70%;
-  margin:0.2rem 0 1rem;
-  image-rendering:pixelated;
+/* CONTENT */
+
+.page-content {
+  position: absolute;
+  inset: 0;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* ---------------- SLOT (NEUE robuste Version) ---------------- */
-
-.slot-area{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+.logo-img {
+  width: 70%;
+  margin-top: 0.2rem;
+  margin-bottom: 1rem;
+  image-rendering: pixelated;
 }
 
-/* ENTSCHEIDEND: KEIN overflow:hidden MEHR */
-.slot-window{
-  position:relative;
-  width:100%;
-  height:150px;         /* gigantischer vertikaler Atemraum */
-  padding:0 60px;       /* horizontaler Innenraum */
-  display:flex;
-  justify-content:center;
+@media (max-width: 768px) {
+  .logo-img { margin-top: 10%; }
 }
 
-/* Liste bleibt animierbar */
-.slot-list{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  transition:transform 170ms cubic-bezier(.32,.72,.23,1);
+/* ----------------------------- SLOT ----------------------------- */
+
+/* Fenster bleibt 65px – wir zentrieren das 42px-Item exakt */
+.slot-window {
+  position: relative;
+  width: 55%;
+  height: 65px;
+  overflow: hidden;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.85) 22%,
+    black 50%,
+    rgba(0,0,0,0.85) 78%,
+    transparent 100%
+  );
 }
 
-/* Items: nie wieder clipping */
-.slot-item{
-  height:42px;
-  font-size:1.1rem;
-  letter-spacing:0.1em;
-
-  width:100%;
-  padding:0 60px;      /* riesiger Innenraum */
-  white-space:nowrap;  /* kein Zeilenumbruch */
-  overflow:visible;    /* niemals abschneiden */
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  opacity:0.3;
-  transform:scale(0.9);
-  transition:opacity 150ms, transform 150ms;
+/* Liste bewegt sich über translateY */
+.slot-list {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 170ms cubic-bezier(.32,.72,.23,1);
 }
 
-.slot-item.active{
-  opacity:1;
-  transform:scale(1.15);
+/* ITEMS */
+
+.slot-item {
+  height: 42px;
+  font-size: 0.86rem;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.20;
+  transform: scale(0.85);
+  transition: opacity 150ms, transform 150ms;
 }
 
-/* Pfeile */
-.arrow{
-  width:0;height:0;
-  border-left:14px solid transparent;
-  border-right:14px solid transparent;
-  opacity:0.75;cursor:pointer;
+.slot-item.active {
+  opacity: 1;
+  transform: scale(1.05);
 }
 
-.arrow-up{border-bottom:14px solid var(--tx);margin-bottom:8px;}
-.arrow-down{border-top:14px solid var(--tx);margin-top:8px;}
+/* ARROWS */
 
-.section-area{
-  margin-top:2rem;
-  font-size:1rem;
-  opacity:0;
-  transition:opacity 260ms ease-out;
+.arrow {
+  width: 0; height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 200ms;
 }
 
-.section-area.visible{opacity:1;}
+.arrow:hover { opacity: 1; }
+
+.arrow-up {
+  border-bottom: 14px solid var(--text-main);
+  margin-bottom: 4px;
+}
+
+.arrow-down {
+  border-top: 14px solid var(--text-main);
+  margin-top: 4px;
+}
+
+/* TEXT */
+
+.section-area {
+  margin-top: 1.2rem;
+  font-size: 0.86rem;
+  opacity: 0;
+  transition: opacity 260ms ease-out;
+}
+
+.section-area.visible {
+  opacity: 1;
+}
+
 </style>
 </head>
-
 <body>
+
 <div class="page-frame">
   <div class="page-background"></div>
 
@@ -130,95 +163,131 @@ body{display:flex;align-items:center;justify-content:center;}
 
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
-    <div class="slot-area">
-      <div class="arrow arrow-up" id="arrow-up"></div>
+    <div class="arrow arrow-up" id="arrow-up"></div>
 
-      <div class="slot-window">
-        <div class="slot-list" id="slot-list">
-          <div class="slot-item">Musik</div>
-          <div class="slot-item">Gemälde</div>
-          <div class="slot-item">Unterstützung</div>
+    <!-- VIEWPORT -->
+    <div class="slot-window">
+      <div class="slot-list" id="slot-list">
 
-          <div class="slot-item">Musik</div>
-          <div class="slot-item">Gemälde</div>
-          <div class="slot-item">Unterstützung</div>
+        <!-- BLOCK 1 -->
+        <div class="slot-item">Musik</div>
+        <div class="slot-item">Gemälde</div>
+        <div class="slot-item">Unterstützung</div>
 
-          <div class="slot-item">Musik</div>
-          <div class="slot-item">Gemälde</div>
-          <div class="slot-item">Unterstützung</div>
-        </div>
+        <!-- BLOCK 2 (Startblock) -->
+        <div class="slot-item">Musik</div>
+        <div class="slot-item">Gemälde</div>
+        <div class="slot-item">Unterstützung</div>
+
+        <!-- BLOCK 3 -->
+        <div class="slot-item">Musik</div>
+        <div class="slot-item">Gemälde</div>
+        <div class="slot-item">Unterstützung</div>
+
       </div>
-
-      <div class="arrow arrow-down" id="arrow-down"></div>
     </div>
 
+    <div class="arrow arrow-down" id="arrow-down"></div>
+
     <div class="section-area" id="section-area"></div>
+
   </div>
 </div>
 
 <script>
-const base=["Musik","Gemälde","Unterstützung"];
-const texts={
-  Musik:"Dies ist ein Testtext für Musik.",
-  Gemälde:"Dies ist ein Testtext für Gemälde.",
-  Unterstützung:"Dies ist ein Testtext für Unterstützung."
+
+/* BASIS */
+
+const baseItems = ["Musik","Gemälde","Unterstützung"];
+const texts = {
+  Musik: "Dies ist ein Testtext für Musik.",
+  Gemälde: "Dies ist ein Testtext für Gemälde.",
+  Unterstützung: "Dies ist ein Testtext für Unterstützung."
 };
 
-const list=document.getElementById("slot-list");
-const items=[...document.querySelectorAll(".slot-item")];
-const out=document.getElementById("section-area");
+const list = document.getElementById("slot-list");
+const items = [...document.querySelectorAll(".slot-item")];
+const out = document.getElementById("section-area");
 
-const ITEM=42;
-const WINDOW=150;
-const CENTER=(WINDOW-ITEM)/2;
+const ITEM_HEIGHT = 42;
+const WINDOW_HEIGHT = 65;
 
-/* Startpunkt */
-let visual=4;
-let y=-(visual*ITEM)+CENTER;
-list.style.transform=`translateY(${y}px)`;
+/* mathematisch korrekte Zentrierung */
+const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* = 11.5px */
 
-function update(){
-  items.forEach(i=>i.classList.remove("active"));
-  items[visual].classList.add("active");
-  const real=base[(visual%3+3)%3];
+/* Startposition = 2. Block, mittleres Item */
+let visualIndex = 4;
+let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
+
+list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+
+/* UPDATE */
+
+function update() {
+  items.forEach(i => i.classList.remove("active"));
+  items[visualIndex].classList.add("active");
+
+  const real = baseItems[(visualIndex % 3 + 3) % 3];
+
   out.classList.remove("visible");
-  requestAnimationFrame(()=>{
-    out.textContent=texts[real];
+  setTimeout(() => {
+    out.textContent = texts[real];
     out.classList.add("visible");
-  });
+  }, 80);
 }
 
-function move(d){
-  visual+=d;
-  y-=d*ITEM;
-  list.style.transition="transform 170ms cubic-bezier(.32,.72,.23,1)";
-  list.style.transform=`translateY(${y}px)`;
+/* MOVE */
 
-  setTimeout(()=>{
-    if(visual<=1 || visual>=7){
-      visual=4;
-      y=-(visual*ITEM)+CENTER;
-      list.style.transition="none";
-      list.style.transform=`translateY(${y}px)`;
+function doMove(dir) {
+  visualIndex += dir;
+  translateY -= dir * ITEM_HEIGHT;
+
+  list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
+  list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+
+  setTimeout(() => {
+    if (visualIndex >= 7 || visualIndex <= 1) {
+      visualIndex = 4;
+      translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
+
+      list.style.transition = "none";
+      list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+
       void list.offsetHeight;
-      list.style.transition="transform 170ms cubic-bezier(.32,.72,.23,1)";
+      list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
     }
+
     update();
-  },170);
+  }, 170);
 }
 
-document.getElementById("arrow-up").onclick=()=>move(-1);
-document.getElementById("arrow-down").onclick=()=>move(1);
+function moveUp() { doMove(-1); }
+function moveDown() { doMove(1); }
 
-let startY=0;
-list.addEventListener("touchstart",e=>startY=e.touches[0].clientY);
-list.addEventListener("touchend",e=>{
-  const d=e.changedTouches[0].clientY-startY;
-  if(d>40)move(-1);
-  if(d<-40)move(1);
+/* EVENTS */
+
+document.getElementById("arrow-up").onclick = moveUp;
+document.getElementById("arrow-down").onclick = moveDown;
+
+/* TOUCH */
+
+let startY = 0;
+
+list.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
 });
 
+list.addEventListener("touchend", e => {
+  const diff = e.changedTouches[0].clientY - startY;
+  if (diff > 40) moveUp();
+  if (diff < -40) moveDown();
+});
+
+/* INIT */
+
 update();
+
 </script>
+
 </body>
 </html>
