@@ -6,25 +6,22 @@
 <title>leerebruecke</title>
 
 <style>
-:root {
-  --bg: #1a1812;
-  --tx: #f5f0e8;
-}
+:root { --bg:#1a1812; --tx:#f5f0e8; }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-html, body {
+html,body{
   height:100%;
   background:var(--bg);
   color:var(--tx);
-  font-family:'Lucida Console', monospace;
-  user-select:none;
+  font-family:'Lucida Console',monospace;
   overflow:hidden;
+  user-select:none;
 }
 
-body { display:flex; align-items:center; justify-content:center; }
+body{display:flex;align-items:center;justify-content:center;}
 
-.page-frame {
+.page-frame{
   position:relative;
   --b:min(100vh,1200px);
   height:calc(var(--b)*1.20);
@@ -32,60 +29,46 @@ body { display:flex; align-items:center; justify-content:center; }
   overflow:hidden;
 }
 
-.page-background {
-  position:absolute;
-  inset:0;
+.page-background{
+  position:absolute;inset:0;
   background:url("Grafiken/Br%C3%BCcke.png") no-repeat;
   background-size:100% 100%;
   image-rendering:pixelated;
 }
 
-.page-content {
-  position:absolute;
-  inset:0;
+.page-content{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
   padding:1.1rem;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
 }
 
-.logo-img {
-  width:70%;
-  margin:0.2rem 0 1rem 0;
-  image-rendering:pixelated;
+.logo-img{
+  width:70%;margin:0.2rem 0 1rem;image-rendering:pixelated;
 }
 
-@media(max-width:768px) {
-  .logo-img { margin-top:10%; }
-}
+@media(max-width:768px){.logo-img{margin-top:10%;}}
 
-/* -------------------- SLOT -------------------- */
+/* ---------------- SLOT ---------------- */
 
-/* Keine vertikale Verschiebung mehr → Fehlerquelle entfernt */
-.slot-area {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
+.slot-area{display:flex;flex-direction:column;align-items:center;}
 
-/* Höhe wieder auf 65px → Zentrierung korrekt, kein Seitenschnitt */
-.slot-window {
+.slot-window{
   position:relative;
-  width:55%;
-  height:65px;
+  width:100%;       /* MAXIMALE BREITE – kein Abschneiden */
+  height:110px;     /* Viel Platz für hohe Fonts */
   overflow:hidden;
 
   mask-image:linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0,0,0,0.85) 22%,
+    rgba(0,0,0,0.85) 18%,
     black 50%,
-    rgba(0,0,0,0.85) 78%,
+    rgba(0,0,0,0.85) 82%,
     transparent 100%
   );
 }
 
-.slot-list {
+.slot-list{
   position:absolute;
   left:50%;
   transform:translateX(-50%);
@@ -95,49 +78,49 @@ body { display:flex; align-items:center; justify-content:center; }
   transition:transform 170ms cubic-bezier(.32,.72,.23,1);
 }
 
-.slot-item {
+.slot-item{
   height:42px;
-  font-size:0.86rem;
+  font-size:1rem;
   letter-spacing:0.1em;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 
-  /* schützt gegen seitliches Abschneiden */
+  /* WICHTIG: niemals horizontales Abschneiden */
   width:100%;
-  padding:0 12px;
+  padding:0 40px;   /* doppelter Puffer für sehr lange Texte */
 
-  opacity:0.20;
-  transform:scale(0.85);
-  transition:opacity 150ms, transform 150ms;
+  display:flex;align-items:center;justify-content:center;
+
+  opacity:0.25;
+  transform:scale(0.9);
+  transition:opacity 150ms,transform 150ms;
 }
 
-.slot-item.active {
+.slot-item.active{
   opacity:1;
-  transform:scale(1.05);
+  transform:scale(1.1);
 }
 
-.arrow {
-  width:0; height:0;
-  opacity:0.75;
-  cursor:pointer;
+/* Pfeile */
+.arrow{
+  width:0;height:0;
+  opacity:0.75;cursor:pointer;
   transition:opacity 200ms;
   border-left:14px solid transparent;
   border-right:14px solid transparent;
 }
-.arrow:hover { opacity:1; }
 
-.arrow-up { border-bottom:14px solid var(--tx); margin-bottom:4px; }
-.arrow-down { border-top:14px solid var(--tx); margin-top:4px; }
+.arrow:hover{opacity:1;}
 
-.section-area {
-  margin-top:1.3rem;
-  font-size:0.86rem;
+.arrow-up{border-bottom:14px solid var(--tx);margin-bottom:6px;}
+.arrow-down{border-top:14px solid var(--tx);margin-top:6px;}
+
+.section-area{
+  margin-top:1.8rem;
+  font-size:1rem;
   opacity:0;
   transition:opacity 260ms ease-out;
 }
 
-.section-area.visible { opacity:1; }
+.section-area.visible{opacity:1;}
 </style>
 </head>
 
@@ -150,7 +133,6 @@ body { display:flex; align-items:center; justify-content:center; }
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
     <div class="slot-area">
-
       <div class="arrow arrow-up" id="arrow-up"></div>
 
       <div class="slot-window">
@@ -158,9 +140,11 @@ body { display:flex; align-items:center; justify-content:center; }
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
+
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
+
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
@@ -175,43 +159,41 @@ body { display:flex; align-items:center; justify-content:center; }
 </div>
 
 <script>
-const base = ["Musik","Gemälde","Unterstützung"];
-const texts = {
+const base=["Musik","Gemälde","Unterstützung"];
+const texts={
   Musik:"Dies ist ein Testtext für Musik.",
   Gemälde:"Dies ist ein Testtext für Gemälde.",
   Unterstützung:"Dies ist ein Testtext für Unterstützung."
 };
 
-const list = document.getElementById("slot-list");
-const items = [...document.querySelectorAll(".slot-item")];
-const out = document.getElementById("section-area");
+const list=document.getElementById("slot-list");
+const items=[...document.querySelectorAll(".slot-item")];
+const out=document.getElementById("section-area");
 
-const ITEM=42, WINDOW=65, CENTER=(WINDOW-ITEM)/2;
+const ITEM=42, WINDOW=110;
+const CENTER=(WINDOW-ITEM)/2;
 
-/* Start exakt in der Mitte des zweiten Blocks */
+/* Start: Mitte Block 2 */
 let visual=4;
 let y=-(visual*ITEM)+CENTER;
-
 list.style.transform=`translateX(-50%) translateY(${y}px)`;
 
-/* Update sichtbares Item */
-function update() {
+function update(){
   items.forEach(i=>i.classList.remove("active"));
   items[visual].classList.add("active");
 
-  const real = base[(visual%3+3)%3];
-
+  const real=base[(visual%3+3)%3];
   out.classList.remove("visible");
+
   requestAnimationFrame(()=>{
     out.textContent=texts[real];
     out.classList.add("visible");
   });
 }
 
-/* Bewegung */
-function move(d){
-  visual+=d;
-  y-=d*ITEM;
+function move(dir){
+  visual+=dir;
+  y-=dir*ITEM;
   list.style.transition="transform 170ms cubic-bezier(.32,.72,.23,1)";
   list.style.transform=`translateX(-50%) translateY(${y}px)`;
 
@@ -228,15 +210,15 @@ function move(d){
   },170);
 }
 
-document.getElementById("arrow-up").onclick = () => move(-1);
-document.getElementById("arrow-down").onclick = () => move(1);
+document.getElementById("arrow-up").onclick=()=>move(-1);
+document.getElementById("arrow-down").onclick=()=>move(1);
 
 let startY=0;
-list.addEventListener("touchstart", e => startY=e.touches[0].clientY);
-list.addEventListener("touchend",   e => {
+list.addEventListener("touchstart",e=>startY=e.touches[0].clientY);
+list.addEventListener("touchend",e=>{
   const d=e.changedTouches[0].clientY-startY;
-  if(d>40) move(-1);
-  if(d<-40) move(1);
+  if(d>40)move(-1);
+  if(d<-40)move(1);
 });
 
 update();
