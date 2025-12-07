@@ -1,5 +1,3 @@
-Code 11
-
 <!doctype html>
 <html lang="de">
 <head>
@@ -13,8 +11,6 @@ Code 11
   --text-main: #f5f0e8;
 }
 
-/* RESET */
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -27,8 +23,6 @@ html, body {
 }
 
 body { display: flex; align-items: center; justify-content: center; }
-
-/* FRAME */
 
 .page-frame {
   position: relative;
@@ -46,8 +40,6 @@ body { display: flex; align-items: center; justify-content: center; }
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
-
-/* CONTENT */
 
 .page-content {
   position: absolute;
@@ -71,12 +63,12 @@ body { display: flex; align-items: center; justify-content: center; }
 
 /* ----------------------------- SLOT ----------------------------- */
 
-/* Fenster bleibt 65px – wir zentrieren das 42px-Item exakt */
 .slot-window {
   position: relative;
   width: 55%;
   height: 65px;
   overflow: hidden;
+  margin-top: -12px; /* Slot nach oben verschoben */
 
   mask-image: linear-gradient(
     to bottom,
@@ -88,7 +80,6 @@ body { display: flex; align-items: center; justify-content: center; }
   );
 }
 
-/* Liste bewegt sich über translateY */
 .slot-list {
   position: absolute;
   left: 50%;
@@ -99,8 +90,6 @@ body { display: flex; align-items: center; justify-content: center; }
   transition: transform 170ms cubic-bezier(.32,.72,.23,1);
 }
 
-/* ITEMS */
-
 .slot-item {
   height: 42px;
   font-size: 0.86rem;
@@ -108,6 +97,7 @@ body { display: flex; align-items: center; justify-content: center; }
   display: flex;
   align-items: center;
   justify-content: center;
+
   opacity: 0.20;
   transform: scale(0.85);
   transition: opacity 150ms, transform 150ms;
@@ -167,21 +157,17 @@ body { display: flex; align-items: center; justify-content: center; }
 
     <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <!-- VIEWPORT -->
     <div class="slot-window">
       <div class="slot-list" id="slot-list">
 
-        <!-- BLOCK 1 -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
 
-        <!-- BLOCK 2 (Startblock) -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
 
-        <!-- BLOCK 3 -->
         <div class="slot-item">Musik</div>
         <div class="slot-item">Gemälde</div>
         <div class="slot-item">Unterstützung</div>
@@ -198,8 +184,6 @@ body { display: flex; align-items: center; justify-content: center; }
 
 <script>
 
-/* BASIS */
-
 const baseItems = ["Musik","Gemälde","Unterstützung"];
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
@@ -214,10 +198,9 @@ const out = document.getElementById("section-area");
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 
-/* mathematisch korrekte Zentrierung */
-const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* = 11.5px */
+/* Kein Subpixel → kein Code-11-Bug */
+const CENTER_OFFSET = Math.round((WINDOW_HEIGHT - ITEM_HEIGHT) / 2);
 
-/* Startposition = 2. Block, mittleres Item */
 let visualIndex = 4;
 let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
 
@@ -240,7 +223,15 @@ function update() {
 
 /* MOVE */
 
+const LOCK_TIME = 400; // 400 ms Hard-Lock
+let locked = false;
+
 function doMove(dir) {
+
+  if (locked) return;
+  locked = true;
+  setTimeout(() => locked = false, LOCK_TIME);
+
   visualIndex += dir;
   translateY -= dir * ITEM_HEIGHT;
 
@@ -248,6 +239,7 @@ function doMove(dir) {
   list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
   setTimeout(() => {
+
     if (visualIndex >= 7 || visualIndex <= 1) {
       visualIndex = 4;
       translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
@@ -266,8 +258,6 @@ function doMove(dir) {
 function moveUp() { doMove(-1); }
 function moveDown() { doMove(1); }
 
-/* EVENTS */
-
 document.getElementById("arrow-up").onclick = moveUp;
 document.getElementById("arrow-down").onclick = moveDown;
 
@@ -283,6 +273,13 @@ list.addEventListener("touchend", e => {
   const diff = e.changedTouches[0].clientY - startY;
   if (diff > 40) moveUp();
   if (diff < -40) moveDown();
+});
+
+/* MOUSE WHEEL */
+
+window.addEventListener("wheel", e => {
+  if (e.deltaY > 0) moveDown();
+  else if (e.deltaY < 0) moveUp();
 });
 
 /* INIT */
