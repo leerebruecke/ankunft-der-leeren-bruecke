@@ -12,7 +12,6 @@
 }
 
 /* RESET */
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -27,7 +26,6 @@ html, body {
 body { display: flex; align-items: center; justify-content: center; }
 
 /* FRAME */
-
 .page-frame {
   position: relative;
   --base: min(100vh, 1200px);
@@ -46,7 +44,6 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* CONTENT */
-
 .page-content {
   position: absolute;
   inset: 0;
@@ -69,24 +66,32 @@ body { display: flex; align-items: center; justify-content: center; }
 
 /* ----------------------------- SLOT ----------------------------- */
 
-/* Fenster bleibt 65px – wir zentrieren das 42px-Item exakt */
+/* Slot 40px höher */
+.slot-wrapper {
+  margin-top: -40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* engerer Sichtbereich, weniger Leerlauf */
 .slot-window {
   position: relative;
   width: 55%;
-  height: 65px;
+  height: 50px;
   overflow: hidden;
 
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0,0,0,0.85) 22%,
+    rgba(0,0,0,0.85) 12%,
     black 50%,
-    rgba(0,0,0,0.85) 78%,
+    rgba(0,0,0,0.85) 88%,
     transparent 100%
   );
 }
 
-/* Liste bewegt sich über translateY */
+/* Slot list */
 .slot-list {
   position: absolute;
   left: 50%;
@@ -98,7 +103,6 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* ITEMS */
-
 .slot-item {
   height: 42px;
   font-size: 0.86rem;
@@ -117,7 +121,6 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* ARROWS */
-
 .arrow {
   width: 0; height: 0;
   border-left: 14px solid transparent;
@@ -140,7 +143,6 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* TEXT */
-
 .section-area {
   margin-top: 1.2rem;
   font-size: 0.86rem;
@@ -151,9 +153,9 @@ body { display: flex; align-items: center; justify-content: center; }
 .section-area.visible {
   opacity: 1;
 }
-
 </style>
 </head>
+
 <body>
 
 <div class="page-frame">
@@ -163,31 +165,30 @@ body { display: flex; align-items: center; justify-content: center; }
 
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
-    <div class="arrow arrow-up" id="arrow-up"></div>
+    <div class="slot-wrapper">
+      <div class="arrow arrow-up" id="arrow-up"></div>
 
-    <!-- VIEWPORT -->
-    <div class="slot-window">
-      <div class="slot-list" id="slot-list">
+      <div class="slot-window">
+        <div class="slot-list" id="slot-list">
 
-        <!-- BLOCK 1 -->
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+          <!-- 3 Blöcke für Loop -->
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
 
-        <!-- BLOCK 2 (Startblock) -->
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
 
-        <!-- BLOCK 3 -->
-        <div class="slot-item">Musik</div>
-        <div class="slot-item">Gemälde</div>
-        <div class="slot-item">Unterstützung</div>
+          <div class="slot-item">Musik</div>
+          <div class="slot-item">Gemälde</div>
+          <div class="slot-item">Unterstützung</div>
 
+        </div>
       </div>
-    </div>
 
-    <div class="arrow arrow-down" id="arrow-down"></div>
+      <div class="arrow arrow-down" id="arrow-down"></div>
+    </div>
 
     <div class="section-area" id="section-area"></div>
 
@@ -195,10 +196,9 @@ body { display: flex; align-items: center; justify-content: center; }
 </div>
 
 <script>
-
 /* BASIS */
-
 const baseItems = ["Musik","Gemälde","Unterstützung"];
+
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
   Gemälde: "Dies ist ein Testtext für Gemälde.",
@@ -210,19 +210,18 @@ const items = [...document.querySelectorAll(".slot-item")];
 const out = document.getElementById("section-area");
 
 const ITEM_HEIGHT = 42;
-const WINDOW_HEIGHT = 65;
+const WINDOW_HEIGHT = 50;
 
-/* mathematisch korrekte Zentrierung */
-const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* = 11.5px */
+/* perfekter Zentrier-Offset */
+const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* 4px */
 
-/* Startposition = 2. Block, mittleres Item */
+/* Startposition = Mitte des Blocks */
 let visualIndex = 4;
 let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
 
 list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
 /* UPDATE */
-
 function update() {
   items.forEach(i => i.classList.remove("active"));
   items[visualIndex].classList.add("active");
@@ -237,7 +236,6 @@ function update() {
 }
 
 /* MOVE */
-
 function doMove(dir) {
   visualIndex += dir;
   translateY -= dir * ITEM_HEIGHT;
@@ -245,6 +243,7 @@ function doMove(dir) {
   list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
   list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
+  /* Loop absolut flüssig */
   setTimeout(() => {
     if (visualIndex >= 7 || visualIndex <= 1) {
       visualIndex = 4;
@@ -253,24 +252,23 @@ function doMove(dir) {
       list.style.transition = "none";
       list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
-      void list.offsetHeight;
-      list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
+      requestAnimationFrame(() => {
+        list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
+      });
     }
 
     update();
-  }, 170);
+  }, 200);   /* 200ms → kein Ruckeln */
 }
 
 function moveUp() { doMove(-1); }
 function moveDown() { doMove(1); }
 
 /* EVENTS */
-
 document.getElementById("arrow-up").onclick = moveUp;
 document.getElementById("arrow-down").onclick = moveDown;
 
 /* TOUCH */
-
 let startY = 0;
 
 list.addEventListener("touchstart", e => {
@@ -284,9 +282,7 @@ list.addEventListener("touchend", e => {
 });
 
 /* INIT */
-
 update();
-
 </script>
 
 </body>
