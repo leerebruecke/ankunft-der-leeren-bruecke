@@ -28,14 +28,14 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:26;          /* zentraler Regler: höher = langsamer */
-  --type-jitter-ms:0;         /* optional: 6-14 für organisches Tippen */
+  --type-char-ms:24;          /* leicht schneller als zuvor */
+  --type-jitter-ms:8;         /* lebendig, aber nicht nervös */
   --fade-out-ms:120;
 
   /* icons */
   --icon-size:70px;
-  --icon-fade-ms:1100ms;
-  --post-min-delay-ms:160;    /* kleine Atempause nach Text-Ende */
+  --icon-fade-ms:900ms;       /* etwas knackiger */
+  --post-min-delay-ms:90;     /* Icons dürfen früh kommen */
 
   --mask-grad:linear-gradient(
     to bottom,
@@ -197,7 +197,7 @@ body{
   display:block;
   margin:0;
   padding:0;
-  white-space:pre-line; /* erlaubt \n ohne innerHTML */
+  white-space:pre-line;
 }
 .seg-normal{opacity:0.92;}
 .seg-italic{font-style:italic;opacity:0.78;}
@@ -209,9 +209,13 @@ body{
   text-align:center;
 }
 
-/* POST BLOCKS */
+/* POST BLOCKS (now visually above text) */
+.section-extras{
+  margin-bottom:0.65rem;
+}
+
 .post-block{
-  margin-top:0.9rem;
+  margin-top:0.25rem;
   display:flex;
   gap:1rem;
   justify-content:center;
@@ -248,6 +252,7 @@ body{
 .post-email{
   width:100%;
   justify-content:center;
+  margin-top:0.15rem;
 }
 
 .post-email a{
@@ -321,8 +326,12 @@ body{
 
     <div class="section-area" id="section-area">
       <div class="section-title" id="section-title"></div>
-      <div class="section-body" id="section-body"></div>
+
+      <!-- Icons/Links FIRST -->
       <div class="section-extras" id="section-extras"></div>
+
+      <!-- Text BELOW -->
+      <div class="section-body" id="section-body"></div>
     </div>
   </div>
 </div>
@@ -607,7 +616,7 @@ function buildSegmentsDOM(segs){
     div.className = `seg ${s.cls}`;
 
     const prefix = s.preBlank ? "\n".repeat(s.preBlank) : "";
-    div.textContent = prefix; /* wird danach weiter getippt */
+    div.textContent = prefix;
     bodyEl.appendChild(div);
 
     nodes.push({ el: div, full: prefix + (s.text || "") });
@@ -616,7 +625,7 @@ function buildSegmentsDOM(segs){
   return nodes;
 }
 
-/* ----------------------------- POST BLOCKS ----------------------------- */
+/* ----------------------------- POST BLOCKS (EARLY) ----------------------------- */
 
 function buildPostBlocks(page){
   const blocks = [];
@@ -662,14 +671,14 @@ function buildPostBlocks(page){
   return blocks;
 }
 
-function showPostBlocksAfterTyping(page){
+function showPostBlocksEarly(page){
   extrasEl.innerHTML = "";
   const blocks = buildPostBlocks(page);
   if (!blocks.length) return;
 
   blocks.forEach(b => extrasEl.appendChild(b));
 
-  const minDelay = cssNum("--post-min-delay-ms", 160);
+  const minDelay = cssNum("--post-min-delay-ms", 90);
   postRevealTimer = setTimeout(() => {
     requestAnimationFrame(() => blocks.forEach(b => b.classList.add("visible")));
   }, minDelay);
@@ -681,20 +690,19 @@ function typePage(page){
   clearTyping();
   titleEl.textContent = "";
   extrasEl.innerHTML = "";
+  bodyEl.innerHTML = "";
+
+  /* Icons/Links first */
+  showPostBlocksEarly(page);
 
   const segs = buildSegments(page);
-
-  if (!segs.length){
-    bodyEl.innerHTML = "";
-    showPostBlocksAfterTyping(page);
-    return;
-  }
+  if (!segs.length) return;
 
   const nodes = buildSegmentsDOM(segs);
   const token = ++typingToken;
 
-  const base = cssNum("--type-char-ms", 26);
-  const jitter = cssNum("--type-jitter-ms", 0);
+  const base = cssNum("--type-char-ms", 24);
+  const jitter = cssNum("--type-jitter-ms", 8);
 
   let segIndex = 0;
   let charIndex = nodes[0]?.el.textContent.length || 0;
@@ -705,7 +713,6 @@ function typePage(page){
     const current = nodes[segIndex];
     if (!current){
       typingTimer = null;
-      showPostBlocksAfterTyping(page);
       return;
     }
 
@@ -721,7 +728,6 @@ function typePage(page){
 
       if (segIndex >= nodes.length){
         typingTimer = null;
-        showPostBlocksAfterTyping(page);
         return;
       }
     }
