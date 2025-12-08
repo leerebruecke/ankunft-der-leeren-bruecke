@@ -28,15 +28,15 @@
   --slot-w-max:600px;
 
   /* typewriter */
-  --type-word-ms:220;         /* ruhiger Wort-Takt */
-  --type-jitter-ms:0;         /* optional: 30-50 für organisches Tippen */
+  --type-word-ms:250;         /* leicht ruhiger als zuvor */
+  --type-jitter-ms:0;         /* 30-50 für organisches Tippen */
   --fade-out-ms:120;
 
   /* icons */
   --icon-size:70px;
   --icon-fade-ms:1100ms;
-  --post-min-delay-ms:140;    /* minimale Verzögerung vor Reveal */
-  --post-max-wait-ms:900;     /* Obergrenze fürs Warten auf Icons */
+  --post-min-delay-ms:140;
+  --post-max-wait-ms:900;
 
   --mask-grad:linear-gradient(
     to bottom,
@@ -237,6 +237,14 @@ body{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
+}
+
+/* optional: extra subtle anti-pop */
+.post-icon{
+  opacity:0;
+  transition:opacity 200ms ease-out;
+}
+.post-icon.ready{
   opacity:0.92;
 }
 
@@ -249,6 +257,15 @@ body{
   font-style:italic;
   opacity:0.78;
   letter-spacing:0.04em;
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce){
+  .slot-item,
+  .post-block,
+  .section-area{
+    transition:none !important;
+  }
 }
 
 /* MOBILE */
@@ -302,16 +319,16 @@ body{
   <div class="page-background"></div>
 
   <div class="page-content">
-    <img src="Grafiken/leerebruecke.png" class="logo-img"/>
+    <img src="Grafiken/leerebruecke.png" class="logo-img" alt="leerebruecke"/>
 
     <div class="slot-group">
-      <div class="arrow arrow-up" id="arrow-up"></div>
+      <div class="arrow arrow-up" id="arrow-up" role="button" aria-label="Nach oben"></div>
 
       <div class="slot-window">
         <div class="slot-list" id="slot-list"></div>
       </div>
 
-      <div class="arrow arrow-down" id="arrow-down"></div>
+      <div class="arrow arrow-down" id="arrow-down" role="button" aria-label="Nach unten"></div>
     </div>
 
     <div class="section-area" id="section-area">
@@ -482,6 +499,9 @@ const cssNum = (name, fallback=0) => {
   return Number.isFinite(v) ? v : fallback;
 };
 
+const prefersReducedMotion = () =>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /* ----------------------------- GEOMETRY ----------------------------- */
 
 let ITEM_HEIGHT, WINDOW_HEIGHT, CENTER_OFFSET, BASE_Y;
@@ -579,7 +599,7 @@ function clearTyping(){
   typingToken++;
 
   if (typingTimer){
-    clearInterval(typingTimer);
+    clearTimeout(typingTimer);
     typingTimer = null;
   }
 
@@ -640,6 +660,9 @@ function buildPostBlocks(page){
       img.alt = file.replace(".png","");
       img.decoding = "async";
       img.loading = "eager";
+      img.className = "post-icon";
+      img.onload = () => img.classList.add("ready");
+      img.onerror = () => img.classList.add("ready");
 
       if (href){
         const a = document.createElement("a");
@@ -725,7 +748,14 @@ function typePage(page){
     return;
   }
 
-  const base = cssNum("--type-word-ms", 220);
+  if (prefersReducedMotion()){
+    bodyEl.innerHTML = renderSegmentsHTML(segs, segs.length, "");
+    clearTimeout(postDeadlineTimer);
+    completePostsSoon(page);
+    return;
+  }
+
+  const base = cssNum("--type-word-ms", 250);
   const jitter = cssNum("--type-jitter-ms", 0);
 
   const tokenized = segs.map(s => {
@@ -737,12 +767,8 @@ function typePage(page){
   let tokIndex = 0;
   const token = ++typingToken;
 
-  typingTimer = setInterval(() => {
-    if (token !== typingToken){
-      clearInterval(typingTimer);
-      typingTimer = null;
-      return;
-    }
+  const step = () => {
+    if (token !== typingToken) return;
 
     const tokensArr = tokenized[segIndex]?.tokens || [];
     tokIndex++;
@@ -755,14 +781,20 @@ function typePage(page){
       tokIndex = 0;
 
       if (segIndex >= tokenized.length){
-        clearInterval(typingTimer);
         typingTimer = null;
-
         clearTimeout(postDeadlineTimer);
         completePostsSoon(page);
+        return;
       }
     }
-  }, Math.max(40, base + (jitter ? (Math.random()*2-1)*jitter : 0)));
+
+    const rand = jitter ? (Math.random()*2-1) * jitter : 0;
+    const delay = Math.max(40, base + rand);
+
+    typingTimer = setTimeout(step, delay);
+  };
+
+  step();
 }
 
 function showPage(page){
@@ -893,6 +925,14 @@ frame.addEventListener("wheel", e => {
     dir > 0 ? moveDown() : moveUp();
   }
 }, { passive:false });
+
+/* ----------------------------- KEYBOARD ----------------------------- */
+
+window.addEventListener("keydown", e => {
+  if (busy) return;
+  if (e.key === "ArrowUp"){ e.preventDefault(); moveUp(); }
+  if (e.key === "ArrowDown"){ e.preventDefault(); moveDown(); }
+});
 
 /* ----------------------------- ICON PRELOAD ----------------------------- */
 
