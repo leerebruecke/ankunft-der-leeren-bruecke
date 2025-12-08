@@ -6,152 +6,158 @@
 <title>leerebruecke</title>
 
 <style>
-:root {
-  --bg-root: #1a1218;
-  --text-main: #f5f0e8;
+:root{
+  --bg-root:#1a1218;
+  --text-main:#f5f0e8;
 }
 
 /* RESET */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-html, body {
-  height: 100%;
-  background: var(--bg-root);
-  color: var(--text-main);
-  font-family: 'Lucida Console', monospace;
-  user-select: none;
-  overflow: hidden;
+html,body{
+  height:100%;
+  background:var(--bg-root);
+  color:var(--text-main);
+  font-family:'Lucida Console',monospace;
+  user-select:none;
+  overflow:hidden;
 }
 
-body { display: flex; align-items: center; justify-content: center; }
+body{display:flex;align-items:center;justify-content:center;}
 
 /* FRAME */
-.page-frame {
-  position: relative;
-  --base: min(100vh, 1200px);
-  height: calc(var(--base) * 1.20);
-  width: calc(var(--base) * 1.20 * 9/16);
-  overflow: hidden;
+.page-frame{
+  position:relative;
+  --base:min(100vh,1200px);
+  height:calc(var(--base)*1.20);
+  width:calc(var(--base)*1.20*9/16);
+  overflow:hidden;
 }
 
-.page-background {
-  position: absolute;
-  inset: 0;
-  background-image: url("Grafiken/Br%C3%BCcke.png");
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
+.page-background{
+  position:absolute;
+  inset:0;
+  background-image:url("Grafiken/Br%C3%BCcke.png");
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
 }
 
 /* CONTENT */
-.page-content {
-  position: absolute;
-  inset: 0;
-  padding: 1.1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.page-content{
+  position:absolute;
+  inset:0;
+  padding:1.1rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%; /* width hardening */
 }
 
-.logo-img {
-  width: 70%;
-  margin-top: 0.2rem;
-  margin-bottom: 1rem;
-  image-rendering: pixelated;
+.logo-img{
+  width:70%;
+  margin-top:0.2rem;
+  margin-bottom:1rem;
+  image-rendering:pixelated;
 }
 
-@media (max-width: 768px) {
-  .logo-img { margin-top: 10%; }
+@media (max-width:768px){
+  .logo-img{margin-top:10%;}
 }
 
 /* ----------------------------- SLOT ----------------------------- */
 
-/* Slot 40px höher */
-.slot-wrapper {
-  margin-top: -40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Wrapper for arrows + window + arrows, shifted up ~40px */
+.slot-group{
+  width:100%;                 /* critical: stable percentage reference */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transform:translateY(-40px);
 }
 
-/* engerer Sichtbereich, weniger Leerlauf */
-.slot-window {
-  position: relative;
-  width: 55%;
-  height: 50px;
-  overflow: hidden;
+/* Window stays at 65px; width is now robust against collapsing parents */
+.slot-window{
+  position:relative;
+  width:clamp(220px,55%,520px);
+  height:65px;
+  overflow:hidden;
+  flex-shrink:0;
 
-  mask-image: linear-gradient(
+  mask-image:linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0,0,0,0.85) 12%,
+    rgba(0,0,0,0.85) 22%,
     black 50%,
-    rgba(0,0,0,0.85) 88%,
+    rgba(0,0,0,0.85) 78%,
     transparent 100%
   );
 }
 
-/* Slot list */
-.slot-list {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) translateY(0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 170ms cubic-bezier(.32,.72,.23,1);
+/* List */
+.slot-list{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%) translateY(0);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transition:transform 170ms cubic-bezier(.32,.72,.23,1);
+  will-change:transform;
 }
 
-/* ITEMS */
-.slot-item {
-  height: 42px;
-  font-size: 0.86rem;
-  letter-spacing: 0.1em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.20;
-  transform: scale(0.85);
-  transition: opacity 150ms, transform 150ms;
+/* Items */
+.slot-item{
+  height:42px;
+  font-size:0.86rem;
+  letter-spacing:0.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0.20;
+  transform:scale(0.85);
+  transition:opacity 150ms, transform 150ms;
+  white-space:nowrap;         /* keeps words intact */
 }
 
-.slot-item.active {
-  opacity: 1;
-  transform: scale(1.05);
+.slot-item.active{
+  opacity:1;
+  transform:scale(1.05);
 }
 
-/* ARROWS */
-.arrow {
-  width: 0; height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  opacity: 0.75;
-  cursor: pointer;
-  transition: opacity 200ms;
+/* Arrows */
+.arrow{
+  width:0;height:0;
+  border-left:14px solid transparent;
+  border-right:14px solid transparent;
+  opacity:0.75;
+  cursor:pointer;
+  transition:opacity 200ms;
+  flex-shrink:0;
 }
 
-.arrow:hover { opacity: 1; }
+.arrow:hover{opacity:1;}
 
-.arrow-up {
-  border-bottom: 14px solid var(--text-main);
-  margin-bottom: 4px;
+.arrow-up{
+  border-bottom:14px solid var(--text-main);
+  margin-bottom:4px;
 }
 
-.arrow-down {
-  border-top: 14px solid var(--text-main);
-  margin-top: 4px;
+.arrow-down{
+  border-top:14px solid var(--text-main);
+  margin-top:4px;
 }
 
-/* TEXT */
-.section-area {
-  margin-top: 1.2rem;
-  font-size: 0.86rem;
-  opacity: 0;
-  transition: opacity 260ms ease-out;
+/* Text below */
+.section-area{
+  margin-top:1.2rem;
+  font-size:0.86rem;
+  opacity:0;
+  transition:opacity 260ms ease-out;
 }
 
-.section-area.visible {
-  opacity: 1;
+.section-area.visible{
+  opacity:1;
 }
 </style>
 </head>
@@ -165,13 +171,13 @@ body { display: flex; align-items: center; justify-content: center; }
 
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
-    <div class="slot-wrapper">
+    <div class="slot-group">
+
       <div class="arrow arrow-up" id="arrow-up"></div>
 
       <div class="slot-window">
         <div class="slot-list" id="slot-list">
 
-          <!-- 3 Blöcke für Loop -->
           <div class="slot-item">Musik</div>
           <div class="slot-item">Gemälde</div>
           <div class="slot-item">Unterstützung</div>
@@ -188,6 +194,7 @@ body { display: flex; align-items: center; justify-content: center; }
       </div>
 
       <div class="arrow arrow-down" id="arrow-down"></div>
+
     </div>
 
     <div class="section-area" id="section-area"></div>
@@ -196,56 +203,56 @@ body { display: flex; align-items: center; justify-content: center; }
 </div>
 
 <script>
-/* BASIS */
+/* DATA */
 const baseItems = ["Musik","Gemälde","Unterstützung"];
-
 const texts = {
   Musik: "Dies ist ein Testtext für Musik.",
   Gemälde: "Dies ist ein Testtext für Gemälde.",
   Unterstützung: "Dies ist ein Testtext für Unterstützung."
 };
 
+/* ELEMENTS */
 const list = document.getElementById("slot-list");
-const items = [...document.querySelectorAll(".slot-item")];
+const items = Array.from(document.querySelectorAll(".slot-item"));
 const out = document.getElementById("section-area");
 
+/* GEOMETRY */
 const ITEM_HEIGHT = 42;
-const WINDOW_HEIGHT = 50;
+const WINDOW_HEIGHT = 65;
+const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
 
-/* perfekter Zentrier-Offset */
-const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;  /* 4px */
-
-/* Startposition = Mitte des Blocks */
-let visualIndex = 4;
+/* STATE */
+let visualIndex = 4; /* 2nd block, middle item */
 let translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
 
+/* INIT POSITION */
 list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
-/* UPDATE */
-function update() {
+/* RENDER */
+function update(){
   items.forEach(i => i.classList.remove("active"));
-  items[visualIndex].classList.add("active");
+  const active = items[visualIndex];
+  if (active) active.classList.add("active");
 
   const real = baseItems[(visualIndex % 3 + 3) % 3];
-
   out.classList.remove("visible");
+
   setTimeout(() => {
-    out.textContent = texts[real];
+    out.textContent = texts[real] ?? "";
     out.classList.add("visible");
   }, 80);
 }
 
-/* MOVE */
-function doMove(dir) {
+/* MOVE CORE */
+function doMove(dir){
   visualIndex += dir;
   translateY -= dir * ITEM_HEIGHT;
 
   list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
   list.style.transform = `translateX(-50%) translateY(${translateY}px)`;
 
-  /* Loop absolut flüssig */
   setTimeout(() => {
-    if (visualIndex >= 7 || visualIndex <= 1) {
+    if (visualIndex >= 7 || visualIndex <= 1){
       visualIndex = 4;
       translateY = -(visualIndex * ITEM_HEIGHT) + CENTER_OFFSET;
 
@@ -256,15 +263,14 @@ function doMove(dir) {
         list.style.transition = "transform 170ms cubic-bezier(.32,.72,.23,1)";
       });
     }
-
     update();
-  }, 200);   /* 200ms → kein Ruckeln */
+  }, 180);
 }
 
-function moveUp() { doMove(-1); }
-function moveDown() { doMove(1); }
+const moveUp = () => doMove(-1);
+const moveDown = () => doMove(1);
 
-/* EVENTS */
+/* CLICK */
 document.getElementById("arrow-up").onclick = moveUp;
 document.getElementById("arrow-down").onclick = moveDown;
 
@@ -273,13 +279,13 @@ let startY = 0;
 
 list.addEventListener("touchstart", e => {
   startY = e.touches[0].clientY;
-});
+}, {passive:true});
 
 list.addEventListener("touchend", e => {
   const diff = e.changedTouches[0].clientY - startY;
   if (diff > 40) moveUp();
   if (diff < -40) moveDown();
-});
+}, {passive:true});
 
 /* INIT */
 update();
