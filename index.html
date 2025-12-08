@@ -28,11 +28,12 @@
   --slot-w-max: 520px;
 
   /* typewriter */
-  --type-speed-ms: 14;
+  --type-speed-ms: 28;  /* slower (previously 14) */
   --fade-out-ms: 120;
 
   /* icons */
-  --icon-size: 70px; /* ~2.5x compared to former ~28px */
+  --icon-size: 70px;      /* ~2.5x */
+  --icon-fade-ms: 520ms;  /* slower/softer reveal */
 }
 
 /* RESET */
@@ -182,8 +183,10 @@ body{
   font-size:var(--text-font);
   opacity:1;
   transition:opacity 260ms ease-out;
-  width:min(85%, 38rem);
-  text-align:center;
+  width:min(85%, 36rem);
+  text-align:left;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 .section-area.fading{
@@ -191,17 +194,16 @@ body{
   transition:opacity var(--fade-out-ms) ease-out;
 }
 
-/* Title under the slot is intentionally disabled */
+/* Title under the slot intentionally disabled */
 .section-title{ display:none; }
 
-/* Body container for typed segments */
 .section-body{
-  white-space:normal;
   line-height:1.45;
   opacity:0.92;
+  padding:0 0.1rem;
 }
 
-/* Typed segment styles */
+/* Typed segments */
 .seg{
   display:block;
   margin:0;
@@ -222,21 +224,33 @@ body{
   opacity:0.55;
 }
 
+/* Attribution line */
 .seg-attrib{
   font-style:italic;
-  opacity:0.48;
-  text-align:right;
-  padding-right:0.1rem;
+  opacity:0.20;
+  margin-top:0.25rem;
+  text-align:left;
 }
 
-/* icon rows remain non-typed visual blocks */
+/* Icons */
 .icon-row{
   margin-top:0.9rem;
   display:flex;
   gap:1rem;
-  justify-content:center;
+  justify-content:flex-start;
   align-items:center;
   flex-wrap:wrap;
+
+  opacity:0;
+  transform:translateY(2px);
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out;
+}
+
+.icon-row.visible{
+  opacity:1;
+  transform:translateY(0);
 }
 
 .icon-row a{
@@ -266,6 +280,7 @@ body{
     --slot-w-max: 360px;
 
     --icon-size: 56px;
+    --icon-fade-ms: 520ms;
   }
 
   .logo-img{
@@ -314,9 +329,7 @@ body{
       <div class="arrow arrow-up" id="arrow-up"></div>
 
       <div class="slot-window">
-        <div class="slot-list" id="slot-list">
-          <!-- injected by JS -->
-        </div>
+        <div class="slot-list" id="slot-list"></div>
       </div>
 
       <div class="arrow arrow-down" id="arrow-down"></div>
@@ -333,9 +346,6 @@ body{
 </div>
 
 <script>
-/* ----------------------------- PAGE DATA ----------------------------- */
-/* id = internal unique key, label = visible slot text (can be "…") */
-
 const PAGES = [
   { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft." },
   { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt." },
@@ -468,8 +478,6 @@ blickt der Abgrund auch in dich hinein.`,
   { id:"orden", label:"Leerebrücke", text:"Ein mythopoietischer Orden." }
 ];
 
-/* ----------------------------- ELEMENTS ----------------------------- */
-
 const list = document.getElementById("slot-list");
 const out = document.getElementById("section-area");
 const titleEl = document.getElementById("section-title");
@@ -479,14 +487,10 @@ const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
 const frame = document.querySelector(".page-frame");
 
-/* ----------------------------- GEOMETRY ----------------------------- */
-
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
 const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
-
-/* ----------------------------- TIMING/STATE ----------------------------- */
 
 const ANIM_MS = 170;
 
@@ -495,11 +499,9 @@ let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
 const WHEEL_CLAMP = 120;
 
-/* typewriter state */
 let typingTimer = null;
 let typingToken = 0;
 
-/* failsafe busy */
 let failTimer = null;
 function setBusy(){
   busy = true;
@@ -514,8 +516,6 @@ function clearBusy(){
   busy = false;
 }
 
-/* ----------------------------- UTIL ----------------------------- */
-
 function escapeHTML(str){
   return String(str)
     .replace(/&/g,"&amp;")
@@ -524,8 +524,6 @@ function escapeHTML(str){
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
 }
-
-/* ----------------------------- BUILD SLOT LIST ----------------------------- */
 
 function buildSlotItems(){
   list.innerHTML = "";
@@ -538,7 +536,6 @@ function buildSlotItems(){
   });
 }
 
-/* Rotate DOM so that "Klang" starts centered */
 function primeStart(){
   let safety = 0;
   while (list.children[1] && list.children[1].dataset.pageId !== "klang" && safety < 500){
@@ -548,13 +545,9 @@ function primeStart(){
   }
 }
 
-/* ----------------------------- PAGE RESOLUTION ----------------------------- */
-
 function resolvePageById(id){
   return PAGES.find(p => p.id === id) || { id, label:"", text:"" };
 }
-
-/* ----------------------------- TYPEWRITER SEGMENTS ----------------------------- */
 
 function clearTyping(){
   typingToken++;
@@ -575,7 +568,7 @@ function buildSegments(page){
   if (page.attrib){
     segs.push({
       cls: "seg-attrib",
-      text: `- ${page.attrib}`,
+      text: `— ${page.attrib}`,
       preBlank: 0
     });
   }
@@ -618,8 +611,6 @@ function renderSegmentsHTML(segs, upToSeg, partialText){
   return html;
 }
 
-/* ----------------------------- ICON RENDER ----------------------------- */
-
 function renderIcons(page){
   extrasEl.innerHTML = "";
   if (!page.icons || !Array.isArray(page.icons) || page.icons.length === 0) return;
@@ -648,14 +639,15 @@ function renderIcons(page){
   });
 
   extrasEl.appendChild(row);
-}
 
-/* ----------------------------- PAGE SHOW ----------------------------- */
+  requestAnimationFrame(() => {
+    row.classList.add("visible");
+  });
+}
 
 function typePage(page){
   clearTyping();
-
-  titleEl.textContent = ""; /* title under slot intentionally unused */
+  titleEl.textContent = "";
 
   const segs = buildSegments(page);
   bodyEl.innerHTML = "";
@@ -666,7 +658,7 @@ function typePage(page){
     return;
   }
 
-  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 14;
+  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 28;
 
   let segIndex = 0;
   let charIndex = 0;
@@ -712,8 +704,6 @@ function showPage(page){
   }, fadeMs);
 }
 
-/* ----------------------------- UPDATE ACTIVE ----------------------------- */
-
 function updateActive(){
   const nodes = Array.from(list.children);
   nodes.forEach(n => n.classList.remove("active"));
@@ -726,8 +716,6 @@ function updateActive(){
 
   showPage(page);
 }
-
-/* ----------------------------- MOVE LOGIC (TRUE ROLL) ----------------------------- */
 
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
@@ -787,8 +775,6 @@ function moveUp(){
   });
 }
 
-/* ----------------------------- INPUT MODES ----------------------------- */
-
 function applyInputMode(){
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
@@ -803,8 +789,6 @@ function applyInputMode(){
 
 applyInputMode();
 window.addEventListener("resize", applyInputMode);
-
-/* ----------------------------- TOUCH SWIPE (FULL FRAME) ----------------------------- */
 
 let startY = 0;
 let startX = 0;
@@ -828,8 +812,6 @@ frame.addEventListener("touchend", e => {
   if (dy < -50) moveDown();
 }, { passive:true });
 
-/* ----------------------------- WHEEL (WHOLE FRAME) ----------------------------- */
-
 frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (busy) { wheelAcc = 0; return; }
@@ -845,8 +827,6 @@ frame.addEventListener("wheel", e => {
     else moveUp();
   }
 }, { passive:false });
-
-/* ----------------------------- INIT ----------------------------- */
 
 buildSlotItems();
 primeStart();
