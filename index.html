@@ -36,7 +36,9 @@
   --icon-size:70px;
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;     /* frühe Icons */
-  --email-min-delay-ms:140;   /* kleine Atempause nach Text-Ende */
+
+  /* email */
+  --email-min-delay-ms:140;   /* nach Text-Ende */
 
   --mask-grad:linear-gradient(
     to bottom,
@@ -188,30 +190,24 @@ body{
 
 .section-title{display:none;}
 
-/* top extras */
+/* TOP EXTRAS */
 .section-extras-top{
   margin-bottom:0.65rem;
 }
 
-/* text block stays within centered area, but types left-to-right */
+/* BODY */
 .section-body{
   line-height:1.45;
   opacity:0.92;
-  text-align:left;
 }
 
-/* bottom extras */
+/* BOTTOM EXTRAS */
 .section-extras-bottom{
   margin-top:0.7rem;
 }
 
-/* Segments for letter typing */
-.seg{
-  display:block;
-  margin:0;
-  padding:0;
-  white-space:pre-line;
-}
+/* Seg base */
+.seg{display:block;margin:0;padding:0;}
 .seg-normal{opacity:0.92;}
 .seg-italic{font-style:italic;opacity:0.78;}
 .seg-aside{font-style:italic;opacity:0.55;}
@@ -219,7 +215,18 @@ body{
   font-style:italic;
   opacity:0.20;
   margin-top:0.25rem;
-  text-align:center;
+}
+
+/*
+  Centered text that types left-to-right:
+  Each line is a centered box with fixed final width (in ch),
+  but text inside is left-aligned.
+*/
+.tw-line{
+  display:block;
+  margin-inline:auto;
+  text-align:left;
+  white-space:pre;
 }
 
 /* POST BLOCKS */
@@ -587,7 +594,7 @@ function buildSlotItems(centerId="klang"){
   list.appendChild(frag);
 }
 
-/* ----------------------------- TYPEWRITER (LETTER) ----------------------------- */
+/* ----------------------------- TYPEWRITER CLEANUP ----------------------------- */
 
 function clearTyping(){
   typingToken++;
@@ -602,6 +609,8 @@ function clearTyping(){
   iconsRevealTimer = null;
   emailRevealTimer = null;
 }
+
+/* ----------------------------- SEGMENTS ----------------------------- */
 
 function buildSegments(page){
   const segs = [];
@@ -620,21 +629,126 @@ function buildSegments(page){
   return segs;
 }
 
-function buildSegmentsDOM(segs){
-  bodyEl.innerHTML = "";
-  const nodes = [];
+/* ----------------------------- MEASURE MAX CHARS ----------------------------- */
 
-  segs.forEach(s => {
-    const div = document.createElement("div");
-    div.className = `seg ${s.cls}`;
+function measureCharWidthPx(){
+  const probe = document.createElement("span");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.whiteSpace = "pre";
+  probe.style.font = getComputedStyle(bodyEl).font;
+  probe.style.fontSize = getComputedStyle(bodyEl).fontSize;
+  probe.textContent = "MMMMMMMMMM";
+  document.body.appendChild(probe);
+  const w = probe.getBoundingClientRect().width / 10;
+  probe.remove();
+  return w || 8;
+}
 
-    const prefix = s.preBlank ? "\n".repeat(s.preBlank) : "";
-    div.textContent = prefix;
-    bodyEl.appendChild(div);
+function computeMaxCharsPerLine(){
+  const containerW = bodyEl.clientWidth || out.clientWidth || 300;
+  const charW = measureCharWidthPx();
+  const max = Math.floor(containerW / charW);
+  return Math.max(12, max);
+}
 
-    nodes.push({ el: div, full: prefix + (s.text || "") });
+/* ----------------------------- WRAP TEXT INTO LINES ----------------------------- */
+
+function wrapParagraphToLines(paragraph, maxChars){
+  const words = paragraph.split(/\s+/).filter(Boolean);
+  if (!words.length) return [""];
+
+  const lines = [];
+  let line = "";
+
+  const pushLine = () => {
+    lines.push(line);
+    line = "";
+  };
+
+  for (const w of words){
+    if (!line){
+      if (w.length <= maxChars){
+        line = w;
+      } else {
+        for (let i = 0; i < w.length; i += maxChars){
+          lines.push(w.slice(i, i + maxChars));
+        }
+        line = "";
+      }
+      continue;
+    }
+
+    const candidate = line + " " + w;
+    if (candidate.length <= maxChars){
+      line = candidate;
+    } else {
+      pushLine();
+      if (w.length <= maxChars){
+        line = w;
+      } else {
+        for (let i = 0; i < w.length; i += maxChars){
+          lines.push(w.slice(i, i + maxChars));
+        }
+        line = "";
+      }
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines;
+}
+
+function segmentToLineObjects(seg, maxChars){
+  const outLines = [];
+
+  if (seg.preBlank){
+    for (let i = 0; i < seg.preBlank; i++){
+      outLines.push({ cls: seg.cls, text: "" });
+    }
+  }
+
+  const raw = String(seg.text || "");
+  const paragraphs = raw.split("\n");
+
+  paragraphs.forEach((p, idx) => {
+    const lines = wrapParagraphToLines(p, maxChars);
+    lines.forEach(l => outLines.push({ cls: seg.cls, text: l }));
+    if (idx < paragraphs.length - 1){
+      outLines.push({ cls: seg.cls, text: "" });
+    }
   });
 
+  return outLines;
+}
+
+/* ----------------------------- BUILD LINE DOM (CENTERED BOXES) ----------------------------- */
+
+function buildLinesDOMFromSegments(segs){
+  bodyEl.innerHTML = "";
+
+  const maxChars = computeMaxCharsPerLine();
+  const lineObjs = [];
+  segs.forEach(seg => lineObjs.push(...segmentToLineObjects(seg, maxChars)));
+
+  const nodes = [];
+  const frag = document.createDocumentFragment();
+
+  lineObjs.forEach(lo => {
+    const div = document.createElement("div");
+    div.className = `tw-line seg ${lo.cls}`;
+
+    const full = lo.text ?? "";
+    const widthCh = Math.max(1, full.length);
+
+    div.style.width = widthCh + "ch";
+    div.textContent = "";
+
+    frag.appendChild(div);
+    nodes.push({ el: div, full });
+  });
+
+  bodyEl.appendChild(frag);
   return nodes;
 }
 
@@ -740,19 +854,19 @@ function typePage(page){
     return;
   }
 
-  const nodes = buildSegmentsDOM(segs);
+  const nodes = buildLinesDOMFromSegments(segs);
   const token = ++typingToken;
 
   const base = cssNum("--type-char-ms", 24);
   const jitter = cssNum("--type-jitter-ms", 8);
 
-  let segIndex = 0;
-  let charIndex = nodes[0]?.el.textContent.length || 0;
+  let lineIndex = 0;
+  let charIndex = 0;
 
   const step = () => {
     if (token !== typingToken) return;
 
-    const current = nodes[segIndex];
+    const current = nodes[lineIndex];
     if (!current){
       typingTimer = null;
       showEmailAfterTyping(page, token);
@@ -761,22 +875,33 @@ function typePage(page){
 
     const full = current.full;
 
-    charIndex++;
-    current.el.textContent = full.slice(0, charIndex);
+    if (!full.length){
+      current.el.textContent = "";
+      lineIndex++;
+      charIndex = 0;
 
-    if (charIndex >= full.length){
-      segIndex++;
-      const next = nodes[segIndex];
-      charIndex = next ? (next.el.textContent.length || 0) : 0;
-
-      if (segIndex >= nodes.length){
+      if (lineIndex >= nodes.length){
         typingTimer = null;
         showEmailAfterTyping(page, token);
         return;
       }
+    } else {
+      charIndex++;
+      current.el.textContent = full.slice(0, charIndex);
+
+      if (charIndex >= full.length){
+        lineIndex++;
+        charIndex = 0;
+
+        if (lineIndex >= nodes.length){
+          typingTimer = null;
+          showEmailAfterTyping(page, token);
+          return;
+        }
+      }
     }
 
-    const rand = jitter ? (Math.random()*2-1) * jitter : 0;
+    const rand = jitter ? (Math.random()*2 - 1) * jitter : 0;
     const delay = Math.max(12, base + rand);
     typingTimer = setTimeout(step, delay);
   };
@@ -941,9 +1066,15 @@ calcGeometry();
 buildSlotItems("klang");
 applyInputMode();
 
+let resizeTimer = null;
 window.addEventListener("resize", () => {
   applyInputMode();
   calcGeometry();
+
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    updateActive();
+  }, 120);
 });
 
 /* Preload zuerst anstoßen, dann initiale Seite zeigen */
