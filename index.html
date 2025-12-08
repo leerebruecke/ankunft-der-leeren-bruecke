@@ -26,6 +26,10 @@
   --slot-w-min: 220px;
   --slot-w-pref: 55%;
   --slot-w-max: 520px;
+
+  /* typewriter */
+  --type-speed-ms: 14;     /* ms per character */
+  --fade-out-ms: 120;
 }
 
 /* RESET */
@@ -168,14 +172,51 @@ body{
   margin-top:4px;
 }
 
+/* ----------------------------- SECTION AREA ----------------------------- */
+
 .section-area{
   margin-top:1.2rem;
   font-size:var(--text-font);
-  opacity:0;
+  opacity:1;
   transition:opacity 260ms ease-out;
+  width:min(85%, 38rem);
+  text-align:center;
 }
 
-.section-area.visible{opacity:1;}
+.section-area.fading{
+  opacity:0;
+  transition:opacity var(--fade-out-ms) ease-out;
+}
+
+.section-title{
+  font-size:calc(var(--text-font) * 1.06);
+  letter-spacing:0.08em;
+  margin-bottom:0.6rem;
+  opacity:0.92;
+}
+
+.section-body{
+  white-space:pre-line;
+  line-height:1.45;
+  opacity:0.92;
+}
+
+.icon-row{
+  margin-top:0.9rem;
+  display:flex;
+  gap:0.8rem;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.icon-row img{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+  image-rendering:auto;
+  opacity:0.9;
+}
 
 /* ----------------------------- MOBILE TUNING ----------------------------- */
 
@@ -195,7 +236,6 @@ body{
     margin-bottom:0.8rem;
   }
 
-  /* keep your current overall mobile scale */
   .slot-group{
     transform:translateY(var(--roll-lift)) scale(0.82);
   }
@@ -204,20 +244,16 @@ body{
     margin-top:0.9rem;
   }
 
-  /* stop background stretching on mobile */
   .page-background{
     background-size:contain;
   }
 
-  /* Pfeile näher aneinander, ohne anderes Layout neu zu formen */
   .arrow-up{ margin-bottom:0px; }
   .arrow-down{ margin-top:0px; }
 
-  /* Pfeile auf Mobile optisch da, aber nicht klickbar */
   .arrow{ pointer-events:none; }
 }
 
-/* very small phones */
 @media (max-width: 420px){
   .slot-group{
     transform:translateY(var(--roll-lift)) scale(0.78);
@@ -241,9 +277,7 @@ body{
 
       <div class="slot-window">
         <div class="slot-list" id="slot-list">
-          <div class="slot-item">Musik</div>
-          <div class="slot-item">Gemälde</div>
-          <div class="slot-item">Unterstützung</div>
+          <!-- Items are injected by JS -->
         </div>
       </div>
 
@@ -251,46 +285,159 @@ body{
 
     </div>
 
-    <div class="section-area" id="section-area"></div>
+    <div class="section-area" id="section-area">
+      <div class="section-title" id="section-title"></div>
+      <div class="section-body" id="section-body"></div>
+      <div class="section-extras" id="section-extras"></div>
+    </div>
 
   </div>
 </div>
 
 <script>
-/* DATA */
-const texts = {
-  Musik: "Dies ist ein Testtext für Musik.",
-  Gemälde: "Dies ist ein Testtext für Gemälde.",
-  Unterstützung: "Dies ist ein Testtext für Unterstützung."
-};
+/* ----------------------------- PAGE DATA ----------------------------- */
+/* Colons are removed by design: titles here are already clean. */
+/* Bracketed notes from your spec are not displayed. */
 
-/* ELEMENTS */
+const PAGES = [
+  { title: "…", text: "Du ziehst vorbei an einer einigenden Kraft." },
+  { title: "…", text: "Du spürst den Geist, aus dem alles stammt." },
+  { title: "…", text: "Du spürst, wie Raum dich umgibt." },
+
+  { title: "Es bleibt Leere", text: "…" },
+  { title: "Es bleiben keine Worte mehr", text: "…" },
+  { title: "Es bleibt kein Weg mehr", text: "…" },
+  { title: "Hier gibt es nichts mehr zu sehen", text: "…" },
+
+  { title: "…", text: "…" },
+  { title: "…", text: "…" },
+
+  { title: "Du bist ziemlich hohl, oder?",
+    text:
+`Die, die für den Seitenabschnitt zuständig sind, haben bereits alles gesagt…
+Flüsternd: Zum Glück muss ich es nicht mehr tun.` },
+
+  { title: "Man kann nicht einfach so nach oben gehen",
+    text: "Du musst in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht." },
+
+  { title: "Hier bist du wohl falsch",
+    text: "Das davor habe ich ernst gemeint." },
+
+  { title: "Warum bist du noch hier?",
+    text:
+`Es scheint, als wärst du weiter in die falsche Richtung gelaufen.
+Hier gibt es nichts für dich.` },
+
+  { title: "Falsche Richtung",
+    text: "Hier lang geht es nicht! Auf, auf und davon!" },
+
+  { title: "…", text: "…" },
+  { title: "…", text: "…" },
+
+  { title: "Über", text: "Über dir die Unendlichkeit." },
+
+  { title: "Klang",
+    text:
+`Ein Stück des Teils, der immer war,
+Dunkelheit, die Licht gebar,
+das stolze Licht, das nachts erlischt,
+und Schein bleibt, solange Winter ist.`,
+    extras: [
+      { type: "note", text: "Goethe (abgewandelt)" },
+      { type: "icons", icons: ["Spotify.png","Apple_Music.png","YouTube_Music.png"] }
+    ]
+  },
+
+  { title: "Spendenbox",
+    text: "Geben ist ein Selbstverlust, aber kein Verlust an sich.",
+    extras: [
+      { type: "note", text: "Kafka" },
+      { type: "aside", text: "*hust* Wir brauchen Geld für den Umsturz deutscher Kunst. *hust*" },
+      { type: "icons", icons: ["PayPal.png","Patreon.png"] }
+    ]
+  },
+
+  { title: "Skizzen",
+    text:
+`„Ich glaube, man könnte die Skizzen verkaufen,
+sie zeigen die Arbeit in ihrem Anfang.“`,
+    extras: [
+      { type: "note", text: "Vincent" },
+      { type: "aside", text: "100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und eine kaufen." }
+      /* Link styling can be added later without changing mechanics */
+    ]
+  },
+
+  { title: "Erscheinungsorte",
+    text:
+`Alles, was tief ist, liebt Masken; Bild und Erscheinung hasst es jedoch.
+Es bleibt der Tiefe Bürde,
+wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
+    extras: [
+      { type: "note", text: "Nietzsche (abgewandelt)" },
+      { type: "icons", icons: ["TikTok.png","Instagram.png","YouTube.png","Twitch.png"] }
+    ]
+  },
+
+  { title: "Museum",
+    text:
+`Keiner öffnet die Tür.
+Es scheint, als wäre das Museum noch geschlossen.
+Die Spendenbox scheint jedoch einwandfrei zu funktionieren.`
+  },
+
+  { title: "Kontaktschleuse",
+    text:
+`Wer mit Ungeheuern kämpft, mag zusehen,
+daß er nicht dabei zum Ungeheuer wird.
+Und wenn du lange in einen Abgrund blickst,
+blickt der Abgrund auch in dich hinein.`,
+    extras: [
+      { type: "note", text: "Nietzsche" },
+      { type: "plain", text: "Kuumitori@gmail.com" }
+    ]
+  },
+
+  { title: "Unter", text: "Unter dir der Grund." },
+
+  { title: "Leerebrücke", text: "Ein mythopoietischer Orden." }
+];
+
+/* ----------------------------- ELEMENTS ----------------------------- */
+
 const list = document.getElementById("slot-list");
 const out = document.getElementById("section-area");
+const titleEl = document.getElementById("section-title");
+const bodyEl = document.getElementById("section-body");
+const extrasEl = document.getElementById("section-extras");
+
 const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
 const frame = document.querySelector(".page-frame");
 
-/* GEOMETRY (must match CSS values) */
+/* ----------------------------- GEOMETRY ----------------------------- */
+
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
-
-/* centered item is always the SECOND child */
 const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
 
-/* TIMING */
+/* ----------------------------- TIMING/STATE ----------------------------- */
+
 const ANIM_MS = 170;
 
-/* STATE */
 let busy = false;
 let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
 const WHEEL_CLAMP = 120;
 
-/* FAILSAFE */
+/* typewriter state */
+let typingTimer = null;
+let typingToken = 0;
+
+/* failsafe busy */
 let failTimer = null;
-function setBusy() {
+function setBusy(){
   busy = true;
   clearTimeout(failTimer);
   failTimer = setTimeout(() => {
@@ -298,32 +445,168 @@ function setBusy() {
     wheelAcc = 0;
   }, ANIM_MS + 140);
 }
-function clearBusy() {
+function clearBusy(){
   clearTimeout(failTimer);
   busy = false;
 }
 
-/* INIT */
-list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+/* ----------------------------- BUILD SLOT LIST ----------------------------- */
 
-/* ACTIVE + TEXT */
+function buildSlotItems(){
+  list.innerHTML = "";
+  PAGES.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "slot-item";
+    div.textContent = p.title;
+    list.appendChild(div);
+  });
+}
+
+/* Rotate DOM so that "Klang" starts centered if present */
+function primeStart(){
+  const nodes = Array.from(list.children);
+  const idx = nodes.findIndex(n => n.textContent.trim() === "Klang");
+  if (idx === -1) return;
+
+  /* We want nodes[1] to be Klang */
+  let safety = 0;
+  while (list.children[1] && list.children[1].textContent.trim() !== "Klang" && safety < 200){
+    const last = list.lastElementChild;
+    if (last) list.insertBefore(last, list.firstElementChild);
+    safety++;
+  }
+}
+
+/* ----------------------------- ACTIVE PAGE RESOLUTION ----------------------------- */
+
+function getCenterNode(){
+  return list.children[1] || null;
+}
+
+function resolvePageByTitle(t){
+  const key = (t || "").trim();
+  return PAGES.find(p => p.title === key) || { title: key, text: "" };
+}
+
+/* ----------------------------- TYPEWRITER RENDER ----------------------------- */
+
+function clearTyping(){
+  typingToken++;
+  if (typingTimer){
+    clearInterval(typingTimer);
+    typingTimer = null;
+  }
+}
+
+function renderExtras(page){
+  extrasEl.innerHTML = "";
+  if (!page.extras || !Array.isArray(page.extras)) return;
+
+  const frag = document.createDocumentFragment();
+
+  page.extras.forEach(ex => {
+    if (ex.type === "icons" && Array.isArray(ex.icons)){
+      const row = document.createElement("div");
+      row.className = "icon-row";
+      ex.icons.forEach(file => {
+        const img = document.createElement("img");
+        img.src = `Grafiken/${file}`;
+        img.alt = file.replace(".png","");
+        row.appendChild(img);
+      });
+      frag.appendChild(row);
+      return;
+    }
+
+    const line = document.createElement("div");
+    line.style.marginTop = "0.5rem";
+    line.style.opacity = "0.7";
+
+    if (ex.type === "note"){
+      line.style.fontStyle = "italic";
+      line.textContent = ex.text || "";
+    } else if (ex.type === "aside"){
+      line.style.fontStyle = "italic";
+      line.style.opacity = "0.55";
+      line.textContent = ex.text || "";
+    } else {
+      line.textContent = ex.text || "";
+    }
+
+    frag.appendChild(line);
+  });
+
+  extrasEl.appendChild(frag);
+}
+
+function typeText(page){
+  clearTyping();
+
+  const token = ++typingToken;
+  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 14;
+
+  const full = (page.text ?? "").toString();
+  let i = 0;
+
+  bodyEl.textContent = "";
+  extrasEl.innerHTML = "";
+
+  if (!full.length){
+    renderExtras(page);
+    return;
+  }
+
+  typingTimer = setInterval(() => {
+    if (token !== typingToken){
+      clearInterval(typingTimer);
+      typingTimer = null;
+      return;
+    }
+
+    i++;
+    bodyEl.textContent = full.slice(0, i);
+
+    if (i >= full.length){
+      clearInterval(typingTimer);
+      typingTimer = null;
+      renderExtras(page);
+    }
+  }, speed);
+}
+
+function showPage(page){
+  titleEl.textContent = page.title || "";
+
+  /* fade out quickly */
+  out.classList.add("fading");
+
+  clearTyping();
+
+  const fadeMs = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--fade-out-ms")) || 120;
+
+  setTimeout(() => {
+    out.classList.remove("fading");
+    typeText(page);
+  }, fadeMs);
+}
+
+/* ----------------------------- UPDATE ACTIVE ----------------------------- */
+
 function updateActive(){
   const nodes = Array.from(list.children);
   nodes.forEach(n => n.classList.remove("active"));
 
-  const centerNode = nodes[1];
-  if (centerNode) centerNode.classList.add("active");
+  const center = getCenterNode();
+  if (center) center.classList.add("active");
 
-  const key = centerNode ? centerNode.textContent.trim() : "";
-
-  out.classList.remove("visible");
-  setTimeout(() => {
-    out.textContent = texts[key] ?? "";
-    out.classList.add("visible");
-  }, 80);
+  const page = resolvePageByTitle(center ? center.textContent : "");
+  showPage(page);
 }
 
-/* MOVE DOWN (stable) */
+/* ----------------------------- MOVE LOGIC (TRUE ROLL) ----------------------------- */
+
+list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+
 function moveDown(){
   if (busy) return;
   setBusy();
@@ -348,7 +631,6 @@ function moveDown(){
   list.addEventListener("transitioncancel", onEnd, { once:true });
 }
 
-/* MOVE UP (hardened) */
 function moveUp(){
   if (busy) return;
   setBusy();
@@ -359,10 +641,9 @@ function moveUp(){
   list.style.transition = "none";
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
-  /* FORCE a layout read so the browser commits this state */
+  /* force layout commit */
   void list.offsetHeight;
 
-  /* Start animation back to BASE_Y */
   requestAnimationFrame(() => {
     list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
@@ -377,7 +658,8 @@ function moveUp(){
   });
 }
 
-/* CLICK ENABLE/DISABLE BY MODE */
+/* ----------------------------- INPUT MODES ----------------------------- */
+
 function applyInputMode(){
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
@@ -389,10 +671,12 @@ function applyInputMode(){
     arrowDown.onclick = moveDown;
   }
 }
+
 applyInputMode();
 window.addEventListener("resize", applyInputMode);
 
-/* TOUCH - full screen swipe */
+/* ----------------------------- TOUCH SWIPE (FULL FRAME) ----------------------------- */
+
 let startY = 0;
 let startX = 0;
 
@@ -415,7 +699,8 @@ frame.addEventListener("touchend", e => {
   if (dy < -50) moveDown();
 }, { passive:true });
 
-/* WHEEL - whole frame */
+/* ----------------------------- WHEEL (WHOLE FRAME) ----------------------------- */
+
 frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (busy) { wheelAcc = 0; return; }
@@ -432,8 +717,12 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* INIT RENDER */
+/* ----------------------------- INIT ----------------------------- */
+
+buildSlotItems();
+primeStart();
 updateActive();
+
 </script>
 
 </body>
