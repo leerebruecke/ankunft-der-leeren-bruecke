@@ -284,11 +284,24 @@ const ANIM_MS = 170;
 
 /* STATE */
 let busy = false;
-
-/* WHEEL SMOOTHING */
 let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
 const WHEEL_CLAMP = 120;
+
+/* FAILSAFE */
+let failTimer = null;
+function setBusy() {
+  busy = true;
+  clearTimeout(failTimer);
+  failTimer = setTimeout(() => {
+    busy = false;
+    wheelAcc = 0;
+  }, ANIM_MS + 140);
+}
+function clearBusy() {
+  clearTimeout(failTimer);
+  busy = false;
+}
 
 /* INIT */
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
@@ -310,17 +323,15 @@ function updateActive(){
   }, 80);
 }
 
-/* MOVE DOWN */
+/* MOVE DOWN (stable) */
 function moveDown(){
   if (busy) return;
-  busy = true;
+  setBusy();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
   const onEnd = () => {
-    list.removeEventListener("transitionend", onEnd);
-
     const first = list.firstElementChild;
     if (first) list.appendChild(first);
 
@@ -329,17 +340,18 @@ function moveDown(){
 
     requestAnimationFrame(() => {
       updateActive();
-      busy = false;
+      clearBusy();
     });
   };
 
   list.addEventListener("transitionend", onEnd, { once:true });
+  list.addEventListener("transitioncancel", onEnd, { once:true });
 }
 
-/* MOVE UP */
+/* MOVE UP (hardened) */
 function moveUp(){
   if (busy) return;
-  busy = true;
+  setBusy();
 
   const last = list.lastElementChild;
   if (last) list.insertBefore(last, list.firstElementChild);
@@ -347,17 +359,21 @@ function moveUp(){
   list.style.transition = "none";
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
+  /* FORCE a layout read so the browser commits this state */
+  void list.offsetHeight;
+
+  /* Start animation back to BASE_Y */
   requestAnimationFrame(() => {
     list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     const onEnd = () => {
-      list.removeEventListener("transitionend", onEnd);
       updateActive();
-      busy = false;
+      clearBusy();
     };
 
     list.addEventListener("transitionend", onEnd, { once:true });
+    list.addEventListener("transitioncancel", onEnd, { once:true });
   });
 }
 
@@ -373,7 +389,6 @@ function applyInputMode(){
     arrowDown.onclick = moveDown;
   }
 }
-
 applyInputMode();
 window.addEventListener("resize", applyInputMode);
 
@@ -400,7 +415,7 @@ frame.addEventListener("touchend", e => {
   if (dy < -50) moveDown();
 }, { passive:true });
 
-/* WHEEL - attach to the whole frame */
+/* WHEEL - whole frame */
 frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (busy) { wheelAcc = 0; return; }
