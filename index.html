@@ -22,18 +22,18 @@
   /* positioning */
   --roll-lift: -40px;
 
-  /* slot width */
-  --slot-w-min: 220px;
-  --slot-w-pref: 55%;
-  --slot-w-max: 520px;
+  /* slot width (more breathing room) */
+  --slot-w-min: 240px;
+  --slot-w-pref: 62%;
+  --slot-w-max: 600px;
 
-  /* Typewriter: middle ground */
-  --type-speed-ms: 22;
+  /* Typewriter (calmer middle) */
+  --type-speed-ms: 26;
   --fade-out-ms: 120;
 
-  /* Icons: slower reveal */
+  /* Icons */
   --icon-size: 70px;
-  --icon-fade-ms: 900ms;
+  --icon-fade-ms: 1100ms;
 }
 
 /* RESET */
@@ -147,6 +147,7 @@ body{
   transform:scale(0.85);
   transition:opacity 150ms, transform 150ms;
   white-space:nowrap;
+  padding:0 0.2rem;
 }
 
 .slot-item.active{
@@ -287,11 +288,12 @@ body{
     --slot-font: 0.74rem;
     --text-font: 0.74rem;
 
-    --slot-w-min: 170px;
-    --slot-w-max: 360px;
+    --slot-w-min: 190px;
+    --slot-w-pref: 70%;
+    --slot-w-max: 400px;
 
     --icon-size: 56px;
-    --icon-fade-ms: 900ms;
+    --icon-fade-ms: 1100ms;
   }
 
   .logo-img{
@@ -527,6 +529,9 @@ const WHEEL_CLAMP = 120;
 let typingTimer = null;
 let typingToken = 0;
 
+/* icon reveal state */
+let postRevealTimer = null;
+
 /* failsafe busy */
 let failTimer = null;
 function setBusy(){
@@ -590,6 +595,10 @@ function clearTyping(){
     clearInterval(typingTimer);
     typingTimer = null;
   }
+  if (postRevealTimer){
+    clearTimeout(postRevealTimer);
+    postRevealTimer = null;
+  }
 }
 
 function buildSegments(page){
@@ -642,6 +651,10 @@ function renderSegmentsHTML(segs, upToSeg, partialText){
 
 function renderPostBlocks(page){
   extrasEl.innerHTML = "";
+  if (postRevealTimer){
+    clearTimeout(postRevealTimer);
+    postRevealTimer = null;
+  }
 
   const blocks = [];
 
@@ -686,9 +699,12 @@ function renderPostBlocks(page){
 
   blocks.forEach(b => extrasEl.appendChild(b));
 
-  requestAnimationFrame(() => {
-    blocks.forEach(b => b.classList.add("visible"));
-  });
+  /* consistent soft reveal independent of text length */
+  postRevealTimer = setTimeout(() => {
+    requestAnimationFrame(() => {
+      blocks.forEach(b => b.classList.add("visible"));
+    });
+  }, 140);
 }
 
 /* ----------------------------- PAGE SHOW ----------------------------- */
@@ -707,7 +723,7 @@ function typePage(page){
   }
 
   const speed = parseInt(getComputedStyle(document.documentElement)
-    .getPropertyValue("--type-speed-ms")) || 22;
+    .getPropertyValue("--type-speed-ms")) || 26;
 
   /* word-wise typing to avoid visible line-break collapse */
   const tokenized = segs.map(s => {
@@ -743,7 +759,9 @@ function typePage(page){
       if (segIndex >= tokenized.length){
         clearInterval(typingTimer);
         typingTimer = null;
-        renderPostBlocks(page);
+
+        /* small constant delay before posts */
+        postRevealTimer = setTimeout(() => renderPostBlocks(page), 160);
       }
     }
   }, speed);
