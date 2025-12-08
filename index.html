@@ -11,29 +11,41 @@
   --text-main:#f5f0e8;
 
   /* geometry */
-  --item-h: 42px;
-  --window-h: 65px;
+  --item-h:42px;
+  --window-h:65px;
 
   /* sizes */
-  --arrow-size: 14px;
-  --slot-font: 0.86rem;
-  --text-font: 0.86rem;
+  --arrow-size:14px;
+  --slot-font:0.86rem;
+  --text-font:0.86rem;
 
   /* positioning */
-  --roll-lift: -40px;
+  --roll-lift:-40px;
 
-  /* slot width (more breathing room) */
-  --slot-w-min: 240px;
-  --slot-w-pref: 62%;
-  --slot-w-max: 600px;
+  /* slot width */
+  --slot-w-min:240px;
+  --slot-w-pref:62%;
+  --slot-w-max:600px;
 
-  /* Typewriter (calmer middle) */
-  --type-speed-ms: 40;
-  --fade-out-ms: 120;
+  /* typewriter */
+  --type-word-ms:220;         /* ruhiger Wort-Takt */
+  --type-jitter-ms:0;         /* optional: 30-50 für organisches Tippen */
+  --fade-out-ms:120;
 
-  /* Icons */
-  --icon-size: 70px;
-  --icon-fade-ms: 1100ms;
+  /* icons */
+  --icon-size:70px;
+  --icon-fade-ms:1100ms;
+  --post-min-delay-ms:140;    /* minimale Verzögerung vor Reveal */
+  --post-max-wait-ms:900;     /* Obergrenze fürs Warten auf Icons */
+
+  --mask-grad:linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.85) 22%,
+    black 50%,
+    rgba(0,0,0,0.85) 78%,
+    transparent 100%
+  );
 }
 
 /* RESET */
@@ -66,10 +78,7 @@ body{
 .page-background{
   position:absolute;
   inset:0;
-  background-image:url("Grafiken/Br%C3%BCcke.png");
-  background-repeat:no-repeat;
-  background-position:center center;
-  background-size:100% 100%;
+  background:url("Grafiken/Br%C3%BCcke.png") center/100% 100% no-repeat;
   image-rendering:pixelated;
 }
 
@@ -91,8 +100,7 @@ body{
   image-rendering:pixelated;
 }
 
-/* ----------------------------- SLOT ----------------------------- */
-
+/* SLOT */
 .slot-group{
   width:100%;
   display:flex;
@@ -103,27 +111,12 @@ body{
 
 .slot-window{
   position:relative;
-  width:clamp(var(--slot-w-min), var(--slot-w-pref), var(--slot-w-max));
+  width:clamp(var(--slot-w-min),var(--slot-w-pref),var(--slot-w-max));
   height:var(--window-h);
   overflow:hidden;
   flex-shrink:0;
-
-  mask-image:linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.85) 22%,
-    black 50%,
-    rgba(0,0,0,0.85) 78%,
-    transparent 100%
-  );
-  -webkit-mask-image:linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.85) 22%,
-    black 50%,
-    rgba(0,0,0,0.85) 78%,
-    transparent 100%
-  );
+  mask-image:var(--mask-grad);
+  -webkit-mask-image:var(--mask-grad);
 }
 
 .slot-list{
@@ -177,17 +170,15 @@ body{
   margin-top:4px;
 }
 
-/* ----------------------------- SECTION AREA ----------------------------- */
-
+/* SECTION AREA */
 .section-area{
   margin-top:1.2rem;
   font-size:var(--text-font);
   opacity:1;
   transition:opacity 260ms ease-out;
-  width:min(85%, 36rem);
+  width:min(85%,36rem);
   text-align:center;
-  margin-left:auto;
-  margin-right:auto;
+  margin-inline:auto;
 }
 
 .section-area.fading{
@@ -195,36 +186,17 @@ body{
   transition:opacity var(--fade-out-ms) ease-out;
 }
 
-/* Title under the slot intentionally disabled */
-.section-title{ display:none; }
+.section-title{display:none;}
 
 .section-body{
   line-height:1.45;
   opacity:0.92;
 }
 
-/* Typed segments */
-.seg{
-  display:block;
-  margin:0;
-  padding:0;
-}
-
-.seg-normal{
-  opacity:0.92;
-}
-
-.seg-italic{
-  font-style:italic;
-  opacity:0.78;
-}
-
-.seg-aside{
-  font-style:italic;
-  opacity:0.55;
-}
-
-/* Attribution line */
+.seg{display:block;margin:0;padding:0;}
+.seg-normal{opacity:0.92;}
+.seg-italic{font-style:italic;opacity:0.78;}
+.seg-aside{font-style:italic;opacity:0.55;}
 .seg-attrib{
   font-style:italic;
   opacity:0.20;
@@ -232,7 +204,7 @@ body{
   text-align:center;
 }
 
-/* Post blocks (icons, email) */
+/* POST BLOCKS */
 .post-block{
   margin-top:0.9rem;
   display:flex;
@@ -265,7 +237,6 @@ body{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
-  image-rendering:auto;
   opacity:0.92;
 }
 
@@ -280,20 +251,18 @@ body{
   letter-spacing:0.04em;
 }
 
-/* ----------------------------- MOBILE TUNING ----------------------------- */
-
+/* MOBILE */
 @media (max-width: 768px){
   :root{
-    --arrow-size: 10px;
-    --slot-font: 0.74rem;
-    --text-font: 0.74rem;
+    --arrow-size:10px;
+    --slot-font:0.74rem;
+    --text-font:0.74rem;
 
-    --slot-w-min: 190px;
-    --slot-w-pref: 70%;
-    --slot-w-max: 400px;
+    --slot-w-min:190px;
+    --slot-w-pref:70%;
+    --slot-w-max:400px;
 
-    --icon-size: 56px;
-    --icon-fade-ms: 1100ms;
+    --icon-size:56px;
   }
 
   .logo-img{
@@ -314,10 +283,10 @@ body{
     background-size:contain;
   }
 
-  .arrow-up{ margin-bottom:0px; }
-  .arrow-down{ margin-top:0px; }
+  .arrow-up{margin-bottom:0;}
+  .arrow-down{margin-top:0;}
 
-  .arrow{ pointer-events:none; }
+  .arrow{pointer-events:none;}
 }
 
 @media (max-width: 420px){
@@ -329,16 +298,13 @@ body{
 </head>
 
 <body>
-
 <div class="page-frame">
   <div class="page-background"></div>
 
   <div class="page-content">
-
     <img src="Grafiken/leerebruecke.png" class="logo-img"/>
 
     <div class="slot-group">
-
       <div class="arrow arrow-up" id="arrow-up"></div>
 
       <div class="slot-window">
@@ -346,7 +312,6 @@ body{
       </div>
 
       <div class="arrow arrow-down" id="arrow-down"></div>
-
     </div>
 
     <div class="section-area" id="section-area">
@@ -354,13 +319,11 @@ body{
       <div class="section-body" id="section-body"></div>
       <div class="section-extras" id="section-extras"></div>
     </div>
-
   </div>
 </div>
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
-/* ":" not transferred. label is what the roll shows. */
 
 const PAGES = [
   { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft…" },
@@ -500,21 +463,38 @@ blickt der Abgrund auch in dich hinein.`,
 
 /* ----------------------------- ELEMENTS ----------------------------- */
 
-const list = document.getElementById("slot-list");
-const out = document.getElementById("section-area");
-const titleEl = document.getElementById("section-title");
-const bodyEl = document.getElementById("section-body");
-const extrasEl = document.getElementById("section-extras");
-const arrowUp = document.getElementById("arrow-up");
-const arrowDown = document.getElementById("arrow-down");
-const frame = document.querySelector(".page-frame");
+const $ = (sel, root=document) => root.querySelector(sel);
+
+const list = $("#slot-list");
+const out = $("#section-area");
+const titleEl = $("#section-title");
+const bodyEl = $("#section-body");
+const extrasEl = $("#section-extras");
+const arrowUp = $("#arrow-up");
+const arrowDown = $("#arrow-down");
+const frame = $(".page-frame");
+
+/* ----------------------------- CSS HELPERS ----------------------------- */
+
+const rootStyle = () => getComputedStyle(document.documentElement);
+const cssNum = (name, fallback=0) => {
+  const v = parseFloat(rootStyle().getPropertyValue(name));
+  return Number.isFinite(v) ? v : fallback;
+};
 
 /* ----------------------------- GEOMETRY ----------------------------- */
 
-const ITEM_HEIGHT = 42;
-const WINDOW_HEIGHT = 65;
-const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
-const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
+let ITEM_HEIGHT, WINDOW_HEIGHT, CENTER_OFFSET, BASE_Y;
+
+function calcGeometry(){
+  ITEM_HEIGHT = cssNum("--item-h", 42);
+  WINDOW_HEIGHT = cssNum("--window-h", 65);
+  CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
+  BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
+
+  list.style.transition = "none";
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+}
 
 /* ----------------------------- TIMING/STATE ----------------------------- */
 
@@ -525,15 +505,17 @@ let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
 const WHEEL_CLAMP = 120;
 
-/* typewriter state */
+let failTimer = null;
+
 let typingTimer = null;
 let typingToken = 0;
 
-/* icon reveal state */
 let postRevealTimer = null;
+let postDeadlineTimer = null;
+let postsShownToken = 0;
 
-/* failsafe busy */
-let failTimer = null;
+/* ----------------------------- BUSY ----------------------------- */
+
 function setBusy(){
   busy = true;
   clearTimeout(failTimer);
@@ -542,6 +524,7 @@ function setBusy(){
     wheelAcc = 0;
   }, ANIM_MS + 140);
 }
+
 function clearBusy(){
   clearTimeout(failTimer);
   busy = false;
@@ -558,71 +541,66 @@ function escapeHTML(str){
     .replace(/'/g,"&#039;");
 }
 
-/* ----------------------------- BUILD SLOT LIST ----------------------------- */
-
-function buildSlotItems(){
-  list.innerHTML = "";
-  PAGES.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "slot-item";
-    div.textContent = p.label;
-    div.dataset.pageId = p.id;
-    list.appendChild(div);
-  });
-}
-
-/* Rotate DOM so that "Klang" starts centered */
-function primeStart(){
-  let safety = 0;
-  while (list.children[1] && list.children[1].dataset.pageId !== "klang" && safety < 800){
-    const last = list.lastElementChild;
-    if (last) list.insertBefore(last, list.firstElementChild);
-    safety++;
-  }
-}
-
-/* ----------------------------- PAGE RESOLUTION ----------------------------- */
-
 function resolvePageById(id){
   return PAGES.find(p => p.id === id) || { id, label:"", text:"" };
 }
 
-/* ----------------------------- TYPEWRITER SEGMENTS ----------------------------- */
+function orderedPages(centerId){
+  const n = PAGES.length;
+  const idx = Math.max(0, PAGES.findIndex(p => p.id === centerId));
+  const prev = (idx - 1 + n) % n;
+  const order = [];
+  for (let i = 0; i < n; i++){
+    order.push(PAGES[(prev + i) % n]);
+  }
+  return order;
+}
+
+/* ----------------------------- BUILD SLOT ----------------------------- */
+
+function buildSlotItems(centerId="klang"){
+  list.innerHTML = "";
+  const frag = document.createDocumentFragment();
+
+  orderedPages(centerId).forEach(p => {
+    const div = document.createElement("div");
+    div.className = "slot-item";
+    div.textContent = p.label;
+    div.dataset.pageId = p.id;
+    frag.appendChild(div);
+  });
+
+  list.appendChild(frag);
+}
+
+/* ----------------------------- TYPEWRITER ----------------------------- */
 
 function clearTyping(){
   typingToken++;
+
   if (typingTimer){
     clearInterval(typingTimer);
     typingTimer = null;
   }
-  if (postRevealTimer){
-    clearTimeout(postRevealTimer);
-    postRevealTimer = null;
-  }
+
+  clearTimeout(postRevealTimer);
+  clearTimeout(postDeadlineTimer);
+  postRevealTimer = null;
+  postDeadlineTimer = null;
 }
 
 function buildSegments(page){
   const segs = [];
-
   const mainClass = page.italicAll ? "seg-italic" : "seg-normal";
+
   if (page.text){
     segs.push({ cls: mainClass, text: page.text, preBlank: 0 });
   }
-
   if (page.attrib){
-    segs.push({
-      cls: "seg-attrib",
-      text: `— ${page.attrib}`,
-      preBlank: 0
-    });
+    segs.push({ cls: "seg-attrib", text: `— ${page.attrib}`, preBlank: 0 });
   }
-
   if (page.aside){
-    segs.push({
-      cls: "seg-aside",
-      text: page.aside,
-      preBlank: 1
-    });
+    segs.push({ cls: "seg-aside", text: page.aside, preBlank: 1 });
   }
 
   return segs;
@@ -647,28 +625,21 @@ function renderSegmentsHTML(segs, upToSeg, partialText){
   return html;
 }
 
-/* ----------------------------- POST BLOCKS (ICONS + EMAIL) ----------------------------- */
+/* ----------------------------- POST BLOCKS ----------------------------- */
 
-function renderPostBlocks(page){
-  extrasEl.innerHTML = "";
-  if (postRevealTimer){
-    clearTimeout(postRevealTimer);
-    postRevealTimer = null;
-  }
-
+function buildPostBlocks(page){
   const blocks = [];
 
-  if (page.icons && Array.isArray(page.icons) && page.icons.length){
+  if (Array.isArray(page.icons) && page.icons.length){
     const row = document.createElement("div");
     row.className = "post-block";
 
-    page.icons.forEach(ic => {
-      const file = ic.file;
-      const href = ic.href;
-
+    page.icons.forEach(({file, href}) => {
       const img = document.createElement("img");
       img.src = `Grafiken/${file}`;
       img.alt = file.replace(".png","");
+      img.decoding = "async";
+      img.loading = "eager";
 
       if (href){
         const a = document.createElement("a");
@@ -697,14 +668,43 @@ function renderPostBlocks(page){
     blocks.push(mailRow);
   }
 
+  return blocks;
+}
+
+function showPostBlocks(page, token){
+  if (token !== postsShownToken) return;
+
+  extrasEl.innerHTML = "";
+  const blocks = buildPostBlocks(page);
   blocks.forEach(b => extrasEl.appendChild(b));
 
-  /* consistent soft reveal independent of text length */
+  const minDelay = cssNum("--post-min-delay-ms", 140);
+
   postRevealTimer = setTimeout(() => {
-    requestAnimationFrame(() => {
-      blocks.forEach(b => b.classList.add("visible"));
-    });
-  }, 140);
+    requestAnimationFrame(() => blocks.forEach(b => b.classList.add("visible")));
+  }, minDelay);
+}
+
+function schedulePostDeadline(page){
+  const hasPosts = (page.icons && page.icons.length) || page.email;
+  if (!hasPosts) return;
+
+  const maxWait = cssNum("--post-max-wait-ms", 900);
+  const token = ++postsShownToken;
+
+  clearTimeout(postDeadlineTimer);
+  postDeadlineTimer = setTimeout(() => showPostBlocks(page, token), maxWait);
+}
+
+function completePostsSoon(page){
+  const hasPosts = (page.icons && page.icons.length) || page.email;
+  if (!hasPosts) return;
+
+  const token = postsShownToken;
+  const afterTypingDelay = 160;
+
+  clearTimeout(postRevealTimer);
+  postRevealTimer = setTimeout(() => showPostBlocks(page, token), afterTypingDelay);
 }
 
 /* ----------------------------- PAGE SHOW ----------------------------- */
@@ -712,20 +712,22 @@ function renderPostBlocks(page){
 function typePage(page){
   clearTyping();
   titleEl.textContent = "";
-
-  const segs = buildSegments(page);
   bodyEl.innerHTML = "";
   extrasEl.innerHTML = "";
 
-  if (segs.length === 0){
-    renderPostBlocks(page);
+  const segs = buildSegments(page);
+
+  schedulePostDeadline(page);
+
+  if (!segs.length){
+    const token = ++postsShownToken;
+    showPostBlocks(page, token);
     return;
   }
 
-  const speed = parseInt(getComputedStyle(document.documentElement)
-    .getPropertyValue("--type-speed-ms")) || 26;
+  const base = cssNum("--type-word-ms", 220);
+  const jitter = cssNum("--type-jitter-ms", 0);
 
-  /* word-wise typing to avoid visible line-break collapse */
   const tokenized = segs.map(s => {
     const tokens = String(s.text || "").match(/\S+\s*/g) || [];
     return { ...s, tokens };
@@ -735,10 +737,6 @@ function typePage(page){
   let tokIndex = 0;
   const token = ++typingToken;
 
-  function currentTokens(){
-    return tokenized[segIndex]?.tokens || [];
-  }
-
   typingTimer = setInterval(() => {
     if (token !== typingToken){
       clearInterval(typingTimer);
@@ -746,7 +744,7 @@ function typePage(page){
       return;
     }
 
-    const tokensArr = currentTokens();
+    const tokensArr = tokenized[segIndex]?.tokens || [];
     tokIndex++;
 
     const partial = tokensArr.slice(0, tokIndex).join("");
@@ -760,19 +758,18 @@ function typePage(page){
         clearInterval(typingTimer);
         typingTimer = null;
 
-        /* small constant delay before posts */
-        postRevealTimer = setTimeout(() => renderPostBlocks(page), 160);
+        clearTimeout(postDeadlineTimer);
+        completePostsSoon(page);
       }
     }
-  }, speed);
+  }, Math.max(40, base + (jitter ? (Math.random()*2-1)*jitter : 0)));
 }
 
 function showPage(page){
   out.classList.add("fading");
   clearTyping();
 
-  const fadeMs = parseInt(getComputedStyle(document.documentElement)
-    .getPropertyValue("--fade-out-ms")) || 120;
+  const fadeMs = cssNum("--fade-out-ms", 120);
 
   setTimeout(() => {
     out.classList.remove("fading");
@@ -780,33 +777,40 @@ function showPage(page){
   }, fadeMs);
 }
 
-/* ----------------------------- UPDATE ACTIVE ----------------------------- */
+/* ----------------------------- ACTIVE UPDATE ----------------------------- */
 
 function updateActive(){
-  const nodes = Array.from(list.children);
-  nodes.forEach(n => n.classList.remove("active"));
+  Array.from(list.children).forEach(n => n.classList.remove("active"));
 
   const center = list.children[1];
   if (center) center.classList.add("active");
 
   const pageId = center?.dataset.pageId || "";
-  const page = resolvePageById(pageId);
-
-  showPage(page);
+  showPage(resolvePageById(pageId));
 }
 
-/* ----------------------------- MOVE LOGIC (TRUE ROLL) ----------------------------- */
+/* ----------------------------- TRANSITION HELP ----------------------------- */
 
-list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+function withTransitionEnd(el, fn){
+  const done = () => {
+    el.removeEventListener("transitionend", done);
+    el.removeEventListener("transitioncancel", done);
+    fn();
+  };
+  el.addEventListener("transitionend", done, { once:true });
+  el.addEventListener("transitioncancel", done, { once:true });
+}
+
+/* ----------------------------- MOVE LOGIC ----------------------------- */
 
 function moveDown(){
   if (busy) return;
   setBusy();
 
-  const onEnd = () => {
-    list.removeEventListener("transitionend", onEnd);
-    list.removeEventListener("transitioncancel", onEnd);
+  list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
+  withTransitionEnd(list, () => {
     const first = list.firstElementChild;
     if (first) list.appendChild(first);
 
@@ -817,13 +821,7 @@ function moveDown(){
       updateActive();
       clearBusy();
     });
-  };
-
-  list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
-
-  list.addEventListener("transitionend", onEnd, { once:true });
-  list.addEventListener("transitioncancel", onEnd, { once:true });
+  });
 }
 
 function moveUp(){
@@ -835,44 +833,28 @@ function moveUp(){
 
   list.style.transition = "none";
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
-
   void list.offsetHeight;
 
   requestAnimationFrame(() => {
-    const onEnd = () => {
-      list.removeEventListener("transitionend", onEnd);
-      list.removeEventListener("transitioncancel", onEnd);
-
-      updateActive();
-      clearBusy();
-    };
-
     list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
-    list.addEventListener("transitionend", onEnd, { once:true });
-    list.addEventListener("transitioncancel", onEnd, { once:true });
+    withTransitionEnd(list, () => {
+      updateActive();
+      clearBusy();
+    });
   });
 }
 
 /* ----------------------------- INPUT MODES ----------------------------- */
 
 function applyInputMode(){
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
-  if (isMobile){
-    arrowUp.onclick = null;
-    arrowDown.onclick = null;
-  } else {
-    arrowUp.onclick = moveUp;
-    arrowDown.onclick = moveDown;
-  }
+  const isMobile = matchMedia("(max-width: 768px)").matches;
+  arrowUp.onclick = isMobile ? null : moveUp;
+  arrowDown.onclick = isMobile ? null : moveDown;
 }
 
-applyInputMode();
-window.addEventListener("resize", applyInputMode);
-
-/* ----------------------------- TOUCH SWIPE (FULL FRAME) ----------------------------- */
+/* ----------------------------- TOUCH SWIPE ----------------------------- */
 
 let startY = 0;
 let startX = 0;
@@ -896,30 +878,60 @@ frame.addEventListener("touchend", e => {
   if (dy < -50) moveDown();
 }, { passive:true });
 
-/* ----------------------------- WHEEL (WHOLE FRAME) ----------------------------- */
+/* ----------------------------- WHEEL ----------------------------- */
 
 frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (busy) { wheelAcc = 0; return; }
 
   wheelAcc += e.deltaY;
-  if (wheelAcc > WHEEL_CLAMP) wheelAcc = WHEEL_CLAMP;
-  if (wheelAcc < -WHEEL_CLAMP) wheelAcc = -WHEEL_CLAMP;
+  wheelAcc = Math.max(-WHEEL_CLAMP, Math.min(WHEEL_CLAMP, wheelAcc));
 
   if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD){
     const dir = wheelAcc > 0 ? 1 : -1;
     wheelAcc = 0;
-    if (dir > 0) moveDown();
-    else moveUp();
+    dir > 0 ? moveDown() : moveUp();
   }
 }, { passive:false });
 
+/* ----------------------------- ICON PRELOAD ----------------------------- */
+
+function preloadIcons(){
+  const files = new Set();
+
+  PAGES.forEach(p => {
+    (p.icons || []).forEach(ic => ic?.file && files.add(ic.file));
+  });
+
+  const loads = [];
+  files.forEach(file => {
+    loads.push(new Promise(res => {
+      const img = new Image();
+      img.onload = () => res(true);
+      img.onerror = () => res(false);
+      img.src = `Grafiken/${file}`;
+    }));
+  });
+
+  return Promise.all(loads);
+}
+
 /* ----------------------------- INIT ----------------------------- */
 
-buildSlotItems();
-primeStart();
-updateActive();
-</script>
+calcGeometry();
+buildSlotItems("klang");
+applyInputMode();
 
+window.addEventListener("resize", () => {
+  applyInputMode();
+  calcGeometry();
+});
+
+/* Preload zuerst anstoßen, dann initiale Seite zeigen */
+preloadIcons().finally(() => {
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+  updateActive();
+});
+</script>
 </body>
 </html>
