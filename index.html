@@ -212,26 +212,39 @@ const list = document.getElementById("slot-list");
 const out = document.getElementById("section-area");
 const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
+const slotWindow = document.querySelector(".slot-window");
+const swipeSurface = document.querySelector(".page-frame"); 
+/* whole display target; you can change to ".page-content" if you prefer */
 
 /* GEOMETRY */
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
 
-/* We keep the centered item as the SECOND child (index 1) */
+/* Centered item is always the SECOND child */
 const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
 
 /* TIMING */
 const ANIM_MS = 170;
+const LOCK_MS = 400;
 
 /* STATE */
 let busy = false;
+let lockUntil = 0;
 
 /* INIT POSITION */
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
+/* LOCK HELPERS */
+function isLocked() {
+  return busy || Date.now() < lockUntil;
+}
+function lockInput() {
+  lockUntil = Date.now() + LOCK_MS;
+}
+
 /* ACTIVE + TEXT */
-function updateActive(){
+function updateActive() {
   const nodes = Array.from(list.children);
   nodes.forEach(n => n.classList.remove("active"));
 
@@ -247,10 +260,11 @@ function updateActive(){
   }, 80);
 }
 
-/* MOVE DOWN: animate to next item, then rotate first -> end */
-function moveDown(){
-  if (busy) return;
+/* MOVE DOWN */
+function moveDown() {
+  if (isLocked()) return;
   busy = true;
+  lockInput();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
@@ -273,10 +287,11 @@ function moveDown(){
   list.addEventListener("transitionend", onEnd, { once: true });
 }
 
-/* MOVE UP: pre-rotate last -> front, then animate back to BASE_Y */
-function moveUp(){
-  if (busy) return;
+/* MOVE UP */
+function moveUp() {
+  if (isLocked()) return;
   busy = true;
+  lockInput();
 
   const last = list.lastElementChild;
   if (last) list.insertBefore(last, list.firstElementChild);
@@ -298,22 +313,66 @@ function moveUp(){
   });
 }
 
-/* EVENTS */
+/* CLICK */
 arrowUp.onclick = moveUp;
 arrowDown.onclick = moveDown;
 
-/* TOUCH */
-let startY = 0;
+/* TOUCH on LIST (kept) */
+let startYList = 0;
 
 list.addEventListener("touchstart", e => {
-  startY = e.touches[0].clientY;
+  startYList = e.touches[0].clientY;
 }, { passive: true });
 
 list.addEventListener("touchend", e => {
-  const diff = e.changedTouches[0].clientY - startY;
+  if (isLocked()) return;
+  const diff = e.changedTouches[0].clientY - startYList;
   if (diff > 40) moveUp();
   if (diff < -40) moveDown();
 }, { passive: true });
+
+/* FULL-SCREEN SWIPE */
+let startYScreen = 0;
+let startXScreen = 0;
+
+swipeSurface.addEventListener("touchstart", e => {
+  const t = e.touches[0];
+  startYScreen = t.clientY;
+  startXScreen = t.clientX;
+}, { passive: true });
+
+swipeSurface.addEventListener("touchend", e => {
+  if (isLocked()) return;
+
+  const t = e.changedTouches[0];
+  const dy = t.clientY - startYScreen;
+  const dx = t.clientX - startXScreen;
+
+  /* ignore mostly horizontal swipes */
+  if (Math.abs(dx) > Math.abs(dy)) return;
+
+  if (dy > 50) moveUp();
+  if (dy < -50) moveDown();
+}, { passive: true });
+
+/* WHEEL (mouse + trackpad) */
+let wheelAcc = 0;
+const WHEEL_THRESHOLD = 30;
+
+slotWindow.addEventListener("wheel", e => {
+  /* crucial for preventing page scroll */
+  e.preventDefault();
+  if (isLocked()) return;
+
+  wheelAcc += e.deltaY;
+
+  if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD) {
+    const dir = wheelAcc > 0 ? 1 : -1;
+    wheelAcc = 0;
+    if (dir > 0) moveDown();
+    else moveUp();
+  }
+}, { passive: false });
 
 /* INIT */
 updateActive();
