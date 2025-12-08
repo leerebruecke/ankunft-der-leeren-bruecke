@@ -27,13 +27,13 @@
   --slot-w-pref: 55%;
   --slot-w-max: 520px;
 
-  /* typewriter */
-  --type-speed-ms: 28;  /* slower (previously 14) */
+  /* Typewriter: middle ground */
+  --type-speed-ms: 22;
   --fade-out-ms: 120;
 
-  /* icons */
-  --icon-size: 70px;      /* ~2.5x */
-  --icon-fade-ms: 520ms;  /* slower/softer reveal */
+  /* Icons: slower reveal */
+  --icon-size: 70px;
+  --icon-fade-ms: 900ms;
 }
 
 /* RESET */
@@ -183,10 +183,8 @@ body{
   font-size:var(--text-font);
   opacity:1;
   transition:opacity 260ms ease-out;
-
-  width: min(52%, 21rem);
-
-  text-align:left;
+  width:min(85%, 36rem);
+  text-align:center;
   margin-left:auto;
   margin-right:auto;
 }
@@ -202,7 +200,6 @@ body{
 .section-body{
   line-height:1.45;
   opacity:0.92;
-  padding:0 0.1rem;
 }
 
 /* Typed segments */
@@ -231,15 +228,15 @@ body{
   font-style:italic;
   opacity:0.20;
   margin-top:0.25rem;
-  text-align:left;
+  text-align:center;
 }
 
-/* Icons */
-.icon-row{
+/* Post blocks (icons, email) */
+.post-block{
   margin-top:0.9rem;
   display:flex;
   gap:1rem;
-  justify-content:flex-start;
+  justify-content:center;
   align-items:center;
   flex-wrap:wrap;
 
@@ -250,24 +247,36 @@ body{
     transform var(--icon-fade-ms) ease-out;
 }
 
-.icon-row.visible{
+.post-block.visible{
   opacity:1;
   transform:translateY(0);
 }
 
-.icon-row a{
+.post-block a{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   text-decoration:none;
+  color:var(--text-main);
 }
 
-.icon-row img{
+.post-block img{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
   image-rendering:auto;
   opacity:0.92;
+}
+
+.post-email{
+  width:100%;
+  justify-content:center;
+}
+
+.post-email a{
+  font-style:italic;
+  opacity:0.78;
+  letter-spacing:0.04em;
 }
 
 /* ----------------------------- MOBILE TUNING ----------------------------- */
@@ -282,7 +291,7 @@ body{
     --slot-w-max: 360px;
 
     --icon-size: 56px;
-    --icon-fade-ms: 520ms;
+    --icon-fade-ms: 900ms;
   }
 
   .logo-img{
@@ -348,37 +357,36 @@ body{
 </div>
 
 <script>
+/* ----------------------------- PAGE DATA ----------------------------- */
+/* ":" not transferred. label is what the roll shows. */
+
 const PAGES = [
-  { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft." },
-  { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt." },
-  { id:"prelude-3", label:"…", text:"Du spürst, wie Raum dich umgibt." },
+  { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft…" },
+  { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt…" },
+  { id:"prelude-3", label:"…", text:"Raum umgibt dich…" },
 
-  { id:"leere", label:"Es bleibt Leere", text:"…" },
-  { id:"keine-worte", label:"Es bleiben keine Worte mehr", text:"…" },
-  { id:"kein-weg", label:"Es bleibt kein Weg mehr", text:"…" },
-  { id:"nichts-zu-sehen", label:"Hier gibt es nichts mehr zu sehen", text:"…" },
+  { id:"ellipsis-1", label:"…", text:"…" },
+  { id:"leere", label:"…", text:"Es bleibt Leere…" },
+  { id:"keine-worte", label:"…", text:"Es bleiben keine Worte mehr…" },
+  { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
 
-  { id:"ellipsis-a", label:"…", text:"…" },
-  { id:"ellipsis-b", label:"…", text:"…" },
+  { id:"ellipsis-2", label:"…", text:"…" },
+  { id:"ellipsis-3", label:"…", text:"…" },
+  { id:"nichts", label:"…", text:"Nichts…" },
+  { id:"ellipsis-4", label:"…", text:"…" },
+  { id:"ellipsis-5", label:"…", text:"…" },
 
   {
     id:"hohl",
     label:"Du bist ziemlich hohl, oder?",
-    text:
-`Die, die für den Seitenabschnitt zuständig sind, haben bereits alles gesagt…
-Flüsternd: Zum Glück muss ich es nicht mehr tun.`
+    text:"Die, die für diesen Seitenabschnitt zuständig sind, haben bereits alles gesagt…",
+    aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
   },
 
   {
     id:"no-up",
-    label:"Man kann nicht einfach so nach oben gehen",
+    label:"Man kann nicht einfach so zur anderen Seit…",
     text:"Du musst in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht."
-  },
-
-  {
-    id:"wrong-here",
-    label:"Hier bist du wohl falsch",
-    text:"Das davor habe ich ernst gemeint."
   },
 
   {
@@ -395,8 +403,8 @@ Hier gibt es nichts für dich.`
     text:"Hier lang geht es nicht! Auf, auf und davon!"
   },
 
-  { id:"ellipsis-c", label:"…", text:"…" },
-  { id:"ellipsis-d", label:"…", text:"…" },
+  { id:"ellipsis-6", label:"…", text:"…" },
+  { id:"ellipsis-7", label:"…", text:"…" },
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
@@ -433,9 +441,11 @@ und Schein bleibt, solange Winter ist.`,
     label:"Skizzen",
     text:
 `„Ich glaube, man könnte die Skizzen verkaufen,
-sie zeigen die Arbeit in ihrem Anfang.“`,
+sie zeigen meine Arbeit in ihrem Anfang.“`,
     attrib:"Vincent",
-    aside:"100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und eine kaufen."
+    aside:
+`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
+zuschlagen.`
   },
 
   {
@@ -473,12 +483,20 @@ daß er nicht dabei zum Ungeheuer wird.
 Und wenn du lange in einen Abgrund blickst,
 blickt der Abgrund auch in dich hinein.`,
     attrib:"Nietzsche",
-    plainTail:"Kuumitori@gmail.com"
+    email:"Kuumitori@gmail.com"
   },
 
   { id:"unter", label:"Unter", text:"Unter dir der Grund." },
-  { id:"orden", label:"Leerebrücke", text:"Ein mythopoietischer Orden." }
+
+  {
+    id:"orden",
+    label:"Leerebrücke",
+    italicAll:true,
+    text:"Ein mythopoietischer Orden."
+  }
 ];
+
+/* ----------------------------- ELEMENTS ----------------------------- */
 
 const list = document.getElementById("slot-list");
 const out = document.getElementById("section-area");
@@ -489,10 +507,14 @@ const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
 const frame = document.querySelector(".page-frame");
 
+/* ----------------------------- GEOMETRY ----------------------------- */
+
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
 const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
+
+/* ----------------------------- TIMING/STATE ----------------------------- */
 
 const ANIM_MS = 170;
 
@@ -501,9 +523,11 @@ let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
 const WHEEL_CLAMP = 120;
 
+/* typewriter state */
 let typingTimer = null;
 let typingToken = 0;
 
+/* failsafe busy */
 let failTimer = null;
 function setBusy(){
   busy = true;
@@ -518,6 +542,8 @@ function clearBusy(){
   busy = false;
 }
 
+/* ----------------------------- UTIL ----------------------------- */
+
 function escapeHTML(str){
   return String(str)
     .replace(/&/g,"&amp;")
@@ -526,6 +552,8 @@ function escapeHTML(str){
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
 }
+
+/* ----------------------------- BUILD SLOT LIST ----------------------------- */
 
 function buildSlotItems(){
   list.innerHTML = "";
@@ -538,18 +566,23 @@ function buildSlotItems(){
   });
 }
 
+/* Rotate DOM so that "Klang" starts centered */
 function primeStart(){
   let safety = 0;
-  while (list.children[1] && list.children[1].dataset.pageId !== "klang" && safety < 500){
+  while (list.children[1] && list.children[1].dataset.pageId !== "klang" && safety < 800){
     const last = list.lastElementChild;
     if (last) list.insertBefore(last, list.firstElementChild);
     safety++;
   }
 }
 
+/* ----------------------------- PAGE RESOLUTION ----------------------------- */
+
 function resolvePageById(id){
   return PAGES.find(p => p.id === id) || { id, label:"", text:"" };
 }
+
+/* ----------------------------- TYPEWRITER SEGMENTS ----------------------------- */
 
 function clearTyping(){
   typingToken++;
@@ -583,14 +616,6 @@ function buildSegments(page){
     });
   }
 
-  if (page.plainTail){
-    segs.push({
-      cls: "seg-normal",
-      text: page.plainTail,
-      preBlank: 1
-    });
-  }
-
   return segs;
 }
 
@@ -613,39 +638,60 @@ function renderSegmentsHTML(segs, upToSeg, partialText){
   return html;
 }
 
-function renderIcons(page){
+/* ----------------------------- POST BLOCKS (ICONS + EMAIL) ----------------------------- */
+
+function renderPostBlocks(page){
   extrasEl.innerHTML = "";
-  if (!page.icons || !Array.isArray(page.icons) || page.icons.length === 0) return;
 
-  const row = document.createElement("div");
-  row.className = "icon-row";
+  const blocks = [];
 
-  page.icons.forEach(ic => {
-    const file = ic.file;
-    const href = ic.href;
+  if (page.icons && Array.isArray(page.icons) && page.icons.length){
+    const row = document.createElement("div");
+    row.className = "post-block";
 
-    const img = document.createElement("img");
-    img.src = `Grafiken/${file}`;
-    img.alt = file.replace(".png","");
+    page.icons.forEach(ic => {
+      const file = ic.file;
+      const href = ic.href;
 
-    if (href){
-      const a = document.createElement("a");
-      a.href = href;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.appendChild(img);
-      row.appendChild(a);
-    } else {
-      row.appendChild(img);
-    }
-  });
+      const img = document.createElement("img");
+      img.src = `Grafiken/${file}`;
+      img.alt = file.replace(".png","");
 
-  extrasEl.appendChild(row);
+      if (href){
+        const a = document.createElement("a");
+        a.href = href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.appendChild(img);
+        row.appendChild(a);
+      } else {
+        row.appendChild(img);
+      }
+    });
+
+    blocks.push(row);
+  }
+
+  if (page.email){
+    const mailRow = document.createElement("div");
+    mailRow.className = "post-block post-email";
+
+    const a = document.createElement("a");
+    a.href = `mailto:${page.email}`;
+    a.textContent = page.email;
+
+    mailRow.appendChild(a);
+    blocks.push(mailRow);
+  }
+
+  blocks.forEach(b => extrasEl.appendChild(b));
 
   requestAnimationFrame(() => {
-    row.classList.add("visible");
+    blocks.forEach(b => b.classList.add("visible"));
   });
 }
+
+/* ----------------------------- PAGE SHOW ----------------------------- */
 
 function typePage(page){
   clearTyping();
@@ -656,14 +702,14 @@ function typePage(page){
   extrasEl.innerHTML = "";
 
   if (segs.length === 0){
-    renderIcons(page);
+    renderPostBlocks(page);
     return;
   }
 
   const speed = parseInt(getComputedStyle(document.documentElement)
-    .getPropertyValue("--type-speed-ms")) || 18;
+    .getPropertyValue("--type-speed-ms")) || 22;
 
-  // pre-split each segment into word+space tokens
+  /* word-wise typing to avoid visible line-break collapse */
   const tokenized = segs.map(s => {
     const tokens = String(s.text || "").match(/\S+\s*/g) || [];
     return { ...s, tokens };
@@ -697,7 +743,7 @@ function typePage(page){
       if (segIndex >= tokenized.length){
         clearInterval(typingTimer);
         typingTimer = null;
-        renderIcons(page);
+        renderPostBlocks(page);
       }
     }
   }, speed);
@@ -707,13 +753,16 @@ function showPage(page){
   out.classList.add("fading");
   clearTyping();
 
-  const fadeMs = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--fade-out-ms")) || 120;
+  const fadeMs = parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue("--fade-out-ms")) || 120;
 
   setTimeout(() => {
     out.classList.remove("fading");
     typePage(page);
   }, fadeMs);
 }
+
+/* ----------------------------- UPDATE ACTIVE ----------------------------- */
 
 function updateActive(){
   const nodes = Array.from(list.children);
@@ -727,6 +776,8 @@ function updateActive(){
 
   showPage(page);
 }
+
+/* ----------------------------- MOVE LOGIC (TRUE ROLL) ----------------------------- */
 
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
@@ -786,6 +837,8 @@ function moveUp(){
   });
 }
 
+/* ----------------------------- INPUT MODES ----------------------------- */
+
 function applyInputMode(){
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
@@ -800,6 +853,8 @@ function applyInputMode(){
 
 applyInputMode();
 window.addEventListener("resize", applyInputMode);
+
+/* ----------------------------- TOUCH SWIPE (FULL FRAME) ----------------------------- */
 
 let startY = 0;
 let startX = 0;
@@ -823,6 +878,8 @@ frame.addEventListener("touchend", e => {
   if (dy < -50) moveDown();
 }, { passive:true });
 
+/* ----------------------------- WHEEL (WHOLE FRAME) ----------------------------- */
+
 frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (busy) { wheelAcc = 0; return; }
@@ -838,6 +895,8 @@ frame.addEventListener("wheel", e => {
     else moveUp();
   }
 }, { passive:false });
+
+/* ----------------------------- INIT ----------------------------- */
 
 buildSlotItems();
 primeStart();
