@@ -9,6 +9,23 @@
 :root{
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
+
+  /* geometry */
+  --item-h: 42px;
+  --window-h: 65px;
+
+  /* sizes */
+  --arrow-size: 14px;
+  --slot-font: 0.86rem;
+  --text-font: 0.86rem;
+
+  /* positioning */
+  --roll-lift: -40px;
+
+  /* slot width */
+  --slot-w-min: 220px;
+  --slot-w-pref: 55%;
+  --slot-w-max: 520px;
 }
 
 /* RESET */
@@ -23,12 +40,17 @@ html,body{
   overflow:hidden;
 }
 
-body{display:flex;align-items:center;justify-content:center;}
+body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
 /* FRAME */
 .page-frame{
   position:relative;
-  --base:min(100vh,1200px);
+  /* safer on mobile browser UI */
+  --base:min(100svh,1200px);
   height:calc(var(--base)*1.20);
   width:calc(var(--base)*1.20*9/16);
   overflow:hidden;
@@ -38,8 +60,11 @@ body{display:flex;align-items:center;justify-content:center;}
   position:absolute;
   inset:0;
   background-image:url("Grafiken/Br%C3%BCcke.png");
-  background-size:100% 100%;
   background-repeat:no-repeat;
+  background-position:center center;
+
+  /* default: keep your intended fit on desktop */
+  background-size:100% 100%;
   image-rendering:pixelated;
 }
 
@@ -61,26 +86,20 @@ body{display:flex;align-items:center;justify-content:center;}
   image-rendering:pixelated;
 }
 
-@media (max-width:768px){
-  .logo-img{margin-top:10%;}
-}
-
 /* ----------------------------- SLOT ----------------------------- */
 
-/* Whole roll module ~40px higher */
 .slot-group{
   width:100%;
   display:flex;
   flex-direction:column;
   align-items:center;
-  transform:translateY(-40px);
+  transform:translateY(var(--roll-lift));
 }
 
-/* Window: keep your proven height, but make width robust */
 .slot-window{
   position:relative;
-  width:clamp(220px,55%,520px);
-  height:65px;
+  width:clamp(var(--slot-w-min), var(--slot-w-pref), var(--slot-w-max));
+  height:var(--window-h);
   overflow:hidden;
   flex-shrink:0;
 
@@ -102,7 +121,6 @@ body{display:flex;align-items:center;justify-content:center;}
   );
 }
 
-/* List */
 .slot-list{
   position:absolute;
   left:50%;
@@ -113,10 +131,9 @@ body{display:flex;align-items:center;justify-content:center;}
   will-change:transform;
 }
 
-/* Items */
 .slot-item{
-  height:42px;
-  font-size:0.86rem;
+  height:var(--item-h);
+  font-size:var(--slot-font);
   letter-spacing:0.1em;
   display:flex;
   align-items:center;
@@ -132,11 +149,10 @@ body{display:flex;align-items:center;justify-content:center;}
   transform:scale(1.05);
 }
 
-/* Arrows */
 .arrow{
   width:0;height:0;
-  border-left:14px solid transparent;
-  border-right:14px solid transparent;
+  border-left:var(--arrow-size) solid transparent;
+  border-right:var(--arrow-size) solid transparent;
   opacity:0.75;
   cursor:pointer;
   transition:opacity 200ms;
@@ -146,25 +162,63 @@ body{display:flex;align-items:center;justify-content:center;}
 .arrow:hover{opacity:1;}
 
 .arrow-up{
-  border-bottom:14px solid var(--text-main);
+  border-bottom:var(--arrow-size) solid var(--text-main);
   margin-bottom:4px;
 }
 
 .arrow-down{
-  border-top:14px solid var(--text-main);
+  border-top:var(--arrow-size) solid var(--text-main);
   margin-top:4px;
 }
 
-/* Text */
 .section-area{
   margin-top:1.2rem;
-  font-size:0.86rem;
+  font-size:var(--text-font);
   opacity:0;
   transition:opacity 260ms ease-out;
 }
 
-.section-area.visible{
-  opacity:1;
+.section-area.visible{opacity:1;}
+
+/* ----------------------------- MOBILE TUNING ----------------------------- */
+
+@media (max-width: 768px){
+  :root{
+    --arrow-size: 10px;
+    --slot-font: 0.74rem;
+    --text-font: 0.74rem;
+
+    /* narrower slot on phones */
+    --slot-w-min: 170px;
+    --slot-w-max: 360px;
+  }
+
+  .logo-img{
+    width:62%;
+    margin-top:8%;
+    margin-bottom:0.8rem;
+  }
+
+  /* reduce perceived size without touching JS geometry */
+  .slot-group{
+    transform:translateY(var(--roll-lift)) scale(0.82);
+  }
+
+  .section-area{
+    margin-top:0.9rem;
+  }
+
+  /* stop background stretching on mobile */
+  .page-background{
+    background-size:contain;
+  }
+}
+
+/* very small phones */
+@media (max-width: 420px){
+  .slot-group{
+    transform:translateY(var(--roll-lift)) scale(0.78);
+  }
 }
 </style>
 </head>
@@ -212,16 +266,14 @@ const list = document.getElementById("slot-list");
 const out = document.getElementById("section-area");
 const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
-const slotWindow = document.querySelector(".slot-window");
-const swipeSurface = document.querySelector(".page-frame"); 
-/* whole display target; you can change to ".page-content" if you prefer */
+const frame = document.querySelector(".page-frame");
 
-/* GEOMETRY */
+/* GEOMETRY (must match CSS values) */
 const ITEM_HEIGHT = 42;
 const WINDOW_HEIGHT = 65;
 const CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
 
-/* Centered item is always the SECOND child */
+/* centered item is always the SECOND child */
 const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
 
 /* TIMING */
@@ -232,19 +284,23 @@ const LOCK_MS = 400;
 let busy = false;
 let lockUntil = 0;
 
-/* INIT POSITION */
+/* WHEEL SMOOTHING */
+let wheelAcc = 0;
+const WHEEL_THRESHOLD = 30;
+
+/* INIT */
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
-/* LOCK HELPERS */
-function isLocked() {
+/* LOCK */
+function isLocked(){
   return busy || Date.now() < lockUntil;
 }
-function lockInput() {
+function lockInput(){
   lockUntil = Date.now() + LOCK_MS;
 }
 
 /* ACTIVE + TEXT */
-function updateActive() {
+function updateActive(){
   const nodes = Array.from(list.children);
   nodes.forEach(n => n.classList.remove("active"));
 
@@ -261,7 +317,7 @@ function updateActive() {
 }
 
 /* MOVE DOWN */
-function moveDown() {
+function moveDown(){
   if (isLocked()) return;
   busy = true;
   lockInput();
@@ -284,11 +340,11 @@ function moveDown() {
     });
   };
 
-  list.addEventListener("transitionend", onEnd, { once: true });
+  list.addEventListener("transitionend", onEnd, { once:true });
 }
 
 /* MOVE UP */
-function moveUp() {
+function moveUp(){
   if (isLocked()) return;
   busy = true;
   lockInput();
@@ -309,7 +365,7 @@ function moveUp() {
       busy = false;
     };
 
-    list.addEventListener("transitionend", onEnd, { once: true });
+    list.addEventListener("transitionend", onEnd, { once:true });
   });
 }
 
@@ -317,64 +373,45 @@ function moveUp() {
 arrowUp.onclick = moveUp;
 arrowDown.onclick = moveDown;
 
-/* TOUCH on LIST (kept) */
-let startYList = 0;
+/* TOUCH - full screen swipe */
+let startY = 0;
+let startX = 0;
 
-list.addEventListener("touchstart", e => {
-  startYList = e.touches[0].clientY;
-}, { passive: true });
-
-list.addEventListener("touchend", e => {
-  if (isLocked()) return;
-  const diff = e.changedTouches[0].clientY - startYList;
-  if (diff > 40) moveUp();
-  if (diff < -40) moveDown();
-}, { passive: true });
-
-/* FULL-SCREEN SWIPE */
-let startYScreen = 0;
-let startXScreen = 0;
-
-swipeSurface.addEventListener("touchstart", e => {
+frame.addEventListener("touchstart", e => {
   const t = e.touches[0];
-  startYScreen = t.clientY;
-  startXScreen = t.clientX;
-}, { passive: true });
+  startY = t.clientY;
+  startX = t.clientX;
+}, { passive:true });
 
-swipeSurface.addEventListener("touchend", e => {
+frame.addEventListener("touchend", e => {
   if (isLocked()) return;
 
   const t = e.changedTouches[0];
-  const dy = t.clientY - startYScreen;
-  const dx = t.clientX - startXScreen;
+  const dy = t.clientY - startY;
+  const dx = t.clientX - startX;
 
-  /* ignore mostly horizontal swipes */
   if (Math.abs(dx) > Math.abs(dy)) return;
 
   if (dy > 50) moveUp();
   if (dy < -50) moveDown();
-}, { passive: true });
+}, { passive:true });
 
-/* WHEEL (mouse + trackpad) */
-let wheelAcc = 0;
-const WHEEL_THRESHOLD = 30;
-
-slotWindow.addEventListener("wheel", e => {
-  /* crucial for preventing page scroll */
+/* WHEEL - attach to the whole frame */
+frame.addEventListener("wheel", e => {
   e.preventDefault();
   if (isLocked()) return;
 
   wheelAcc += e.deltaY;
 
-  if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD) {
+  if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD){
     const dir = wheelAcc > 0 ? 1 : -1;
     wheelAcc = 0;
     if (dir > 0) moveDown();
     else moveUp();
   }
-}, { passive: false });
+}, { passive:false });
 
-/* INIT */
+/* INIT RENDER */
 updateActive();
 </script>
 
