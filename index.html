@@ -49,7 +49,6 @@ body{
 /* FRAME */
 .page-frame{
   position:relative;
-  /* safer on mobile browser UI */
   --base:min(100svh,1200px);
   height:calc(var(--base)*1.20);
   width:calc(var(--base)*1.20*9/16);
@@ -62,8 +61,6 @@ body{
   background-image:url("Grafiken/Br%C3%BCcke.png");
   background-repeat:no-repeat;
   background-position:center center;
-
-  /* default: keep your intended fit on desktop */
   background-size:100% 100%;
   image-rendering:pixelated;
 }
@@ -188,7 +185,6 @@ body{
     --slot-font: 0.74rem;
     --text-font: 0.74rem;
 
-    /* narrower slot on phones */
     --slot-w-min: 170px;
     --slot-w-max: 360px;
   }
@@ -199,7 +195,7 @@ body{
     margin-bottom:0.8rem;
   }
 
-  /* reduce perceived size without touching JS geometry */
+  /* keep your current overall mobile scale */
   .slot-group{
     transform:translateY(var(--roll-lift)) scale(0.82);
   }
@@ -212,6 +208,13 @@ body{
   .page-background{
     background-size:contain;
   }
+
+  /* Pfeile näher aneinander, ohne anderes Layout neu zu formen */
+  .arrow-up{ margin-bottom:0px; }
+  .arrow-down{ margin-top:0px; }
+
+  /* Pfeile auf Mobile optisch da, aber nicht klickbar */
+  .arrow{ pointer-events:none; }
 }
 
 /* very small phones */
@@ -278,26 +281,17 @@ const BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
 
 /* TIMING */
 const ANIM_MS = 170;
-const LOCK_MS = 400;
 
 /* STATE */
 let busy = false;
-let lockUntil = 0;
 
 /* WHEEL SMOOTHING */
 let wheelAcc = 0;
 const WHEEL_THRESHOLD = 30;
+const WHEEL_CLAMP = 120;
 
 /* INIT */
 list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
-
-/* LOCK */
-function isLocked(){
-  return busy || Date.now() < lockUntil;
-}
-function lockInput(){
-  lockUntil = Date.now() + LOCK_MS;
-}
 
 /* ACTIVE + TEXT */
 function updateActive(){
@@ -318,9 +312,8 @@ function updateActive(){
 
 /* MOVE DOWN */
 function moveDown(){
-  if (isLocked()) return;
+  if (busy) return;
   busy = true;
-  lockInput();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
@@ -345,9 +338,8 @@ function moveDown(){
 
 /* MOVE UP */
 function moveUp(){
-  if (isLocked()) return;
+  if (busy) return;
   busy = true;
-  lockInput();
 
   const last = list.lastElementChild;
   if (last) list.insertBefore(last, list.firstElementChild);
@@ -369,9 +361,21 @@ function moveUp(){
   });
 }
 
-/* CLICK */
-arrowUp.onclick = moveUp;
-arrowDown.onclick = moveDown;
+/* CLICK ENABLE/DISABLE BY MODE */
+function applyInputMode(){
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (isMobile){
+    arrowUp.onclick = null;
+    arrowDown.onclick = null;
+  } else {
+    arrowUp.onclick = moveUp;
+    arrowDown.onclick = moveDown;
+  }
+}
+
+applyInputMode();
+window.addEventListener("resize", applyInputMode);
 
 /* TOUCH - full screen swipe */
 let startY = 0;
@@ -384,7 +388,7 @@ frame.addEventListener("touchstart", e => {
 }, { passive:true });
 
 frame.addEventListener("touchend", e => {
-  if (isLocked()) return;
+  if (busy) return;
 
   const t = e.changedTouches[0];
   const dy = t.clientY - startY;
@@ -399,9 +403,11 @@ frame.addEventListener("touchend", e => {
 /* WHEEL - attach to the whole frame */
 frame.addEventListener("wheel", e => {
   e.preventDefault();
-  if (isLocked()) return;
+  if (busy) { wheelAcc = 0; return; }
 
   wheelAcc += e.deltaY;
+  if (wheelAcc > WHEEL_CLAMP) wheelAcc = WHEEL_CLAMP;
+  if (wheelAcc < -WHEEL_CLAMP) wheelAcc = -WHEEL_CLAMP;
 
   if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD){
     const dir = wheelAcc > 0 ? 1 : -1;
