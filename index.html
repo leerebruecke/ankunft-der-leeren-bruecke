@@ -184,7 +184,7 @@ body{
   opacity:1;
   transition:opacity 260ms ease-out;
 
-  width: min(56%, 22.5rem);
+  width: min(52%, 21rem);
 
   text-align:left;
   margin-left:auto;
@@ -660,13 +660,22 @@ function typePage(page){
     return;
   }
 
-  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 28;
+  const speed = parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue("--type-speed-ms")) || 18;
+
+  // pre-split each segment into word+space tokens
+  const tokenized = segs.map(s => {
+    const tokens = String(s.text || "").match(/\S+\s*/g) || [];
+    return { ...s, tokens };
+  });
 
   let segIndex = 0;
-  let charIndex = 0;
+  let tokIndex = 0;
   const token = ++typingToken;
 
-  const currentText = () => segs[segIndex]?.text ?? "";
+  function currentTokens(){
+    return tokenized[segIndex]?.tokens || [];
+  }
 
   typingTimer = setInterval(() => {
     if (token !== typingToken){
@@ -675,17 +684,17 @@ function typePage(page){
       return;
     }
 
-    const full = currentText();
-    charIndex++;
+    const tokensArr = currentTokens();
+    tokIndex++;
 
-    const partial = full.slice(0, charIndex);
-    bodyEl.innerHTML = renderSegmentsHTML(segs, segIndex, partial);
+    const partial = tokensArr.slice(0, tokIndex).join("");
+    bodyEl.innerHTML = renderSegmentsHTML(tokenized, segIndex, partial);
 
-    if (charIndex >= full.length){
+    if (tokIndex >= tokensArr.length){
       segIndex++;
-      charIndex = 0;
+      tokIndex = 0;
 
-      if (segIndex >= segs.length){
+      if (segIndex >= tokenized.length){
         clearInterval(typingTimer);
         typingTimer = null;
         renderIcons(page);
