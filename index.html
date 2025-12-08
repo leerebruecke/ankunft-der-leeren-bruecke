@@ -28,14 +28,15 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:24;          /* leicht schneller als zuvor */
+  --type-char-ms:24;          /* leicht verschnellert */
   --type-jitter-ms:8;         /* lebendig, aber nicht nervös */
   --fade-out-ms:120;
 
   /* icons */
   --icon-size:70px;
-  --icon-fade-ms:900ms;       /* etwas knackiger */
-  --post-min-delay-ms:90;     /* Icons dürfen früh kommen */
+  --icon-fade-ms:900ms;
+  --post-min-delay-ms:90;     /* frühe Icons */
+  --email-min-delay-ms:140;   /* kleine Atempause nach Text-Ende */
 
   --mask-grad:linear-gradient(
     to bottom,
@@ -187,9 +188,21 @@ body{
 
 .section-title{display:none;}
 
+/* top extras */
+.section-extras-top{
+  margin-bottom:0.65rem;
+}
+
+/* text block stays within centered area, but types left-to-right */
 .section-body{
   line-height:1.45;
   opacity:0.92;
+  text-align:left;
+}
+
+/* bottom extras */
+.section-extras-bottom{
+  margin-top:0.7rem;
 }
 
 /* Segments for letter typing */
@@ -209,11 +222,7 @@ body{
   text-align:center;
 }
 
-/* POST BLOCKS (now visually above text) */
-.section-extras{
-  margin-bottom:0.65rem;
-}
-
+/* POST BLOCKS */
 .post-block{
   margin-top:0.25rem;
   display:flex;
@@ -327,11 +336,11 @@ body{
     <div class="section-area" id="section-area">
       <div class="section-title" id="section-title"></div>
 
-      <!-- Icons/Links FIRST -->
-      <div class="section-extras" id="section-extras"></div>
+      <div class="section-extras-top" id="section-extras-top"></div>
 
-      <!-- Text BELOW -->
       <div class="section-body" id="section-body"></div>
+
+      <div class="section-extras-bottom" id="section-extras-bottom"></div>
     </div>
   </div>
 </div>
@@ -483,7 +492,8 @@ const list = $("#slot-list");
 const out = $("#section-area");
 const titleEl = $("#section-title");
 const bodyEl = $("#section-body");
-const extrasEl = $("#section-extras");
+const extrasTop = $("#section-extras-top");
+const extrasBottom = $("#section-extras-bottom");
 const arrowUp = $("#arrow-up");
 const arrowDown = $("#arrow-down");
 const frame = $(".page-frame");
@@ -524,7 +534,8 @@ let failTimer = null;
 let typingTimer = null;
 let typingToken = 0;
 
-let postRevealTimer = null;
+let iconsRevealTimer = null;
+let emailRevealTimer = null;
 
 /* ----------------------------- BUSY ----------------------------- */
 
@@ -586,8 +597,10 @@ function clearTyping(){
     typingTimer = null;
   }
 
-  clearTimeout(postRevealTimer);
-  postRevealTimer = null;
+  clearTimeout(iconsRevealTimer);
+  clearTimeout(emailRevealTimer);
+  iconsRevealTimer = null;
+  emailRevealTimer = null;
 }
 
 function buildSegments(page){
@@ -625,62 +638,89 @@ function buildSegmentsDOM(segs){
   return nodes;
 }
 
-/* ----------------------------- POST BLOCKS (EARLY) ----------------------------- */
+/* ----------------------------- ICONS TOP (EARLY + SYNC) ----------------------------- */
 
-function buildPostBlocks(page){
-  const blocks = [];
+function buildIconRow(page){
+  if (!Array.isArray(page.icons) || !page.icons.length) return null;
 
-  if (Array.isArray(page.icons) && page.icons.length){
-    const row = document.createElement("div");
-    row.className = "post-block";
+  const row = document.createElement("div");
+  row.className = "post-block";
 
-    page.icons.forEach(({file, href}) => {
-      const img = document.createElement("img");
-      img.src = `Grafiken/${file}`;
-      img.alt = file.replace(".png","");
-      img.decoding = "async";
-      img.loading = "eager";
+  page.icons.forEach(({file, href}) => {
+    const img = document.createElement("img");
+    img.src = `Grafiken/${file}`;
+    img.alt = file.replace(".png","");
+    img.decoding = "async";
+    img.loading = "eager";
 
-      if (href){
-        const a = document.createElement("a");
-        a.href = href;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.appendChild(img);
-        row.appendChild(a);
-      } else {
-        row.appendChild(img);
-      }
-    });
+    if (href){
+      const a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.appendChild(img);
+      row.appendChild(a);
+    } else {
+      row.appendChild(img);
+    }
+  });
 
-    blocks.push(row);
-  }
-
-  if (page.email){
-    const mailRow = document.createElement("div");
-    mailRow.className = "post-block post-email";
-
-    const a = document.createElement("a");
-    a.href = `mailto:${page.email}`;
-    a.textContent = page.email;
-
-    mailRow.appendChild(a);
-    blocks.push(mailRow);
-  }
-
-  return blocks;
+  return row;
 }
 
-function showPostBlocksEarly(page){
-  extrasEl.innerHTML = "";
-  const blocks = buildPostBlocks(page);
-  if (!blocks.length) return;
+function showIconsEarly(page){
+  extrasTop.innerHTML = "";
+  const row = buildIconRow(page);
+  if (!row) return;
 
-  blocks.forEach(b => extrasEl.appendChild(b));
+  extrasTop.appendChild(row);
+
+  const imgs = Array.from(row.querySelectorAll("img"));
+  const decodes = imgs.map(img => {
+    if (typeof img.decode === "function"){
+      return img.decode().catch(() => {});
+    }
+    return Promise.resolve();
+  });
 
   const minDelay = cssNum("--post-min-delay-ms", 90);
-  postRevealTimer = setTimeout(() => {
-    requestAnimationFrame(() => blocks.forEach(b => b.classList.add("visible")));
+
+  Promise.all(decodes).finally(() => {
+    iconsRevealTimer = setTimeout(() => {
+      requestAnimationFrame(() => row.classList.add("visible"));
+    }, minDelay);
+  });
+}
+
+/* ----------------------------- EMAIL BOTTOM (AFTER TEXT) ----------------------------- */
+
+function buildEmailRow(page){
+  if (!page.email) return null;
+
+  const mailRow = document.createElement("div");
+  mailRow.className = "post-block post-email";
+
+  const a = document.createElement("a");
+  a.href = `mailto:${page.email}`;
+  a.textContent = page.email;
+
+  mailRow.appendChild(a);
+  return mailRow;
+}
+
+function showEmailAfterTyping(page, token){
+  if (token !== typingToken) return;
+
+  extrasBottom.innerHTML = "";
+
+  const row = buildEmailRow(page);
+  if (!row) return;
+
+  extrasBottom.appendChild(row);
+
+  const minDelay = cssNum("--email-min-delay-ms", 140);
+  emailRevealTimer = setTimeout(() => {
+    requestAnimationFrame(() => row.classList.add("visible"));
   }, minDelay);
 }
 
@@ -689,14 +729,16 @@ function showPostBlocksEarly(page){
 function typePage(page){
   clearTyping();
   titleEl.textContent = "";
-  extrasEl.innerHTML = "";
+  extrasTop.innerHTML = "";
+  extrasBottom.innerHTML = "";
   bodyEl.innerHTML = "";
 
-  /* Icons/Links first */
-  showPostBlocksEarly(page);
+  showIconsEarly(page);
 
   const segs = buildSegments(page);
-  if (!segs.length) return;
+  if (!segs.length){
+    return;
+  }
 
   const nodes = buildSegmentsDOM(segs);
   const token = ++typingToken;
@@ -713,6 +755,7 @@ function typePage(page){
     const current = nodes[segIndex];
     if (!current){
       typingTimer = null;
+      showEmailAfterTyping(page, token);
       return;
     }
 
@@ -728,6 +771,7 @@ function typePage(page){
 
       if (segIndex >= nodes.length){
         typingTimer = null;
+        showEmailAfterTyping(page, token);
         return;
       }
     }
