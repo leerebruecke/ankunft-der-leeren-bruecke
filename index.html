@@ -28,8 +28,11 @@
   --slot-w-max: 520px;
 
   /* typewriter */
-  --type-speed-ms: 14;     /* ms per character */
+  --type-speed-ms: 14;
   --fade-out-ms: 120;
+
+  /* icons */
+  --icon-size: 70px; /* ~2.5x compared to former ~28px */
 }
 
 /* RESET */
@@ -188,34 +191,67 @@ body{
   transition:opacity var(--fade-out-ms) ease-out;
 }
 
-.section-title{
-  font-size:calc(var(--text-font) * 1.06);
-  letter-spacing:0.08em;
-  margin-bottom:0.6rem;
-  opacity:0.92;
-}
+/* Title under the slot is intentionally disabled */
+.section-title{ display:none; }
 
+/* Body container for typed segments */
 .section-body{
-  white-space:pre-line;
+  white-space:normal;
   line-height:1.45;
   opacity:0.92;
 }
 
+/* Typed segment styles */
+.seg{
+  display:block;
+  margin:0;
+  padding:0;
+}
+
+.seg-normal{
+  opacity:0.92;
+}
+
+.seg-italic{
+  font-style:italic;
+  opacity:0.78;
+}
+
+.seg-aside{
+  font-style:italic;
+  opacity:0.55;
+}
+
+.seg-attrib{
+  font-style:italic;
+  opacity:0.48;
+  text-align:right;
+  padding-right:0.1rem;
+}
+
+/* icon rows remain non-typed visual blocks */
 .icon-row{
   margin-top:0.9rem;
   display:flex;
-  gap:0.8rem;
+  gap:1rem;
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
 }
 
+.icon-row a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
 .icon-row img{
-  width:28px;
-  height:28px;
+  width:var(--icon-size);
+  height:var(--icon-size);
   object-fit:contain;
   image-rendering:auto;
-  opacity:0.9;
+  opacity:0.92;
 }
 
 /* ----------------------------- MOBILE TUNING ----------------------------- */
@@ -228,6 +264,8 @@ body{
 
     --slot-w-min: 170px;
     --slot-w-max: 360px;
+
+    --icon-size: 56px;
   }
 
   .logo-img{
@@ -277,7 +315,7 @@ body{
 
       <div class="slot-window">
         <div class="slot-list" id="slot-list">
-          <!-- Items are injected by JS -->
+          <!-- injected by JS -->
         </div>
       </div>
 
@@ -296,111 +334,138 @@ body{
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
-/* Colons are removed by design: titles here are already clean. */
-/* Bracketed notes from your spec are not displayed. */
+/* id = internal unique key, label = visible slot text (can be "…") */
 
 const PAGES = [
-  { title: "…", text: "Du ziehst vorbei an einer einigenden Kraft." },
-  { title: "…", text: "Du spürst den Geist, aus dem alles stammt." },
-  { title: "…", text: "Du spürst, wie Raum dich umgibt." },
+  { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft." },
+  { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt." },
+  { id:"prelude-3", label:"…", text:"Du spürst, wie Raum dich umgibt." },
 
-  { title: "Es bleibt Leere", text: "…" },
-  { title: "Es bleiben keine Worte mehr", text: "…" },
-  { title: "Es bleibt kein Weg mehr", text: "…" },
-  { title: "Hier gibt es nichts mehr zu sehen", text: "…" },
+  { id:"leere", label:"Es bleibt Leere", text:"…" },
+  { id:"keine-worte", label:"Es bleiben keine Worte mehr", text:"…" },
+  { id:"kein-weg", label:"Es bleibt kein Weg mehr", text:"…" },
+  { id:"nichts-zu-sehen", label:"Hier gibt es nichts mehr zu sehen", text:"…" },
 
-  { title: "…", text: "…" },
-  { title: "…", text: "…" },
+  { id:"ellipsis-a", label:"…", text:"…" },
+  { id:"ellipsis-b", label:"…", text:"…" },
 
-  { title: "Du bist ziemlich hohl, oder?",
+  {
+    id:"hohl",
+    label:"Du bist ziemlich hohl, oder?",
     text:
 `Die, die für den Seitenabschnitt zuständig sind, haben bereits alles gesagt…
-Flüsternd: Zum Glück muss ich es nicht mehr tun.` },
+Flüsternd: Zum Glück muss ich es nicht mehr tun.`
+  },
 
-  { title: "Man kann nicht einfach so nach oben gehen",
-    text: "Du musst in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht." },
+  {
+    id:"no-up",
+    label:"Man kann nicht einfach so nach oben gehen",
+    text:"Du musst in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht."
+  },
 
-  { title: "Hier bist du wohl falsch",
-    text: "Das davor habe ich ernst gemeint." },
+  {
+    id:"wrong-here",
+    label:"Hier bist du wohl falsch",
+    text:"Das davor habe ich ernst gemeint."
+  },
 
-  { title: "Warum bist du noch hier?",
+  {
+    id:"why-here",
+    label:"Warum bist du noch hier?",
     text:
 `Es scheint, als wärst du weiter in die falsche Richtung gelaufen.
-Hier gibt es nichts für dich.` },
+Hier gibt es nichts für dich.`
+  },
 
-  { title: "Falsche Richtung",
-    text: "Hier lang geht es nicht! Auf, auf und davon!" },
+  {
+    id:"wrong-dir",
+    label:"Falsche Richtung",
+    text:"Hier lang geht es nicht! Auf, auf und davon!"
+  },
 
-  { title: "…", text: "…" },
-  { title: "…", text: "…" },
+  { id:"ellipsis-c", label:"…", text:"…" },
+  { id:"ellipsis-d", label:"…", text:"…" },
 
-  { title: "Über", text: "Über dir die Unendlichkeit." },
+  { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
-  { title: "Klang",
+  {
+    id:"klang",
+    label:"Klang",
     text:
 `Ein Stück des Teils, der immer war,
 Dunkelheit, die Licht gebar,
 das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
-    extras: [
-      { type: "note", text: "Goethe (abgewandelt)" },
-      { type: "icons", icons: ["Spotify.png","Apple_Music.png","YouTube_Music.png"] }
+    attrib:"Goethe (abgewandelt)",
+    icons:[
+      { file:"Spotify.png" },
+      { file:"Apple_Music.png" },
+      { file:"YouTube_Music.png" }
     ]
   },
 
-  { title: "Spendenbox",
-    text: "Geben ist ein Selbstverlust, aber kein Verlust an sich.",
-    extras: [
-      { type: "note", text: "Kafka" },
-      { type: "aside", text: "*hust* Wir brauchen Geld für den Umsturz deutscher Kunst. *hust*" },
-      { type: "icons", icons: ["PayPal.png","Patreon.png"] }
+  {
+    id:"spenden",
+    label:"Spendenbox",
+    text:"Geben ist ein Selbstverlust, aber kein Verlust an sich.",
+    attrib:"Kafka",
+    aside:"*hust* Wir brauchen Geld für den Umsturz deutscher Kunst. *hust*",
+    icons:[
+      { file:"PayPal.png" },
+      { file:"Patreon.png" }
     ]
   },
 
-  { title: "Skizzen",
+  {
+    id:"skizzen",
+    label:"Skizzen",
     text:
 `„Ich glaube, man könnte die Skizzen verkaufen,
 sie zeigen die Arbeit in ihrem Anfang.“`,
-    extras: [
-      { type: "note", text: "Vincent" },
-      { type: "aside", text: "100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und eine kaufen." }
-      /* Link styling can be added later without changing mechanics */
-    ]
+    attrib:"Vincent",
+    aside:"100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und eine kaufen."
   },
 
-  { title: "Erscheinungsorte",
+  {
+    id:"erscheinungsorte",
+    label:"Erscheinungsorte",
     text:
 `Alles, was tief ist, liebt Masken; Bild und Erscheinung hasst es jedoch.
 Es bleibt der Tiefe Bürde,
 wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
-    extras: [
-      { type: "note", text: "Nietzsche (abgewandelt)" },
-      { type: "icons", icons: ["TikTok.png","Instagram.png","YouTube.png","Twitch.png"] }
+    attrib:"Nietzsche (abgewandelt)",
+    icons:[
+      { file:"TikTok.png" },
+      { file:"Instagram.png" },
+      { file:"YouTube.png" },
+      { file:"Twitch.png" }
     ]
   },
 
-  { title: "Museum",
+  {
+    id:"museum",
+    label:"Museum",
+    italicAll:true,
     text:
 `Keiner öffnet die Tür.
 Es scheint, als wäre das Museum noch geschlossen.
 Die Spendenbox scheint jedoch einwandfrei zu funktionieren.`
   },
 
-  { title: "Kontaktschleuse",
+  {
+    id:"kontakt",
+    label:"Kontaktschleuse",
     text:
 `Wer mit Ungeheuern kämpft, mag zusehen,
 daß er nicht dabei zum Ungeheuer wird.
 Und wenn du lange in einen Abgrund blickst,
 blickt der Abgrund auch in dich hinein.`,
-    extras: [
-      { type: "note", text: "Nietzsche" },
-      { type: "plain", text: "Kuumitori@gmail.com" }
-    ]
+    attrib:"Nietzsche",
+    plainTail:"Kuumitori@gmail.com"
   },
 
-  { title: "Unter", text: "Unter dir der Grund." },
-
-  { title: "Leerebrücke", text: "Ein mythopoietischer Orden." }
+  { id:"unter", label:"Unter", text:"Unter dir der Grund." },
+  { id:"orden", label:"Leerebrücke", text:"Ein mythopoietischer Orden." }
 ];
 
 /* ----------------------------- ELEMENTS ----------------------------- */
@@ -410,7 +475,6 @@ const out = document.getElementById("section-area");
 const titleEl = document.getElementById("section-title");
 const bodyEl = document.getElementById("section-body");
 const extrasEl = document.getElementById("section-extras");
-
 const arrowUp = document.getElementById("arrow-up");
 const arrowDown = document.getElementById("arrow-down");
 const frame = document.querySelector(".page-frame");
@@ -450,6 +514,17 @@ function clearBusy(){
   busy = false;
 }
 
+/* ----------------------------- UTIL ----------------------------- */
+
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
 /* ----------------------------- BUILD SLOT LIST ----------------------------- */
 
 function buildSlotItems(){
@@ -457,38 +532,29 @@ function buildSlotItems(){
   PAGES.forEach(p => {
     const div = document.createElement("div");
     div.className = "slot-item";
-    div.textContent = p.title;
+    div.textContent = p.label;
+    div.dataset.pageId = p.id;
     list.appendChild(div);
   });
 }
 
-/* Rotate DOM so that "Klang" starts centered if present */
+/* Rotate DOM so that "Klang" starts centered */
 function primeStart(){
-  const nodes = Array.from(list.children);
-  const idx = nodes.findIndex(n => n.textContent.trim() === "Klang");
-  if (idx === -1) return;
-
-  /* We want nodes[1] to be Klang */
   let safety = 0;
-  while (list.children[1] && list.children[1].textContent.trim() !== "Klang" && safety < 200){
+  while (list.children[1] && list.children[1].dataset.pageId !== "klang" && safety < 500){
     const last = list.lastElementChild;
     if (last) list.insertBefore(last, list.firstElementChild);
     safety++;
   }
 }
 
-/* ----------------------------- ACTIVE PAGE RESOLUTION ----------------------------- */
+/* ----------------------------- PAGE RESOLUTION ----------------------------- */
 
-function getCenterNode(){
-  return list.children[1] || null;
+function resolvePageById(id){
+  return PAGES.find(p => p.id === id) || { id, label:"", text:"" };
 }
 
-function resolvePageByTitle(t){
-  const key = (t || "").trim();
-  return PAGES.find(p => p.title === key) || { title: key, text: "" };
-}
-
-/* ----------------------------- TYPEWRITER RENDER ----------------------------- */
+/* ----------------------------- TYPEWRITER SEGMENTS ----------------------------- */
 
 function clearTyping(){
   typingToken++;
@@ -498,63 +564,115 @@ function clearTyping(){
   }
 }
 
-function renderExtras(page){
-  extrasEl.innerHTML = "";
-  if (!page.extras || !Array.isArray(page.extras)) return;
+function buildSegments(page){
+  const segs = [];
 
-  const frag = document.createDocumentFragment();
+  const mainClass = page.italicAll ? "seg-italic" : "seg-normal";
+  if (page.text){
+    segs.push({ cls: mainClass, text: page.text, preBlank: 0 });
+  }
 
-  page.extras.forEach(ex => {
-    if (ex.type === "icons" && Array.isArray(ex.icons)){
-      const row = document.createElement("div");
-      row.className = "icon-row";
-      ex.icons.forEach(file => {
-        const img = document.createElement("img");
-        img.src = `Grafiken/${file}`;
-        img.alt = file.replace(".png","");
-        row.appendChild(img);
-      });
-      frag.appendChild(row);
-      return;
-    }
+  if (page.attrib){
+    segs.push({
+      cls: "seg-attrib",
+      text: `- ${page.attrib}`,
+      preBlank: 0
+    });
+  }
 
-    const line = document.createElement("div");
-    line.style.marginTop = "0.5rem";
-    line.style.opacity = "0.7";
+  if (page.aside){
+    segs.push({
+      cls: "seg-aside",
+      text: page.aside,
+      preBlank: 1
+    });
+  }
 
-    if (ex.type === "note"){
-      line.style.fontStyle = "italic";
-      line.textContent = ex.text || "";
-    } else if (ex.type === "aside"){
-      line.style.fontStyle = "italic";
-      line.style.opacity = "0.55";
-      line.textContent = ex.text || "";
-    } else {
-      line.textContent = ex.text || "";
-    }
+  if (page.plainTail){
+    segs.push({
+      cls: "seg-normal",
+      text: page.plainTail,
+      preBlank: 1
+    });
+  }
 
-    frag.appendChild(line);
-  });
-
-  extrasEl.appendChild(frag);
+  return segs;
 }
 
-function typeText(page){
+function renderSegmentsHTML(segs, upToSeg, partialText){
+  let html = "";
+
+  for (let i = 0; i < segs.length; i++){
+    const s = segs[i];
+    const blanks = s.preBlank ? "<br>".repeat(s.preBlank) : "";
+
+    if (i < upToSeg){
+      const content = escapeHTML(s.text).replace(/\n/g,"<br>");
+      html += `${blanks}<div class="seg ${s.cls}">${content}</div>`;
+    } else if (i === upToSeg){
+      const content = escapeHTML(partialText).replace(/\n/g,"<br>");
+      html += `${blanks}<div class="seg ${s.cls}">${content}</div>`;
+    }
+  }
+
+  return html;
+}
+
+/* ----------------------------- ICON RENDER ----------------------------- */
+
+function renderIcons(page){
+  extrasEl.innerHTML = "";
+  if (!page.icons || !Array.isArray(page.icons) || page.icons.length === 0) return;
+
+  const row = document.createElement("div");
+  row.className = "icon-row";
+
+  page.icons.forEach(ic => {
+    const file = ic.file;
+    const href = ic.href;
+
+    const img = document.createElement("img");
+    img.src = `Grafiken/${file}`;
+    img.alt = file.replace(".png","");
+
+    if (href){
+      const a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.appendChild(img);
+      row.appendChild(a);
+    } else {
+      row.appendChild(img);
+    }
+  });
+
+  extrasEl.appendChild(row);
+}
+
+/* ----------------------------- PAGE SHOW ----------------------------- */
+
+function typePage(page){
   clearTyping();
 
-  const token = ++typingToken;
-  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 14;
+  titleEl.textContent = ""; /* title under slot intentionally unused */
 
-  const full = (page.text ?? "").toString();
-  let i = 0;
-
-  bodyEl.textContent = "";
+  const segs = buildSegments(page);
+  bodyEl.innerHTML = "";
   extrasEl.innerHTML = "";
 
-  if (!full.length){
-    renderExtras(page);
+  if (segs.length === 0){
+    renderIcons(page);
     return;
   }
+
+  const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--type-speed-ms")) || 14;
+
+  let segIndex = 0;
+  let charIndex = 0;
+  const token = ++typingToken;
+
+  const currentText = () => segs[segIndex]?.text ?? "";
 
   typingTimer = setInterval(() => {
     if (token !== typingToken){
@@ -563,30 +681,34 @@ function typeText(page){
       return;
     }
 
-    i++;
-    bodyEl.textContent = full.slice(0, i);
+    const full = currentText();
+    charIndex++;
 
-    if (i >= full.length){
-      clearInterval(typingTimer);
-      typingTimer = null;
-      renderExtras(page);
+    const partial = full.slice(0, charIndex);
+    bodyEl.innerHTML = renderSegmentsHTML(segs, segIndex, partial);
+
+    if (charIndex >= full.length){
+      segIndex++;
+      charIndex = 0;
+
+      if (segIndex >= segs.length){
+        clearInterval(typingTimer);
+        typingTimer = null;
+        renderIcons(page);
+      }
     }
   }, speed);
 }
 
 function showPage(page){
-  titleEl.textContent = page.title || "";
-
-  /* fade out quickly */
   out.classList.add("fading");
-
   clearTyping();
 
   const fadeMs = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--fade-out-ms")) || 120;
 
   setTimeout(() => {
     out.classList.remove("fading");
-    typeText(page);
+    typePage(page);
   }, fadeMs);
 }
 
@@ -596,10 +718,12 @@ function updateActive(){
   const nodes = Array.from(list.children);
   nodes.forEach(n => n.classList.remove("active"));
 
-  const center = getCenterNode();
+  const center = list.children[1];
   if (center) center.classList.add("active");
 
-  const page = resolvePageByTitle(center ? center.textContent : "");
+  const pageId = center?.dataset.pageId || "";
+  const page = resolvePageById(pageId);
+
   showPage(page);
 }
 
@@ -611,10 +735,10 @@ function moveDown(){
   if (busy) return;
   setBusy();
 
-  list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
-
   const onEnd = () => {
+    list.removeEventListener("transitionend", onEnd);
+    list.removeEventListener("transitioncancel", onEnd);
+
     const first = list.firstElementChild;
     if (first) list.appendChild(first);
 
@@ -626,6 +750,9 @@ function moveDown(){
       clearBusy();
     });
   };
+
+  list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
   list.addEventListener("transitionend", onEnd, { once:true });
   list.addEventListener("transitioncancel", onEnd, { once:true });
@@ -641,17 +768,19 @@ function moveUp(){
   list.style.transition = "none";
   list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
 
-  /* force layout commit */
   void list.offsetHeight;
 
   requestAnimationFrame(() => {
-    list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
-
     const onEnd = () => {
+      list.removeEventListener("transitionend", onEnd);
+      list.removeEventListener("transitioncancel", onEnd);
+
       updateActive();
       clearBusy();
     };
+
+    list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
+    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     list.addEventListener("transitionend", onEnd, { once:true });
     list.addEventListener("transitioncancel", onEnd, { once:true });
@@ -722,7 +851,6 @@ frame.addEventListener("wheel", e => {
 buildSlotItems();
 primeStart();
 updateActive();
-
 </script>
 
 </body>
