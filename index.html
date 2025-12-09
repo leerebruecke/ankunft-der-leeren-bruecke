@@ -28,19 +28,19 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:17;          /* ~0.3x schneller als 24ms */
-  --type-jitter-ms:14;        /* spürbarer, aber nicht nervös */
+  --type-char-ms:17;          /* ~0.3x schneller */
+  --type-jitter-ms:14;        /* spürbar lebendig */
   --fade-out-ms:120;
 
   /* icons */
   --icon-size:70px;
   --icon-fade-ms:900ms;
-  --post-min-delay-ms:90;     /* frühe Icons */
-  --icon-rand-span-ms:180;    /* Zufallsfenster pro Icon */
-  --glow-pulse-ms:620ms;      /* Glow-Impuls-Dauer */
+  --post-min-delay-ms:90;
+  --icon-rand-span-ms:180;
+  --glow-pulse-ms:620ms;
 
   /* email */
-  --email-min-delay-ms:140;   /* nach Text-Ende */
+  --email-min-delay-ms:140;
 
   --mask-grad:linear-gradient(
     to bottom,
@@ -220,11 +220,7 @@ body{
   text-align:center;
 }
 
-/*
-  Centered text that types left-to-right:
-  Each line is a centered box with fixed final width (in ch),
-  but text inside is left-aligned.
-*/
+/* Centered LTR typewriter lines */
 .tw-line{
   display:block;
   margin-inline:auto;
@@ -232,7 +228,7 @@ body{
   white-space:pre;
 }
 
-/* POST BLOCKS */
+/* ICON ROW CONTAINER */
 .post-block{
   margin-top:0.25rem;
   display:flex;
@@ -240,30 +236,32 @@ body{
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
-
-  opacity:0;
-  transform:translateY(2px);
-  transition:
-    opacity var(--icon-fade-ms) ease-out,
-    transform var(--icon-fade-ms) ease-out;
 }
 
-.post-block.visible{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.post-block a{
+/* Per-icon button (fixes flicker) */
+.icon-btn{
   position:relative;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   text-decoration:none;
   color:var(--text-main);
+
+  opacity:0;
+  transform:translateY(2px);
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out;
+  transition-delay: var(--ic-delay, 0ms);
 }
 
-/* Tooltip (custom, desktop-friendly) */
-.post-block a[data-label]::after{
+.icon-btn.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Tooltip */
+.icon-btn[data-label]::after{
   content:attr(data-label);
   position:absolute;
   bottom:calc(100% + 8px);
@@ -281,11 +279,11 @@ body{
   transition:opacity 140ms ease-out;
 }
 
-.post-block a[data-label]:hover::after{
+.icon-btn[data-label]:hover::after{
   opacity:1;
 }
 
-.post-block img{
+.icon-btn img{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
@@ -293,16 +291,7 @@ body{
   will-change:transform, filter, opacity;
 }
 
-/* Per-icon random delay hook */
-.post-block img{
-  transition:
-    opacity var(--icon-fade-ms) ease-out,
-    transform var(--icon-fade-ms) ease-out,
-    filter var(--icon-fade-ms) ease-out;
-  transition-delay: var(--ic-delay, 0ms);
-}
-
-/* Glow pulse animation on reveal */
+/* Glow pulse */
 @keyframes glowPulse{
   0%{
     filter: drop-shadow(0 0 0 rgba(245,240,232,0))
@@ -321,23 +310,37 @@ body{
   }
 }
 
-.post-block.visible img{
+.icon-btn.visible img{
   animation: glowPulse var(--glow-pulse-ms) ease-out 1;
 }
 
-.post-email{
+/* Email row (bottom) */
+.email-row{
   width:100%;
+  display:flex;
   justify-content:center;
-  margin-top:0.15rem;
+
+  opacity:0;
+  transform:translateY(2px);
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out;
 }
 
-.post-email a{
+.email-row.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.email-row a{
   font-style:italic;
   opacity:0.78;
   letter-spacing:0.04em;
+  text-decoration:none;
+  color:var(--text-main);
 }
 
-/* Inline link test styling inside text */
+/* Inline link test styling */
 .inline-link{
   color:#7aa8ff;
   text-decoration:underline;
@@ -381,8 +384,7 @@ body{
 
   .arrow{pointer-events:none;}
 
-  /* Tooltips off on mobile */
-  .post-block a[data-label]::after{display:none;}
+  .icon-btn[data-label]::after{display:none;}
 }
 
 @media (max-width: 420px){
@@ -477,7 +479,7 @@ Hier gibt es nichts für dich.`
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
-  /* Klang (SVGs) */
+  /* Klang (SVGs; SoundCloud später als letztes hinzufügen) */
   {
     id:"klang",
     label:"Klang",
@@ -491,7 +493,6 @@ und Schein bleibt, solange Winter ist.`,
       { file:"Spotify.png" },
       { file:"Apple_Music.png" },
       { file:"YouTube_Music.png" }
-      /* SoundCloud kommt später als letztes */
     ]
   },
 
@@ -500,7 +501,7 @@ und Schein bleibt, solange Winter ist.`,
     label:"Spendenbox",
     text:"Geben ist ein Selbstverlust, aber kein Verlust an sich.",
     attrib:"Kafka",
-    aside:"*hust* Wir brauchen Geld für den Umsturz deutscher Kunst. *hust*",
+    aside:"*hust* Wir brauchen Munition für eine ernsthafte Erneuerung der deutschen Kunst. *hust*",
     icons:[
       { file:"PayPal.png" },
       { file:"Patreon.png" }
@@ -517,7 +518,6 @@ sie zeigen meine Arbeit in ihrem Anfang.“`,
     aside:
 `100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
 zuschlagen.`,
-    /* Test: Wort-Link wird in buildSegments() eingefügt */
     testLinkWord:"zuschlagen",
     testLinkHref:"https://www.vangoghmuseum.nl/"
   },
@@ -656,7 +656,7 @@ function orderedPages(centerId){
   return order;
 }
 
-/* Convert icon extension to .svg automatically */
+/* SVG swap helper (names unchanged, only extension differs) */
 function iconSrc(file){
   const s = String(file || "");
   if (s.toLowerCase().endsWith(".png")){
@@ -721,12 +721,9 @@ function buildSegments(page){
   if (page.aside){
     let asideText = page.aside;
 
-    /* Test link injection for "Skizzen" aside word "zuschlagen" */
     if (page.testLinkWord && page.testLinkHref && typeof asideText === "string"){
       const word = page.testLinkWord;
       const href = page.testLinkHref;
-
-      /* We mark with a simple token for later inline rendering */
       asideText = asideText.replace(
         new RegExp(`\\b${word}\\b`),
         `[[LINK:${word}|${href}]]`
@@ -763,11 +760,7 @@ function computeMaxCharsPerLine(){
 }
 
 /* ----------------------------- INLINE TOKEN PARSER ----------------------------- */
-/*
-  Supports one lightweight token style:
-  [[LINK:word|href]]
-  This is used only for the test in "Skizzen".
-*/
+
 function extractInlineParts(text){
   const s = String(text || "");
   const parts = [];
@@ -794,10 +787,7 @@ function wrapParagraphToLines(paragraph, maxChars){
   const lines = [];
   let line = "";
 
-  const pushLine = () => {
-    lines.push(line);
-    line = "";
-  };
+  const pushLine = () => { lines.push(line); line = ""; };
 
   for (const w of words){
     if (!line){
@@ -832,11 +822,6 @@ function wrapParagraphToLines(paragraph, maxChars){
   return lines;
 }
 
-/*
-  For simplicity and stability of the centered-line typewriter,
-  inline links are only supported in ASIDE segments and are kept on a single line
-  (no mid-link wrapping). If a wrap would be needed, the token is treated as plain text.
-*/
 function segmentToLineObjects(seg, maxChars){
   const outLines = [];
 
@@ -851,13 +836,12 @@ function segmentToLineObjects(seg, maxChars){
 
   paragraphs.forEach((p, idx) => {
     if (seg.allowInline && p.includes("[[LINK:")){
-      /* treat as a single line with parts */
       const parts = extractInlineParts(p);
       const plainLen = parts.map(pt => pt.value || "").join("").length;
+
       if (plainLen <= maxChars){
         outLines.push({ cls: seg.cls, text: p, parts });
       } else {
-        /* fallback to plain wrapping without parts */
         const cleaned = p.replace(/\[\[LINK:([^\]|]+)\|([^\]]+)\]\]/g, "$1");
         const lines = wrapParagraphToLines(cleaned, maxChars);
         lines.forEach(l => outLines.push({ cls: seg.cls, text: l, parts:null }));
@@ -875,7 +859,7 @@ function segmentToLineObjects(seg, maxChars){
   return outLines;
 }
 
-/* ----------------------------- BUILD LINE DOM (CENTERED BOXES) ----------------------------- */
+/* ----------------------------- BUILD LINE DOM ----------------------------- */
 
 function buildLinesDOMFromSegments(segs){
   bodyEl.innerHTML = "";
@@ -891,16 +875,14 @@ function buildLinesDOMFromSegments(segs){
     const div = document.createElement("div");
     div.className = `tw-line seg ${lo.cls}`;
 
-    /* Determine final plain text for width */
     let plain = lo.text ?? "";
     if (lo.parts){
       plain = lo.parts.map(pt => pt.value || "").join("");
     }
-    const widthCh = Math.max(1, plain.length);
 
+    const widthCh = Math.max(1, plain.length);
     div.style.width = widthCh + "ch";
 
-    /* Store parts for later render */
     div._twParts = lo.parts || null;
     div._twPlain = plain;
 
@@ -918,7 +900,6 @@ function buildLinesDOMFromSegments(segs){
   return nodes;
 }
 
-/* Render partial for a line (supports simple inline link in aside) */
 function renderLinePartial(node, count){
   const el = node.el;
 
@@ -927,7 +908,6 @@ function renderLinePartial(node, count){
     return;
   }
 
-  /* Build DOM with link when fully/partially typed */
   const parts = node.parts;
   let remaining = count;
 
@@ -971,27 +951,24 @@ function buildIconRow(page){
     img.decoding = "async";
     img.loading = "eager";
 
-    /* Random delay per icon for organic reveal */
+    const a = document.createElement("a");
+    a.className = "icon-btn";
+    a.dataset.label = iconLabelFromFile(file);
+
     const span = cssNum("--icon-rand-span-ms", 180);
     const rand = Math.floor(Math.random() * span);
-    img.style.setProperty("--ic-delay", `${rand}ms`);
+    a.style.setProperty("--ic-delay", `${rand}ms`);
 
     if (href){
-      const a = document.createElement("a");
       a.href = href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.dataset.label = iconLabelFromFile(file);
-      a.appendChild(img);
-      row.appendChild(a);
     } else {
-      /* still wrap for tooltip label */
-      const a = document.createElement("a");
       a.href = "javascript:void(0)";
-      a.dataset.label = iconLabelFromFile(file);
-      a.appendChild(img);
-      row.appendChild(a);
     }
+
+    a.appendChild(img);
+    row.appendChild(a);
   });
 
   return row;
@@ -1004,7 +981,9 @@ function showIconsEarly(page){
 
   extrasTop.appendChild(row);
 
+  const btns = Array.from(row.querySelectorAll(".icon-btn"));
   const imgs = Array.from(row.querySelectorAll("img"));
+
   const decodes = imgs.map(img => {
     if (typeof img.decode === "function"){
       return img.decode().catch(() => {});
@@ -1016,7 +995,7 @@ function showIconsEarly(page){
 
   Promise.all(decodes).finally(() => {
     iconsRevealTimer = setTimeout(() => {
-      requestAnimationFrame(() => row.classList.add("visible"));
+      requestAnimationFrame(() => btns.forEach(b => b.classList.add("visible")));
     }, minDelay);
   });
 }
@@ -1026,22 +1005,21 @@ function showIconsEarly(page){
 function buildEmailRow(page){
   if (!page.email) return null;
 
-  const mailRow = document.createElement("div");
-  mailRow.className = "post-block post-email";
+  const row = document.createElement("div");
+  row.className = "email-row";
 
   const a = document.createElement("a");
   a.href = `mailto:${page.email}`;
   a.textContent = page.email;
 
-  mailRow.appendChild(a);
-  return mailRow;
+  row.appendChild(a);
+  return row;
 }
 
 function showEmailAfterTyping(page, token){
   if (token !== typingToken) return;
 
   extrasBottom.innerHTML = "";
-
   const row = buildEmailRow(page);
   if (!row) return;
 
@@ -1065,9 +1043,7 @@ function typePage(page){
   showIconsEarly(page);
 
   const segs = buildSegments(page);
-  if (!segs.length){
-    return;
-  }
+  if (!segs.length) return;
 
   const nodes = buildLinesDOMFromSegments(segs);
   const token = ++typingToken;
