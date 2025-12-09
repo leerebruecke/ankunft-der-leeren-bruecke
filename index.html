@@ -39,6 +39,10 @@
   --icon-rand-span-ms:180;
   --glow-pulse-ms:620ms;
 
+  /* persistent glow */
+  --glow-idle-ms:2600ms;
+  --glow-idle-delay-ms:900ms;
+
   /* email */
   --email-min-delay-ms:140;
 
@@ -288,10 +292,10 @@ body{
   height:var(--icon-size);
   object-fit:contain;
   opacity:0.92;
-  will-change:transform, filter, opacity;
+  will-change:transform, filter;
 }
 
-/* Glow pulse */
+/* Glow pulse (NO opacity animation) */
 @keyframes glowPulse{
   0%{
     filter: drop-shadow(0 0 0 rgba(245,240,232,0))
@@ -310,11 +314,33 @@ body{
   }
 }
 
-.icon-btn.visible img{
-  animation: glowPulse var(--glow-pulse-ms) ease-out 1;
+/* Gentle persistent idle glow */
+@keyframes glowIdle{
+  0%{
+    filter: drop-shadow(0 0 2px rgba(245,240,232,0.06))
+            drop-shadow(0 0 6px rgba(245,240,232,0.04));
+    transform:scale(1.0);
+  }
+  50%{
+    filter: drop-shadow(0 0 7px rgba(245,240,232,0.18))
+            drop-shadow(0 0 13px rgba(245,240,232,0.10));
+    transform:scale(1.01);
+  }
+  100%{
+    filter: drop-shadow(0 0 2px rgba(245,240,232,0.06))
+            drop-shadow(0 0 6px rgba(245,240,232,0.04));
+    transform:scale(1.0);
+  }
 }
 
-/* Email row (bottom; after typing) */
+/* Pulse once + then idle loop */
+.icon-btn.visible img{
+  animation:
+    glowPulse var(--glow-pulse-ms) ease-out 1,
+    glowIdle var(--glow-idle-ms) ease-in-out var(--glow-idle-delay-ms) infinite;
+}
+
+/* Email row */
 .email-row{
   width:100%;
   display:flex;
@@ -414,11 +440,8 @@ body{
 
     <div class="section-area" id="section-area">
       <div class="section-title" id="section-title"></div>
-
       <div class="section-extras-top" id="section-extras-top"></div>
-
       <div class="section-body" id="section-body"></div>
-
       <div class="section-extras-bottom" id="section-extras-bottom"></div>
     </div>
   </div>
@@ -616,8 +639,10 @@ let typingToken = 0;
 let iconsRevealTimer = null;
 let emailRevealTimer = null;
 
-/* Guard gegen Doppel-Render derselben Page */
-let currentPageId = null;
+/* Render-Stabilität */
+let pageToken = 0;
+let fadeTimer = null;
+let activePageId = null;
 
 /* ----------------------------- BUSY ----------------------------- */
 
@@ -652,7 +677,7 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG swap helper */
+/* SVG-first + PNG fallback paths */
 function iconSrc(file){
   const s = String(file || "");
   if (s.toLowerCase().endsWith(".png")){
@@ -711,6 +736,9 @@ function clearTyping(){
   clearTimeout(emailRevealTimer);
   iconsRevealTimer = null;
   emailRevealTimer = null;
+
+  clearTimeout(fadeTimer);
+  fadeTimer = null;
 }
 
 /* ----------------------------- SEGMENTS ----------------------------- */
@@ -940,7 +968,7 @@ function renderLinePartial(node, count){
   }
 }
 
-/* ----------------------------- ICONS TOP (STABLE REVEAL) ----------------------------- */
+/* ----------------------------- ICONS TOP ----------------------------- */
 
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
@@ -955,11 +983,10 @@ function buildIconRow(page){
     img.decoding = "async";
     img.loading = "eager";
 
-    /* Fallback: wenn SVG nicht existiert, auf PNG wechseln */
     img.addEventListener("error", () => {
-      const wantedPng = pngFallbackSrc(file);
-      if (img.src !== wantedPng){
-        img.src = wantedPng;
+      const fallback = pngFallbackSrc(file);
+      if (img.src !== fallback){
+        img.src = fallback;
       }
     }, { once:true });
 
@@ -997,7 +1024,6 @@ function showIconsEarly(page){
   const minDelay = cssNum("--post-min-delay-ms", 90);
 
   clearTimeout(iconsRevealTimer);
-
   iconsRevealTimer = setTimeout(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -1007,7 +1033,7 @@ function showIconsEarly(page){
   }, minDelay);
 }
 
-/* ----------------------------- EMAIL BOTTOM (AFTER TEXT) ----------------------------- */
+/* ----------------------------- EMAIL BOTTOM ----------------------------- */
 
 function buildEmailRow(page){
   if (!page.email) return null;
@@ -1109,13 +1135,19 @@ function typePage(page){
   step();
 }
 
+/* Tokenisierte Fade-Schleuse */
 function showPage(page){
+  const myToken = ++pageToken;
+
   out.classList.add("fading");
   clearTyping();
 
   const fadeMs = cssNum("--fade-out-ms", 120);
 
-  setTimeout(() => {
+  clearTimeout(fadeTimer);
+  fadeTimer = setTimeout(() => {
+    if (myToken !== pageToken) return;
+
     out.classList.remove("fading");
     typePage(page);
   }, fadeMs);
@@ -1132,10 +1164,9 @@ function updateActive(){
   const pageId = center?.dataset.pageId || "";
   if (!pageId) return;
 
-  /* Guard: gleiche Page nicht erneut rendern */
-  if (pageId === currentPageId) return;
+  if (pageId === activePageId) return;
+  activePageId = pageId;
 
-  currentPageId = pageId;
   showPage(resolvePageById(pageId));
 }
 
@@ -1168,7 +1199,7 @@ function moveDown(){
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     requestAnimationFrame(() => {
-      currentPageId = null; /* bewusst freigeben, da Page wirklich gewechselt */
+      activePageId = null;
       updateActive();
       clearBusy();
     });
@@ -1191,7 +1222,7 @@ function moveUp(){
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     withTransitionEnd(list, () => {
-      currentPageId = null;
+      activePageId = null;
       updateActive();
       clearBusy();
     });
@@ -1234,7 +1265,7 @@ frame.addEventListener("touchend", e => {
 
 frame.addEventListener("wheel", e => {
   e.preventDefault();
-  if (busy) { wheelAcc = 0; return; }
+  if (busy) { return; }
 
   wheelAcc += e.deltaY;
   wheelAcc = Math.max(-WHEEL_CLAMP, Math.min(WHEEL_CLAMP, wheelAcc));
@@ -1246,7 +1277,7 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* ----------------------------- ICON PRELOAD (SVG + PNG-Fallback) ----------------------------- */
+/* ----------------------------- ICON PRELOAD ----------------------------- */
 
 function preloadIcons(){
   const files = new Set();
@@ -1291,15 +1322,15 @@ window.addEventListener("resize", () => {
 
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    /* Guard bei Resize: nicht flackern */
+    activePageId = null;
     updateActive();
-  }, 120);
+  }, 160);
 });
 
 /* Preload zuerst anstoßen, dann initiale Seite zeigen */
 preloadIcons().finally(() => {
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
-  currentPageId = null;
+  activePageId = null;
   updateActive();
 });
 </script>
