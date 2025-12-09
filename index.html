@@ -28,8 +28,8 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:17;          /* ~0.3x schneller */
-  --type-jitter-ms:14;        /* spürbar lebendig */
+  --type-char-ms:17;          /* schneller */
+  --type-jitter-ms:14;        /* spürbar lebendig, nicht nervös */
   --fade-out-ms:120;
 
   /* icons */
@@ -238,7 +238,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Per-icon button (fixes flicker) */
+/* Per-icon button (stable reveal) */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -249,6 +249,7 @@ body{
 
   opacity:0;
   transform:translateY(2px);
+
   transition:
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
@@ -314,7 +315,7 @@ body{
   animation: glowPulse var(--glow-pulse-ms) ease-out 1;
 }
 
-/* Email row (bottom) */
+/* Email row (bottom; after typing) */
 .email-row{
   width:100%;
   display:flex;
@@ -479,7 +480,7 @@ Hier gibt es nichts für dich.`
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
-  /* Klang (SVGs; SoundCloud später als letztes hinzufügen) */
+  /* Klang (SoundCloud später als letztes hinzufügen) */
   {
     id:"klang",
     label:"Klang",
@@ -690,7 +691,7 @@ function buildSlotItems(centerId="klang"){
   list.appendChild(frag);
 }
 
-/* ----------------------------- TYPEWRITER CLEANUP ----------------------------- */
+/* ----------------------------- CLEANUP ----------------------------- */
 
 function clearTyping(){
   typingToken++;
@@ -716,7 +717,7 @@ function buildSegments(page){
     segs.push({ cls: mainClass, text: page.text, preBlank: 0, allowInline:false });
   }
   if (page.attrib){
-    segs.push({ cls: "seg-attrib", text: `— ${page.attrib}`, preBlank: 0, allowInline:false });
+    segs.push({ cls:"seg-attrib", text:`— ${page.attrib}`, preBlank:0, allowInline:false });
   }
   if (page.aside){
     let asideText = page.aside;
@@ -730,7 +731,7 @@ function buildSegments(page){
       );
     }
 
-    segs.push({ cls: "seg-aside", text: asideText, preBlank: 1, allowInline:true });
+    segs.push({ cls:"seg-aside", text: asideText, preBlank:1, allowInline:true });
   }
 
   return segs;
@@ -883,9 +884,6 @@ function buildLinesDOMFromSegments(segs){
     const widthCh = Math.max(1, plain.length);
     div.style.width = widthCh + "ch";
 
-    div._twParts = lo.parts || null;
-    div._twPlain = plain;
-
     div.textContent = "";
     frag.appendChild(div);
 
@@ -936,7 +934,7 @@ function renderLinePartial(node, count){
   }
 }
 
-/* ----------------------------- ICONS TOP (EARLY + SYNC + RANDOM) ----------------------------- */
+/* ----------------------------- ICONS TOP (STABLE REVEAL) ----------------------------- */
 
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
@@ -982,22 +980,17 @@ function showIconsEarly(page){
   extrasTop.appendChild(row);
 
   const btns = Array.from(row.querySelectorAll(".icon-btn"));
-  const imgs = Array.from(row.querySelectorAll("img"));
-
-  const decodes = imgs.map(img => {
-    if (typeof img.decode === "function"){
-      return img.decode().catch(() => {});
-    }
-    return Promise.resolve();
-  });
-
   const minDelay = cssNum("--post-min-delay-ms", 90);
 
-  Promise.all(decodes).finally(() => {
-    iconsRevealTimer = setTimeout(() => {
-      requestAnimationFrame(() => btns.forEach(b => b.classList.add("visible")));
-    }, minDelay);
-  });
+  clearTimeout(iconsRevealTimer);
+
+  iconsRevealTimer = setTimeout(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        btns.forEach(b => b.classList.add("visible"));
+      });
+    });
+  }, minDelay);
 }
 
 /* ----------------------------- EMAIL BOTTOM (AFTER TEXT) ----------------------------- */
@@ -1026,6 +1019,8 @@ function showEmailAfterTyping(page, token){
   extrasBottom.appendChild(row);
 
   const minDelay = cssNum("--email-min-delay-ms", 140);
+
+  clearTimeout(emailRevealTimer);
   emailRevealTimer = setTimeout(() => {
     requestAnimationFrame(() => row.classList.add("visible"));
   }, minDelay);
@@ -1229,7 +1224,7 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* ----------------------------- ICON PRELOAD ----------------------------- */
+/* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
 
 function preloadIcons(){
   const files = new Set();
