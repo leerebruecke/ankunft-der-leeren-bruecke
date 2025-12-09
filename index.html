@@ -28,8 +28,8 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:17;          /* schneller */
-  --type-jitter-ms:14;        /* spürbar lebendig, nicht nervös */
+  --type-char-ms:17;
+  --type-jitter-ms:14;
   --fade-out-ms:120;
 
   /* icons */
@@ -253,7 +253,6 @@ body{
   transition:
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
-  transition-delay: var(--ic-delay, 0ms);
 }
 
 .icon-btn.visible{
@@ -429,18 +428,15 @@ body{
 /* ----------------------------- PAGE DATA ----------------------------- */
 
 const PAGES = [
-  /* Prelude */
   { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
   { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt…" },
   { id:"prelude-3", label:"…", text:"Raum umgibt dich…" },
 
-  /* Early ellipses cluster */
   { id:"ellipsis-1", label:"…", text:"…" },
   { id:"leere", label:"…", text:"Es bleibt Leere…" },
   { id:"keine-worte", label:"…", text:"Es bleiben keine Worte mehr…" },
   { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
 
-  /* Sandwich for "Falsche Richtung" before why-here */
   { id:"ellipsis-2", label:"…", text:"…" },
   {
     id:"wrong-dir",
@@ -449,7 +445,6 @@ const PAGES = [
   },
   { id:"ellipsis-3", label:"…", text:"…" },
 
-  /* No-up & why-here */
   {
     id:"no-up",
     label:"Man kann nicht so zur anderen Seite…",
@@ -463,14 +458,12 @@ const PAGES = [
 Hier gibt es nichts für dich.`
   },
 
-  /* More empties + replacement of "Nichts…" */
   { id:"ellipsis-4", label:"…", text:"…" },
   { id:"ellipsis-5", label:"…", text:"…" },
   { id:"nichts", label:"…", text:"Leere…" },
   { id:"ellipsis-6", label:"…", text:"…" },
   { id:"ellipsis-7", label:"…", text:"…" },
 
-  /* Meta */
   {
     id:"hohl",
     label:"Du bist ziemlich hohl, oder?",
@@ -480,7 +473,6 @@ Hier gibt es nichts für dich.`
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
-  /* Klang (SoundCloud später als letztes hinzufügen) */
   {
     id:"klang",
     label:"Klang",
@@ -624,6 +616,9 @@ let typingToken = 0;
 let iconsRevealTimer = null;
 let emailRevealTimer = null;
 
+/* Guard gegen Doppel-Render derselben Page */
+let currentPageId = null;
+
 /* ----------------------------- BUSY ----------------------------- */
 
 function setBusy(){
@@ -657,7 +652,7 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG swap helper (names unchanged, only extension differs) */
+/* SVG swap helper */
 function iconSrc(file){
   const s = String(file || "");
   if (s.toLowerCase().endsWith(".png")){
@@ -667,6 +662,17 @@ function iconSrc(file){
     return `Grafiken/${s}`;
   }
   return `Grafiken/${s}`;
+}
+
+function pngFallbackSrc(file){
+  const s = String(file || "");
+  if (s.toLowerCase().endsWith(".png")){
+    return `Grafiken/${s}`;
+  }
+  if (s.toLowerCase().endsWith(".svg")){
+    return `Grafiken/${s.replace(/\.svg$/i,".png")}`;
+  }
+  return `Grafiken/${s}.png`;
 }
 
 function iconLabelFromFile(file){
@@ -949,13 +955,21 @@ function buildIconRow(page){
     img.decoding = "async";
     img.loading = "eager";
 
+    /* Fallback: wenn SVG nicht existiert, auf PNG wechseln */
+    img.addEventListener("error", () => {
+      const wantedPng = pngFallbackSrc(file);
+      if (img.src !== wantedPng){
+        img.src = wantedPng;
+      }
+    }, { once:true });
+
     const a = document.createElement("a");
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
 
     const span = cssNum("--icon-rand-span-ms", 180);
     const rand = Math.floor(Math.random() * span);
-    a.style.setProperty("--ic-delay", `${rand}ms`);
+    a.style.transitionDelay = `${rand}ms`;
 
     if (href){
       a.href = href;
@@ -1116,6 +1130,12 @@ function updateActive(){
   if (center) center.classList.add("active");
 
   const pageId = center?.dataset.pageId || "";
+  if (!pageId) return;
+
+  /* Guard: gleiche Page nicht erneut rendern */
+  if (pageId === currentPageId) return;
+
+  currentPageId = pageId;
   showPage(resolvePageById(pageId));
 }
 
@@ -1148,6 +1168,7 @@ function moveDown(){
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     requestAnimationFrame(() => {
+      currentPageId = null; /* bewusst freigeben, da Page wirklich gewechselt */
       updateActive();
       clearBusy();
     });
@@ -1170,6 +1191,7 @@ function moveUp(){
     list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     withTransitionEnd(list, () => {
+      currentPageId = null;
       updateActive();
       clearBusy();
     });
@@ -1224,7 +1246,7 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
+/* ----------------------------- ICON PRELOAD (SVG + PNG-Fallback) ----------------------------- */
 
 function preloadIcons(){
   const files = new Set();
@@ -1237,8 +1259,18 @@ function preloadIcons(){
   files.forEach(file => {
     loads.push(new Promise(res => {
       const img = new Image();
+      let triedPng = false;
+
       img.onload = () => res(true);
-      img.onerror = () => res(false);
+      img.onerror = () => {
+        if (!triedPng){
+          triedPng = true;
+          img.src = pngFallbackSrc(file);
+        } else {
+          res(false);
+        }
+      };
+
       img.src = iconSrc(file);
     }));
   });
@@ -1259,6 +1291,7 @@ window.addEventListener("resize", () => {
 
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
+    /* Guard bei Resize: nicht flackern */
     updateActive();
   }, 120);
 });
@@ -1266,6 +1299,7 @@ window.addEventListener("resize", () => {
 /* Preload zuerst anstoßen, dann initiale Seite zeigen */
 preloadIcons().finally(() => {
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+  currentPageId = null;
   updateActive();
 });
 </script>
