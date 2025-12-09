@@ -28,14 +28,16 @@
   --slot-w-max:600px;
 
   /* typewriter (letter-based) */
-  --type-char-ms:24;          /* leicht verschnellert */
-  --type-jitter-ms:8;         /* lebendig, aber nicht nervös */
+  --type-char-ms:17;          /* ~0.3x schneller als 24ms */
+  --type-jitter-ms:14;        /* spürbarer, aber nicht nervös */
   --fade-out-ms:120;
 
   /* icons */
   --icon-size:70px;
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;     /* frühe Icons */
+  --icon-rand-span-ms:180;    /* Zufallsfenster pro Icon */
+  --glow-pulse-ms:620ms;      /* Glow-Impuls-Dauer */
 
   /* email */
   --email-min-delay-ms:140;   /* nach Text-Ende */
@@ -215,6 +217,7 @@ body{
   font-style:italic;
   opacity:0.20;
   margin-top:0.25rem;
+  text-align:center;
 }
 
 /*
@@ -251,6 +254,7 @@ body{
 }
 
 .post-block a{
+  position:relative;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -258,11 +262,67 @@ body{
   color:var(--text-main);
 }
 
+/* Tooltip (custom, desktop-friendly) */
+.post-block a[data-label]::after{
+  content:attr(data-label);
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  font-size:0.68rem;
+  letter-spacing:0.04em;
+  white-space:nowrap;
+  padding:0.22rem 0.4rem;
+  border-radius:4px;
+  background:rgba(0,0,0,0.55);
+  color:var(--text-main);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 140ms ease-out;
+}
+
+.post-block a[data-label]:hover::after{
+  opacity:1;
+}
+
 .post-block img{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
   opacity:0.92;
+  will-change:transform, filter, opacity;
+}
+
+/* Per-icon random delay hook */
+.post-block img{
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out,
+    filter var(--icon-fade-ms) ease-out;
+  transition-delay: var(--ic-delay, 0ms);
+}
+
+/* Glow pulse animation on reveal */
+@keyframes glowPulse{
+  0%{
+    filter: drop-shadow(0 0 0 rgba(245,240,232,0))
+            drop-shadow(0 0 0 rgba(245,240,232,0));
+    transform:scale(0.985);
+  }
+  45%{
+    filter: drop-shadow(0 0 8px rgba(245,240,232,0.22))
+            drop-shadow(0 0 16px rgba(245,240,232,0.12));
+    transform:scale(1.0);
+  }
+  100%{
+    filter: drop-shadow(0 0 0 rgba(245,240,232,0))
+            drop-shadow(0 0 0 rgba(245,240,232,0));
+    transform:scale(1.0);
+  }
+}
+
+.post-block.visible img{
+  animation: glowPulse var(--glow-pulse-ms) ease-out 1;
 }
 
 .post-email{
@@ -275,6 +335,13 @@ body{
   font-style:italic;
   opacity:0.78;
   letter-spacing:0.04em;
+}
+
+/* Inline link test styling inside text */
+.inline-link{
+  color:#7aa8ff;
+  text-decoration:underline;
+  text-underline-offset:2px;
 }
 
 /* MOBILE */
@@ -313,6 +380,9 @@ body{
   .arrow-down{margin-top:0;}
 
   .arrow{pointer-events:none;}
+
+  /* Tooltips off on mobile */
+  .post-block a[data-label]::after{display:none;}
 }
 
 @media (max-width: 420px){
@@ -356,34 +426,32 @@ body{
 /* ----------------------------- PAGE DATA ----------------------------- */
 
 const PAGES = [
-  { id:"prelude-1", label:"…", text:"Du ziehst vorbei an einer einigenden Kraft…" },
+  /* Prelude */
+  { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
   { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt…" },
   { id:"prelude-3", label:"…", text:"Raum umgibt dich…" },
 
+  /* Early ellipses cluster */
   { id:"ellipsis-1", label:"…", text:"…" },
   { id:"leere", label:"…", text:"Es bleibt Leere…" },
   { id:"keine-worte", label:"…", text:"Es bleiben keine Worte mehr…" },
   { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
 
+  /* Sandwich for "Falsche Richtung" before why-here */
   { id:"ellipsis-2", label:"…", text:"…" },
-  { id:"ellipsis-3", label:"…", text:"…" },
-  { id:"nichts", label:"…", text:"Nichts…" },
-  { id:"ellipsis-4", label:"…", text:"…" },
-  { id:"ellipsis-5", label:"…", text:"…" },
-
   {
-    id:"hohl",
-    label:"Du bist ziemlich hohl, oder?",
-    text:"Die, die für diesen Seitenabschnitt zuständig sind, haben bereits alles gesagt…",
-    aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
+    id:"wrong-dir",
+    label:"Falsche Richtung",
+    text:"Hier lang geht es nicht! Auf, auf und davon!"
   },
+  { id:"ellipsis-3", label:"…", text:"…" },
 
+  /* No-up & why-here */
   {
     id:"no-up",
-    label:"Man kann nicht einfach so zur anderen Seit…",
-    text:"Du musst in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht."
+    label:"Man kann nicht so zur anderen Seite…",
+    text:"Du musst in die andere Richtung gehen. So funktioniert das Spiel eben, frag mich nicht."
   },
-
   {
     id:"why-here",
     label:"Warum bist du noch hier?",
@@ -392,17 +460,24 @@ const PAGES = [
 Hier gibt es nichts für dich.`
   },
 
-  {
-    id:"wrong-dir",
-    label:"Falsche Richtung",
-    text:"Hier lang geht es nicht! Auf, auf und davon!"
-  },
-
+  /* More empties + replacement of "Nichts…" */
+  { id:"ellipsis-4", label:"…", text:"…" },
+  { id:"ellipsis-5", label:"…", text:"…" },
+  { id:"nichts", label:"…", text:"Leere…" },
   { id:"ellipsis-6", label:"…", text:"…" },
   { id:"ellipsis-7", label:"…", text:"…" },
 
+  /* Meta */
+  {
+    id:"hohl",
+    label:"Du bist ziemlich hohl, oder?",
+    text:"Die, die für diesen Seitenabschnitt zuständig sind, haben bereits alles gesagt…",
+    aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
+  },
+
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
+  /* Klang (SVGs) */
   {
     id:"klang",
     label:"Klang",
@@ -416,6 +491,7 @@ und Schein bleibt, solange Winter ist.`,
       { file:"Spotify.png" },
       { file:"Apple_Music.png" },
       { file:"YouTube_Music.png" }
+      /* SoundCloud kommt später als letztes */
     ]
   },
 
@@ -440,7 +516,10 @@ sie zeigen meine Arbeit in ihrem Anfang.“`,
     attrib:"Vincent",
     aside:
 `100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
-zuschlagen.`
+zuschlagen.`,
+    /* Test: Wort-Link wird in buildSegments() eingefügt */
+    testLinkWord:"zuschlagen",
+    testLinkHref:"https://www.vangoghmuseum.nl/"
   },
 
   {
@@ -487,7 +566,7 @@ blickt der Abgrund auch in dich hinein.`,
     id:"orden",
     label:"Leerebrücke",
     italicAll:true,
-    text:"Ein mythopoietischer Orden."
+    text:"Ein Orden mythopoetischer Geisterjäger."
   }
 ];
 
@@ -577,6 +656,23 @@ function orderedPages(centerId){
   return order;
 }
 
+/* Convert icon extension to .svg automatically */
+function iconSrc(file){
+  const s = String(file || "");
+  if (s.toLowerCase().endsWith(".png")){
+    return `Grafiken/${s.slice(0, -4)}.svg`;
+  }
+  if (s.toLowerCase().endsWith(".svg")){
+    return `Grafiken/${s}`;
+  }
+  return `Grafiken/${s}`;
+}
+
+function iconLabelFromFile(file){
+  const base = String(file || "").replace(/\.(png|svg)$/i,"");
+  return base.replace(/[_\-]+/g," ");
+}
+
 /* ----------------------------- BUILD SLOT ----------------------------- */
 
 function buildSlotItems(centerId="klang"){
@@ -617,13 +713,27 @@ function buildSegments(page){
   const mainClass = page.italicAll ? "seg-italic" : "seg-normal";
 
   if (page.text){
-    segs.push({ cls: mainClass, text: page.text, preBlank: 0 });
+    segs.push({ cls: mainClass, text: page.text, preBlank: 0, allowInline:false });
   }
   if (page.attrib){
-    segs.push({ cls: "seg-attrib", text: `— ${page.attrib}`, preBlank: 0 });
+    segs.push({ cls: "seg-attrib", text: `— ${page.attrib}`, preBlank: 0, allowInline:false });
   }
   if (page.aside){
-    segs.push({ cls: "seg-aside", text: page.aside, preBlank: 1 });
+    let asideText = page.aside;
+
+    /* Test link injection for "Skizzen" aside word "zuschlagen" */
+    if (page.testLinkWord && page.testLinkHref && typeof asideText === "string"){
+      const word = page.testLinkWord;
+      const href = page.testLinkHref;
+
+      /* We mark with a simple token for later inline rendering */
+      asideText = asideText.replace(
+        new RegExp(`\\b${word}\\b`),
+        `[[LINK:${word}|${href}]]`
+      );
+    }
+
+    segs.push({ cls: "seg-aside", text: asideText, preBlank: 1, allowInline:true });
   }
 
   return segs;
@@ -650,6 +760,29 @@ function computeMaxCharsPerLine(){
   const charW = measureCharWidthPx();
   const max = Math.floor(containerW / charW);
   return Math.max(12, max);
+}
+
+/* ----------------------------- INLINE TOKEN PARSER ----------------------------- */
+/*
+  Supports one lightweight token style:
+  [[LINK:word|href]]
+  This is used only for the test in "Skizzen".
+*/
+function extractInlineParts(text){
+  const s = String(text || "");
+  const parts = [];
+  let i = 0;
+  const re = /\[\[LINK:([^\]|]+)\|([^\]]+)\]\]/g;
+  let m;
+
+  while ((m = re.exec(s))){
+    const start = m.index;
+    if (start > i) parts.push({ type:"text", value:s.slice(i, start) });
+    parts.push({ type:"link", value:m[1], href:m[2] });
+    i = start + m[0].length;
+  }
+  if (i < s.length) parts.push({ type:"text", value:s.slice(i) });
+  return parts;
 }
 
 /* ----------------------------- WRAP TEXT INTO LINES ----------------------------- */
@@ -699,12 +832,17 @@ function wrapParagraphToLines(paragraph, maxChars){
   return lines;
 }
 
+/*
+  For simplicity and stability of the centered-line typewriter,
+  inline links are only supported in ASIDE segments and are kept on a single line
+  (no mid-link wrapping). If a wrap would be needed, the token is treated as plain text.
+*/
 function segmentToLineObjects(seg, maxChars){
   const outLines = [];
 
   if (seg.preBlank){
     for (let i = 0; i < seg.preBlank; i++){
-      outLines.push({ cls: seg.cls, text: "" });
+      outLines.push({ cls: seg.cls, text: "", parts:null });
     }
   }
 
@@ -712,10 +850,25 @@ function segmentToLineObjects(seg, maxChars){
   const paragraphs = raw.split("\n");
 
   paragraphs.forEach((p, idx) => {
-    const lines = wrapParagraphToLines(p, maxChars);
-    lines.forEach(l => outLines.push({ cls: seg.cls, text: l }));
+    if (seg.allowInline && p.includes("[[LINK:")){
+      /* treat as a single line with parts */
+      const parts = extractInlineParts(p);
+      const plainLen = parts.map(pt => pt.value || "").join("").length;
+      if (plainLen <= maxChars){
+        outLines.push({ cls: seg.cls, text: p, parts });
+      } else {
+        /* fallback to plain wrapping without parts */
+        const cleaned = p.replace(/\[\[LINK:([^\]|]+)\|([^\]]+)\]\]/g, "$1");
+        const lines = wrapParagraphToLines(cleaned, maxChars);
+        lines.forEach(l => outLines.push({ cls: seg.cls, text: l, parts:null }));
+      }
+    } else {
+      const lines = wrapParagraphToLines(p, maxChars);
+      lines.forEach(l => outLines.push({ cls: seg.cls, text: l, parts:null }));
+    }
+
     if (idx < paragraphs.length - 1){
-      outLines.push({ cls: seg.cls, text: "" });
+      outLines.push({ cls: seg.cls, text: "", parts:null });
     }
   });
 
@@ -738,21 +891,72 @@ function buildLinesDOMFromSegments(segs){
     const div = document.createElement("div");
     div.className = `tw-line seg ${lo.cls}`;
 
-    const full = lo.text ?? "";
-    const widthCh = Math.max(1, full.length);
+    /* Determine final plain text for width */
+    let plain = lo.text ?? "";
+    if (lo.parts){
+      plain = lo.parts.map(pt => pt.value || "").join("");
+    }
+    const widthCh = Math.max(1, plain.length);
 
     div.style.width = widthCh + "ch";
-    div.textContent = "";
 
+    /* Store parts for later render */
+    div._twParts = lo.parts || null;
+    div._twPlain = plain;
+
+    div.textContent = "";
     frag.appendChild(div);
-    nodes.push({ el: div, full });
+
+    nodes.push({
+      el: div,
+      fullPlain: plain,
+      parts: lo.parts || null
+    });
   });
 
   bodyEl.appendChild(frag);
   return nodes;
 }
 
-/* ----------------------------- ICONS TOP (EARLY + SYNC) ----------------------------- */
+/* Render partial for a line (supports simple inline link in aside) */
+function renderLinePartial(node, count){
+  const el = node.el;
+
+  if (!node.parts){
+    el.textContent = node.fullPlain.slice(0, count);
+    return;
+  }
+
+  /* Build DOM with link when fully/partially typed */
+  const parts = node.parts;
+  let remaining = count;
+
+  el.innerHTML = "";
+
+  for (const p of parts){
+    const text = p.value || "";
+    if (remaining <= 0) break;
+
+    const take = Math.min(remaining, text.length);
+    const chunk = text.slice(0, take);
+
+    if (p.type === "link"){
+      const a = document.createElement("a");
+      a.href = p.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "inline-link";
+      a.textContent = chunk;
+      el.appendChild(a);
+    } else {
+      el.appendChild(document.createTextNode(chunk));
+    }
+
+    remaining -= take;
+  }
+}
+
+/* ----------------------------- ICONS TOP (EARLY + SYNC + RANDOM) ----------------------------- */
 
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
@@ -762,20 +966,31 @@ function buildIconRow(page){
 
   page.icons.forEach(({file, href}) => {
     const img = document.createElement("img");
-    img.src = `Grafiken/${file}`;
-    img.alt = file.replace(".png","");
+    img.src = iconSrc(file);
+    img.alt = iconLabelFromFile(file);
     img.decoding = "async";
     img.loading = "eager";
+
+    /* Random delay per icon for organic reveal */
+    const span = cssNum("--icon-rand-span-ms", 180);
+    const rand = Math.floor(Math.random() * span);
+    img.style.setProperty("--ic-delay", `${rand}ms`);
 
     if (href){
       const a = document.createElement("a");
       a.href = href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
+      a.dataset.label = iconLabelFromFile(file);
       a.appendChild(img);
       row.appendChild(a);
     } else {
-      row.appendChild(img);
+      /* still wrap for tooltip label */
+      const a = document.createElement("a");
+      a.href = "javascript:void(0)";
+      a.dataset.label = iconLabelFromFile(file);
+      a.appendChild(img);
+      row.appendChild(a);
     }
   });
 
@@ -857,8 +1072,8 @@ function typePage(page){
   const nodes = buildLinesDOMFromSegments(segs);
   const token = ++typingToken;
 
-  const base = cssNum("--type-char-ms", 24);
-  const jitter = cssNum("--type-jitter-ms", 8);
+  const base = cssNum("--type-char-ms", 17);
+  const jitter = cssNum("--type-jitter-ms", 14);
 
   let lineIndex = 0;
   let charIndex = 0;
@@ -873,10 +1088,10 @@ function typePage(page){
       return;
     }
 
-    const full = current.full;
+    const fullLen = current.fullPlain.length;
 
-    if (!full.length){
-      current.el.textContent = "";
+    if (fullLen === 0){
+      renderLinePartial(current, 0);
       lineIndex++;
       charIndex = 0;
 
@@ -887,9 +1102,9 @@ function typePage(page){
       }
     } else {
       charIndex++;
-      current.el.textContent = full.slice(0, charIndex);
+      renderLinePartial(current, Math.min(charIndex, fullLen));
 
-      if (charIndex >= full.length){
+      if (charIndex >= fullLen){
         lineIndex++;
         charIndex = 0;
 
@@ -902,7 +1117,7 @@ function typePage(page){
     }
 
     const rand = jitter ? (Math.random()*2 - 1) * jitter : 0;
-    const delay = Math.max(12, base + rand);
+    const delay = Math.max(10, base + rand);
     typingTimer = setTimeout(step, delay);
   };
 
@@ -1053,7 +1268,7 @@ function preloadIcons(){
       const img = new Image();
       img.onload = () => res(true);
       img.onerror = () => res(false);
-      img.src = `Grafiken/${file}`;
+      img.src = iconSrc(file);
     }));
   });
 
