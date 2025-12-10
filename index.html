@@ -37,11 +37,14 @@
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
-  --glow-pulse-ms:620ms;
 
-  /* persistent glow */
+  /* glow */
+  --glow-pulse-ms:620ms;
   --glow-idle-ms:2600ms;
-  --glow-idle-delay-ms:900ms;
+  --glow-idle-delay-ms:700ms;
+  --glow-strength-1:0.24;
+  --glow-strength-2:0.14;
+  --glow-layer-opacity:0.38;
 
   /* email */
   --email-min-delay-ms:140;
@@ -242,7 +245,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Per-icon button (stable reveal) */
+/* Icon button */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -287,54 +290,71 @@ body{
   opacity:1;
 }
 
-.icon-btn img{
+/* Two-layer icon system */
+.icon-stack{
+  position:relative;
   width:var(--icon-size);
   height:var(--icon-size);
-  object-fit:contain;
-  opacity:0.92;
-  will-change:transform, filter;
+  display:inline-block;
 }
 
-/* Glow pulse (NO opacity animation) */
+.icon-img,
+.icon-glow{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+/* The real icon must be fully stable */
+.icon-img{
+  opacity:1;
+  filter:none;
+  transform:none;
+  z-index:2;
+}
+
+/* The glow layer lives behind */
+.icon-glow{
+  z-index:1;
+  opacity:var(--glow-layer-opacity);
+  pointer-events:none;
+  will-change:filter;
+}
+
+/* Pulse on reveal, then idle glow */
 @keyframes glowPulse{
   0%{
     filter: drop-shadow(0 0 0 rgba(245,240,232,0))
             drop-shadow(0 0 0 rgba(245,240,232,0));
-    transform:scale(0.985);
   }
   45%{
-    filter: drop-shadow(0 0 8px rgba(245,240,232,0.22))
-            drop-shadow(0 0 16px rgba(245,240,232,0.12));
-    transform:scale(1.0);
+    filter: drop-shadow(0 0 10px rgba(245,240,232,var(--glow-strength-1)))
+            drop-shadow(0 0 18px rgba(245,240,232,var(--glow-strength-2)));
   }
   100%{
     filter: drop-shadow(0 0 0 rgba(245,240,232,0))
             drop-shadow(0 0 0 rgba(245,240,232,0));
-    transform:scale(1.0);
   }
 }
 
-/* Gentle persistent idle glow */
 @keyframes glowIdle{
   0%{
-    filter: drop-shadow(0 0 2px rgba(245,240,232,0.06))
-            drop-shadow(0 0 6px rgba(245,240,232,0.04));
-    transform:scale(1.0);
+    filter: drop-shadow(0 0 4px rgba(245,240,232,0.08))
+            drop-shadow(0 0 8px rgba(245,240,232,0.05));
   }
   50%{
-    filter: drop-shadow(0 0 7px rgba(245,240,232,0.18))
-            drop-shadow(0 0 13px rgba(245,240,232,0.10));
-    transform:scale(1.01);
+    filter: drop-shadow(0 0 10px rgba(245,240,232,var(--glow-strength-1)))
+            drop-shadow(0 0 16px rgba(245,240,232,var(--glow-strength-2)));
   }
   100%{
-    filter: drop-shadow(0 0 2px rgba(245,240,232,0.06))
-            drop-shadow(0 0 6px rgba(245,240,232,0.04));
-    transform:scale(1.0);
+    filter: drop-shadow(0 0 4px rgba(245,240,232,0.08))
+            drop-shadow(0 0 8px rgba(245,240,232,0.05));
   }
 }
 
-/* Pulse once + then idle loop */
-.icon-btn.visible img{
+.icon-btn.visible .icon-glow{
   animation:
     glowPulse var(--glow-pulse-ms) ease-out 1,
     glowIdle var(--glow-idle-ms) ease-in-out var(--glow-idle-delay-ms) infinite;
@@ -639,7 +659,6 @@ let typingToken = 0;
 let iconsRevealTimer = null;
 let emailRevealTimer = null;
 
-/* Render-Stabilität */
 let pageToken = 0;
 let fadeTimer = null;
 let activePageId = null;
@@ -677,7 +696,6 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG-first + PNG fallback paths */
 function iconSrc(file){
   const s = String(file || "");
   if (s.toLowerCase().endsWith(".png")){
@@ -970,6 +988,41 @@ function renderLinePartial(node, count){
 
 /* ----------------------------- ICONS TOP ----------------------------- */
 
+function createIconStack(file){
+  const stack = document.createElement("span");
+  stack.className = "icon-stack";
+
+  const src = iconSrc(file);
+  const fallback = pngFallbackSrc(file);
+
+  const imgMain = document.createElement("img");
+  imgMain.className = "icon-img";
+  imgMain.src = src;
+  imgMain.alt = iconLabelFromFile(file);
+  imgMain.decoding = "async";
+  imgMain.loading = "eager";
+
+  const imgGlow = document.createElement("img");
+  imgGlow.className = "icon-glow";
+  imgGlow.src = src;
+  imgGlow.alt = "";
+  imgGlow.decoding = "async";
+  imgGlow.loading = "eager";
+
+  const applyFallback = () => {
+    if (imgMain.src !== fallback) imgMain.src = fallback;
+    if (imgGlow.src !== fallback) imgGlow.src = fallback;
+  };
+
+  imgMain.addEventListener("error", applyFallback, { once:true });
+  imgGlow.addEventListener("error", applyFallback, { once:true });
+
+  stack.appendChild(imgGlow);
+  stack.appendChild(imgMain);
+
+  return stack;
+}
+
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
 
@@ -977,19 +1030,6 @@ function buildIconRow(page){
   row.className = "post-block";
 
   page.icons.forEach(({file, href}) => {
-    const img = document.createElement("img");
-    img.src = iconSrc(file);
-    img.alt = iconLabelFromFile(file);
-    img.decoding = "async";
-    img.loading = "eager";
-
-    img.addEventListener("error", () => {
-      const fallback = pngFallbackSrc(file);
-      if (img.src !== fallback){
-        img.src = fallback;
-      }
-    }, { once:true });
-
     const a = document.createElement("a");
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
@@ -1006,7 +1046,7 @@ function buildIconRow(page){
       a.href = "javascript:void(0)";
     }
 
-    a.appendChild(img);
+    a.appendChild(createIconStack(file));
     row.appendChild(a);
   });
 
@@ -1135,7 +1175,6 @@ function typePage(page){
   step();
 }
 
-/* Tokenisierte Fade-Schleuse */
 function showPage(page){
   const myToken = ++pageToken;
 
@@ -1265,7 +1304,7 @@ frame.addEventListener("touchend", e => {
 
 frame.addEventListener("wheel", e => {
   e.preventDefault();
-  if (busy) { return; }
+  if (busy) return;
 
   wheelAcc += e.deltaY;
   wheelAcc = Math.max(-WHEEL_CLAMP, Math.min(WHEEL_CLAMP, wheelAcc));
@@ -1327,7 +1366,6 @@ window.addEventListener("resize", () => {
   }, 160);
 });
 
-/* Preload zuerst anstoßen, dann initiale Seite zeigen */
 preloadIcons().finally(() => {
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
   activePageId = null;
