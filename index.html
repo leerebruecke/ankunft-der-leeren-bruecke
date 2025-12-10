@@ -1,48 +1,1293 @@
 <!doctype html>
-<html>
+<html lang="de">
 <head>
 <meta charset="utf-8"/>
-<title>PURE ICON TEST</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>leerebruecke</title>
+
 <style>
-  body{
-    background:#ffffff;      /* <- knallweiß */
-    color:#000000;           /* schwarze Schrift */
-    font-family:monospace;
-    padding:20px;
+:root{
+  --bg-root:#1a1218;
+  --text-main:#f5f0e8;
+
+  /* geometry */
+  --item-h:42px;
+  --window-h:65px;
+
+  /* sizes */
+  --arrow-size:14px;
+  --slot-font:0.86rem;
+  --text-font:0.86rem;
+
+  /* positioning */
+  --roll-lift:-40px;
+
+  /* slot width */
+  --slot-w-min:240px;
+  --slot-w-pref:62%;
+  --slot-w-max:600px;
+
+  /* typewriter (letter-based) */
+  --type-char-ms:17;
+  --type-jitter-ms:14;
+  --fade-out-ms:120;
+
+  /* icons */
+  --icon-size:70px;
+  --icon-fade-ms:900ms;
+  --post-min-delay-ms:90;
+  --icon-rand-span-ms:180;
+
+  /* white backing under icons */
+  --icon-pad-radius:12px;
+  --icon-back-opacity:1;
+
+  /* email */
+  --email-min-delay-ms:140;
+
+  --mask-grad:linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.85) 22%,
+    black 50%,
+    rgba(0,0,0,0.85) 78%,
+    transparent 100%
+  );
+}
+
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html,body{
+  height:100%;
+  background:var(--bg-root);
+  color:var(--text-main);
+  font-family:'Lucida Console',monospace;
+  user-select:none;
+  overflow:hidden;
+}
+
+body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* FRAME */
+.page-frame{
+  position:relative;
+  --base:min(100svh,1200px);
+  height:calc(var(--base)*1.20);
+  width:calc(var(--base)*1.20*9/16);
+  overflow:hidden;
+}
+
+.page-background{
+  position:absolute;
+  inset:0;
+  background:url("Grafiken/Br%C3%BCcke.png") center/100% 100% no-repeat;
+  image-rendering:pixelated;
+}
+
+/* CONTENT */
+.page-content{
+  position:absolute;
+  inset:0;
+  padding:1.1rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+}
+
+.logo-img{
+  width:70%;
+  margin-top:0.2rem;
+  margin-bottom:1rem;
+  image-rendering:pixelated;
+}
+
+/* SLOT */
+.slot-group{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transform:translateY(var(--roll-lift));
+}
+
+.slot-window{
+  position:relative;
+  width:clamp(var(--slot-w-min),var(--slot-w-pref),var(--slot-w-max));
+  height:var(--window-h);
+  overflow:hidden;
+  flex-shrink:0;
+  mask-image:var(--mask-grad);
+  -webkit-mask-image:var(--mask-grad);
+}
+
+.slot-list{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%) translateY(0);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  will-change:transform;
+}
+
+.slot-item{
+  height:var(--item-h);
+  font-size:var(--slot-font);
+  letter-spacing:0.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0.20;
+  transform:scale(0.85);
+  transition:opacity 150ms, transform 150ms;
+  white-space:nowrap;
+  padding:0 0.2rem;
+}
+
+.slot-item.active{
+  opacity:1;
+  transform:scale(1.05);
+}
+
+.arrow{
+  width:0;height:0;
+  border-left:var(--arrow-size) solid transparent;
+  border-right:var(--arrow-size) solid transparent;
+  opacity:0.75;
+  cursor:pointer;
+  transition:opacity 200ms;
+  flex-shrink:0;
+}
+
+.arrow:hover{opacity:1;}
+
+.arrow-up{
+  border-bottom:var(--arrow-size) solid var(--text-main);
+  margin-bottom:4px;
+}
+
+.arrow-down{
+  border-top:var(--arrow-size) solid var(--text-main);
+  margin-top:4px;
+}
+
+/* SECTION AREA */
+.section-area{
+  margin-top:1.2rem;
+  font-size:var(--text-font);
+  opacity:1;
+  transition:opacity 260ms ease-out;
+  width:min(85%,36rem);
+  text-align:center;
+  margin-inline:auto;
+}
+
+.section-area.fading{
+  opacity:0;
+  transition:opacity var(--fade-out-ms) ease-out;
+}
+
+.section-title{display:none;}
+
+/* TOP EXTRAS */
+.section-extras-top{
+  margin-bottom:0.65rem;
+}
+
+/* BODY */
+.section-body{
+  line-height:1.45;
+  opacity:0.92;
+}
+
+/* BOTTOM EXTRAS */
+.section-extras-bottom{
+  margin-top:0.7rem;
+}
+
+/* Seg base */
+.seg{display:block;margin:0;padding:0;}
+.seg-normal{opacity:0.92;}
+.seg-italic{font-style:italic;opacity:0.78;}
+.seg-aside{font-style:italic;opacity:0.55;}
+.seg-attrib{
+  font-style:italic;
+  opacity:0.20;
+  margin-top:0.25rem;
+  text-align:center;
+}
+
+/* Centered LTR typewriter lines */
+.tw-line{
+  display:block;
+  margin-inline:auto;
+  text-align:left;
+  white-space:pre;
+}
+
+/* ICON ROW CONTAINER */
+.post-block{
+  margin-top:0.25rem;
+  display:flex;
+  gap:1rem;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* Per-icon button (stable reveal) */
+.icon-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:var(--text-main);
+
+  opacity:0;
+  transform:translateY(2px);
+
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out;
+  transition-delay: var(--ic-delay, 0ms);
+}
+
+/* WHITE BACKING LAYER */
+.icon-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,var(--icon-back-opacity));
+  border-radius:var(--icon-pad-radius);
+  z-index:0;
+}
+
+/* ensure the img sits above the white pad */
+.icon-btn img{
+  position:relative;
+  z-index:1;
+
+  width:var(--icon-size);
+  height:var(--icon-size);
+  object-fit:contain;
+
+  opacity:1;
+  transform:none;
+  animation:none;
+  filter:none;
+}
+
+.icon-btn.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Tooltip */
+.icon-btn[data-label]::after{
+  content:attr(data-label);
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  font-size:0.68rem;
+  letter-spacing:0.04em;
+  white-space:nowrap;
+  padding:0.22rem 0.4rem;
+  border-radius:4px;
+  background:rgba(0,0,0,0.55);
+  color:var(--text-main);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 140ms ease-out;
+  z-index:2;
+}
+
+.icon-btn[data-label]:hover::after{
+  opacity:1;
+}
+
+/* Email row (bottom; after typing) */
+.email-row{
+  width:100%;
+  display:flex;
+  justify-content:center;
+
+  opacity:0;
+  transform:translateY(2px);
+  transition:
+    opacity var(--icon-fade-ms) ease-out,
+    transform var(--icon-fade-ms) ease-out;
+}
+
+.email-row.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.email-row a{
+  font-style:italic;
+  opacity:0.78;
+  letter-spacing:0.04em;
+  text-decoration:none;
+  color:var(--text-main);
+}
+
+/* Inline link test styling */
+.inline-link{
+  color:#7aa8ff;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+
+/* MOBILE */
+@media (max-width: 768px){
+  :root{
+    --arrow-size:10px;
+    --slot-font:0.74rem;
+    --text-font:0.74rem;
+
+    --slot-w-min:190px;
+    --slot-w-pref:70%;
+    --slot-w-max:400px;
+
+    --icon-size:56px;
   }
 
-  .icon-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:40px;
+  .logo-img{
+    width:62%;
+    margin-top:8%;
+    margin-bottom:0.8rem;
   }
 
-  img{
-    width:100px;
-    height:100px;
-    background:none;         /* keine Abdunkelung */
-    padding:0;
-    margin:0;
-    border:none;
+  .slot-group{
+    transform:translateY(var(--roll-lift)) scale(0.82);
   }
+
+  .section-area{
+    margin-top:0.9rem;
+  }
+
+  .page-background{
+    background-size:contain;
+  }
+
+  .arrow-up{margin-bottom:0;}
+  .arrow-down{margin-top:0;}
+
+  .arrow{pointer-events:none;}
+
+  .icon-btn[data-label]::after{display:none;}
+}
+
+@media (max-width: 420px){
+  .slot-group{
+    transform:translateY(var(--roll-lift)) scale(0.78);
+  }
+}
 </style>
 </head>
 
 <body>
+<div class="page-frame">
+  <div class="page-background"></div>
 
-<h1>PURE ICON TEST</h1>
+  <div class="page-content">
+    <img src="Grafiken/leerebruecke.png" class="logo-img" alt="leerebruecke"/>
 
-<div class="icon-row">
-  <img src="Grafiken/Spotify.svg" alt="Spotify"/>
-  <img src="Grafiken/Apple_Music.svg" alt="Apple Music"/>
-  <img src="Grafiken/YouTube_Music.svg" alt="YouTube Music"/>
-  <img src="Grafiken/PayPal.svg" alt="PayPal"/>
-  <img src="Grafiken/Patreon.svg" alt="Patreon"/>
-  <img src="Grafiken/TikTok.svg" alt="TikTok"/>
-  <img src="Grafiken/Instagram.svg" alt="Instagram"/>
-  <img src="Grafiken/YouTube.svg" alt="YouTube"/>
-  <img src="Grafiken/Twitch.svg" alt="Twitch"/>
+    <div class="slot-group">
+      <div class="arrow arrow-up" id="arrow-up"></div>
+
+      <div class="slot-window">
+        <div class="slot-list" id="slot-list"></div>
+      </div>
+
+      <div class="arrow arrow-down" id="arrow-down"></div>
+    </div>
+
+    <div class="section-area" id="section-area">
+      <div class="section-title" id="section-title"></div>
+
+      <div class="section-extras-top" id="section-extras-top"></div>
+
+      <div class="section-body" id="section-body"></div>
+
+      <div class="section-extras-bottom" id="section-extras-bottom"></div>
+    </div>
+  </div>
 </div>
 
+<script>
+/* ----------------------------- PAGE DATA ----------------------------- */
+
+const PAGES = [
+  { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
+  { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt…" },
+  { id:"prelude-3", label:"…", text:"Raum umgibt dich…" },
+
+  { id:"ellipsis-1", label:"…", text:"…" },
+  { id:"leere", label:"…", text:"Es bleibt Leere…" },
+  { id:"keine-worte", label:"…", text:"Es bleiben keine Worte mehr…" },
+  { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
+
+  { id:"ellipsis-2", label:"…", text:"…" },
+  {
+    id:"wrong-dir",
+    label:"Falsche Richtung",
+    text:"Hier lang geht es nicht! Auf, auf und davon!"
+  },
+  { id:"ellipsis-3", label:"…", text:"…" },
+
+  {
+    id:"no-up",
+    label:"Man kann nicht so zur anderen Seite…",
+    text:"Du musst in die andere Richtung gehen. So funktioniert das Spiel eben, frag mich nicht."
+  },
+  {
+    id:"why-here",
+    label:"Warum bist du noch hier?",
+    text:
+`Es scheint, als wärst du weiter in die falsche Richtung gelaufen.
+Hier gibt es nichts für dich.`
+  },
+
+  { id:"ellipsis-4", label:"…", text:"…" },
+  { id:"ellipsis-5", label:"…", text:"…" },
+  { id:"nichts", label:"…", text:"Leere…" },
+  { id:"ellipsis-6", label:"…", text:"…" },
+  { id:"ellipsis-7", label:"…", text:"…" },
+
+  {
+    id:"hohl",
+    label:"Du bist ziemlich hohl, oder?",
+    text:"Die, die für diesen Seitenabschnitt zuständig sind, haben bereits alles gesagt…",
+    aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
+  },
+
+  { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
+
+  /* Klang (jetzt inkl. SoundCloud) */
+  {
+    id:"klang",
+    label:"Klang",
+    text:
+`Ein Stück des Teils, der immer war,
+Dunkelheit, die Licht gebar,
+das stolze Licht, das nachts erlischt,
+und Schein bleibt, solange Winter ist.`,
+    attrib:"Goethe (abgewandelt)",
+    icons:[
+      { file:"Spotify.png" },
+      { file:"Apple_Music.png" },
+      { file:"YouTube_Music.png" },
+      { file:"SoundCloud.png" }
+    ]
+  },
+
+  {
+    id:"spenden",
+    label:"Spendenbox",
+    text:"Geben ist ein Selbstverlust, aber kein Verlust an sich.",
+    attrib:"Kafka",
+    aside:"*hust* Wir brauchen Munition für eine ernsthafte Erneuerung der deutschen Kunst. *hust*",
+    icons:[
+      { file:"PayPal.png" },
+      { file:"Patreon.png" }
+    ]
+  },
+
+  {
+    id:"skizzen",
+    label:"Skizzen",
+    text:
+`„Ich glaube, man könnte die Skizzen verkaufen,
+sie zeigen meine Arbeit in ihrem Anfang.“`,
+    attrib:"Vincent",
+    aside:
+`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
+zuschlagen.`,
+    testLinkWord:"zuschlagen",
+    testLinkHref:"https://www.vangoghmuseum.nl/"
+  },
+
+  {
+    id:"erscheinungsorte",
+    label:"Erscheinungsorte",
+    text:
+`Alles, was tief ist, liebt Masken; Bild und Erscheinung hasst es jedoch.
+Es bleibt der Tiefe Bürde,
+wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
+    attrib:"Nietzsche (abgewandelt)",
+    icons:[
+      { file:"TikTok.png" },
+      { file:"Instagram.png" },
+      { file:"YouTube.png" },
+      { file:"Twitch.png" }
+    ]
+  },
+
+  {
+    id:"museum",
+    label:"Museum",
+    italicAll:true,
+    text:
+`Keiner öffnet die Tür.
+Es scheint, als wäre das Museum noch geschlossen.
+Die Spendenbox scheint jedoch einwandfrei zu funktionieren.`
+  },
+
+  {
+    id:"kontakt",
+    label:"Kontaktschleuse",
+    text:
+`Wer mit Ungeheuern kämpft, mag zusehen,
+daß er nicht dabei zum Ungeheuer wird.
+Und wenn du lange in einen Abgrund blickst,
+blickt der Abgrund auch in dich hinein.`,
+    attrib:"Nietzsche",
+    email:"Kuumitori@gmail.com"
+  },
+
+  { id:"unter", label:"Unter", text:"Unter dir der Grund." },
+
+  {
+    id:"orden",
+    label:"Leerebrücke",
+    italicAll:true,
+    text:"Ein Orden mythopoetischer Geisterjäger."
+  }
+];
+
+/* ----------------------------- ELEMENTS ----------------------------- */
+
+const $ = (sel, root=document) => root.querySelector(sel);
+
+const list = $("#slot-list");
+const out = $("#section-area");
+const titleEl = $("#section-title");
+const bodyEl = $("#section-body");
+const extrasTop = $("#section-extras-top");
+const extrasBottom = $("#section-extras-bottom");
+const arrowUp = $("#arrow-up");
+const arrowDown = $("#arrow-down");
+const frame = $(".page-frame");
+
+/* ----------------------------- CSS HELPERS ----------------------------- */
+
+const rootStyle = () => getComputedStyle(document.documentElement);
+const cssNum = (name, fallback=0) => {
+  const v = parseFloat(rootStyle().getPropertyValue(name));
+  return Number.isFinite(v) ? v : fallback;
+};
+
+/* ----------------------------- GEOMETRY ----------------------------- */
+
+let ITEM_HEIGHT, WINDOW_HEIGHT, CENTER_OFFSET, BASE_Y;
+
+function calcGeometry(){
+  ITEM_HEIGHT = cssNum("--item-h", 42);
+  WINDOW_HEIGHT = cssNum("--window-h", 65);
+  CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
+  BASE_Y = -(1 * ITEM_HEIGHT) + CENTER_OFFSET;
+
+  list.style.transition = "none";
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+}
+
+/* ----------------------------- TIMING/STATE ----------------------------- */
+
+const ANIM_MS = 170;
+
+let busy = false;
+let wheelAcc = 0;
+const WHEEL_THRESHOLD = 30;
+const WHEEL_CLAMP = 120;
+
+let failTimer = null;
+
+let typingTimer = null;
+let typingToken = 0;
+
+let iconsRevealTimer = null;
+let emailRevealTimer = null;
+
+/* ----------------------------- BUSY ----------------------------- */
+
+function setBusy(){
+  busy = true;
+  clearTimeout(failTimer);
+  failTimer = setTimeout(() => {
+    busy = false;
+    wheelAcc = 0;
+  }, ANIM_MS + 140);
+}
+
+function clearBusy(){
+  clearTimeout(failTimer);
+  busy = false;
+}
+
+/* ----------------------------- UTIL ----------------------------- */
+
+function resolvePageById(id){
+  return PAGES.find(p => p.id === id) || { id, label:"", text:"" };
+}
+
+function orderedPages(centerId){
+  const n = PAGES.length;
+  const idx = Math.max(0, PAGES.findIndex(p => p.id === centerId));
+  const prev = (idx - 1 + n) % n;
+  const order = [];
+  for (let i = 0; i < n; i++){
+    order.push(PAGES[(prev + i) % n]);
+  }
+  return order;
+}
+
+/* SVG swap helper (tolerant):
+   data may still say .png
+   repo may only contain .svg */
+function iconSrc(file){
+  const s = String(file || "").trim();
+  if (!s) return "";
+
+  const lower = s.toLowerCase();
+  if (lower.endsWith(".png")){
+    return `Grafiken/${s.slice(0, -4)}.svg`;
+  }
+  if (lower.endsWith(".svg")){
+    return `Grafiken/${s}`;
+  }
+  return `Grafiken/${s}`;
+}
+
+function iconBaseName(file){
+  return String(file || "").trim().replace(/\.(png|svg)$/i,"");
+}
+
+function iconLabelFromFile(file){
+  const base = iconBaseName(file);
+  return base.replace(/[_\-]+/g," ");
+}
+
+/* ----------------------------- BUILD SLOT ----------------------------- */
+
+function buildSlotItems(centerId="klang"){
+  list.innerHTML = "";
+  const frag = document.createDocumentFragment();
+
+  orderedPages(centerId).forEach(p => {
+    const div = document.createElement("div");
+    div.className = "slot-item";
+    div.textContent = p.label;
+    div.dataset.pageId = p.id;
+    frag.appendChild(div);
+  });
+
+  list.appendChild(frag);
+}
+
+/* ----------------------------- CLEANUP ----------------------------- */
+
+function clearTyping(){
+  typingToken++;
+
+  if (typingTimer){
+    clearTimeout(typingTimer);
+    typingTimer = null;
+  }
+
+  clearTimeout(iconsRevealTimer);
+  clearTimeout(emailRevealTimer);
+  iconsRevealTimer = null;
+  emailRevealTimer = null;
+}
+
+/* ----------------------------- SEGMENTS ----------------------------- */
+
+function buildSegments(page){
+  const segs = [];
+  const mainClass = page.italicAll ? "seg-italic" : "seg-normal";
+
+  if (page.text){
+    segs.push({ cls: mainClass, text: page.text, preBlank: 0, allowInline:false });
+  }
+  if (page.attrib){
+    segs.push({ cls:"seg-attrib", text:`— ${page.attrib}`, preBlank:0, allowInline:false });
+  }
+  if (page.aside){
+    let asideText = page.aside;
+
+    if (page.testLinkWord && page.testLinkHref && typeof asideText === "string"){
+      const word = page.testLinkWord;
+      const href = page.testLinkHref;
+      asideText = asideText.replace(
+        new RegExp(`\\b${word}\\b`),
+        `[[LINK:${word}|${href}]]`
+      );
+    }
+
+    segs.push({ cls:"seg-aside", text: asideText, preBlank:1, allowInline:true });
+  }
+
+  return segs;
+}
+
+/* ----------------------------- MEASURE MAX CHARS ----------------------------- */
+
+function measureCharWidthPx(){
+  const probe = document.createElement("span");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.whiteSpace = "pre";
+  probe.style.font = getComputedStyle(bodyEl).font;
+  probe.style.fontSize = getComputedStyle(bodyEl).fontSize;
+  probe.textContent = "MMMMMMMMMM";
+  document.body.appendChild(probe);
+  const w = probe.getBoundingClientRect().width / 10;
+  probe.remove();
+  return w || 8;
+}
+
+function computeMaxCharsPerLine(){
+  const containerW = bodyEl.clientWidth || out.clientWidth || 300;
+  const charW = measureCharWidthPx();
+  const max = Math.floor(containerW / charW);
+  return Math.max(12, max);
+}
+
+/* ----------------------------- INLINE TOKEN PARSER ----------------------------- */
+
+function extractInlineParts(text){
+  const s = String(text || "");
+  const parts = [];
+  let i = 0;
+  const re = /\[\[LINK:([^\]|]+)\|([^\]]+)\]\]/g;
+  let m;
+
+  while ((m = re.exec(s))){
+    const start = m.index;
+    if (start > i) parts.push({ type:"text", value:s.slice(i, start) });
+    parts.push({ type:"link", value:m[1], href:m[2] });
+    i = start + m[0].length;
+  }
+  if (i < s.length) parts.push({ type:"text", value:s.slice(i) });
+  return parts;
+}
+
+/* ----------------------------- WRAP TEXT INTO LINES ----------------------------- */
+
+function wrapParagraphToLines(paragraph, maxChars){
+  const words = paragraph.split(/\s+/).filter(Boolean);
+  if (!words.length) return [""];
+
+  const lines = [];
+  let line = "";
+
+  const pushLine = () => { lines.push(line); line = ""; };
+
+  for (const w of words){
+    if (!line){
+      if (w.length <= maxChars){
+        line = w;
+      } else {
+        for (let i = 0; i < w.length; i += maxChars){
+          lines.push(w.slice(i, i + maxChars));
+        }
+        line = "";
+      }
+      continue;
+    }
+
+    const candidate = line + " " + w;
+    if (candidate.length <= maxChars){
+      line = candidate;
+    } else {
+      pushLine();
+      if (w.length <= maxChars){
+        line = w;
+      } else {
+        for (let i = 0; i < w.length; i += maxChars){
+          lines.push(w.slice(i, i + maxChars));
+        }
+        line = "";
+      }
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines;
+}
+
+function segmentToLineObjects(seg, maxChars){
+  const outLines = [];
+
+  if (seg.preBlank){
+    for (let i = 0; i < seg.preBlank; i++){
+      outLines.push({ cls: seg.cls, text: "", parts:null });
+    }
+  }
+
+  const raw = String(seg.text || "");
+  const paragraphs = raw.split("\n");
+
+  paragraphs.forEach((p, idx) => {
+    if (seg.allowInline && p.includes("[[LINK:")){
+      const parts = extractInlineParts(p);
+      const plainLen = parts.map(pt => pt.value || "").join("").length;
+
+      if (plainLen <= maxChars){
+        outLines.push({ cls: seg.cls, text: p, parts });
+      } else {
+        const cleaned = p.replace(/\[\[LINK:([^\]|]+)\|([^\]]+)\]\]/g, "$1");
+        const lines = wrapParagraphToLines(cleaned, maxChars);
+        lines.forEach(l => outLines.push({ cls: seg.cls, text: l, parts:null }));
+      }
+    } else {
+      const lines = wrapParagraphToLines(p, maxChars);
+      lines.forEach(l => outLines.push({ cls: seg.cls, text: l, parts:null }));
+    }
+
+    if (idx < paragraphs.length - 1){
+      outLines.push({ cls: seg.cls, text: "", parts:null });
+    }
+  });
+
+  return outLines;
+}
+
+/* ----------------------------- BUILD LINE DOM ----------------------------- */
+
+function buildLinesDOMFromSegments(segs){
+  bodyEl.innerHTML = "";
+
+  const maxChars = computeMaxCharsPerLine();
+  const lineObjs = [];
+  segs.forEach(seg => lineObjs.push(...segmentToLineObjects(seg, maxChars)));
+
+  const nodes = [];
+  const frag = document.createDocumentFragment();
+
+  lineObjs.forEach(lo => {
+    const div = document.createElement("div");
+    div.className = `tw-line seg ${lo.cls}`;
+
+    let plain = lo.text ?? "";
+    if (lo.parts){
+      plain = lo.parts.map(pt => pt.value || "").join("");
+    }
+
+    const widthCh = Math.max(1, plain.length);
+    div.style.width = widthCh + "ch";
+
+    div.textContent = "";
+    frag.appendChild(div);
+
+    nodes.push({
+      el: div,
+      fullPlain: plain,
+      parts: lo.parts || null
+    });
+  });
+
+  bodyEl.appendChild(frag);
+  return nodes;
+}
+
+function renderLinePartial(node, count){
+  const el = node.el;
+
+  if (!node.parts){
+    el.textContent = node.fullPlain.slice(0, count);
+    return;
+  }
+
+  const parts = node.parts;
+  let remaining = count;
+
+  el.innerHTML = "";
+
+  for (const p of parts){
+    const text = p.value || "";
+    if (remaining <= 0) break;
+
+    const take = Math.min(remaining, text.length);
+    const chunk = text.slice(0, take);
+
+    if (p.type === "link"){
+      const a = document.createElement("a");
+      a.href = p.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "inline-link";
+      a.textContent = chunk;
+      el.appendChild(a);
+    } else {
+      el.appendChild(document.createTextNode(chunk));
+    }
+
+    remaining -= take;
+  }
+}
+
+/* ----------------------------- ICONS TOP ----------------------------- */
+
+function buildIconRow(page){
+  if (!Array.isArray(page.icons) || !page.icons.length) return null;
+
+  const row = document.createElement("div");
+  row.className = "post-block";
+
+  page.icons.forEach(({file, href}) => {
+    const img = document.createElement("img");
+    img.src = iconSrc(file);
+    img.alt = iconLabelFromFile(file);
+    img.decoding = "async";
+    img.loading = "eager";
+
+    /* If a path is wrong, force basename.svg */
+    img.addEventListener("error", () => {
+      const base = iconBaseName(file);
+      const fallback = base ? `Grafiken/${base}.svg` : "";
+      if (fallback && img.src !== fallback){
+        img.src = fallback;
+      }
+    }, { once:true });
+
+    const a = document.createElement("a");
+    a.className = "icon-btn";
+    a.dataset.label = iconLabelFromFile(file);
+
+    const span = cssNum("--icon-rand-span-ms", 180);
+    const rand = Math.floor(Math.random() * span);
+    a.style.setProperty("--ic-delay", `${rand}ms`);
+
+    if (href){
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    } else {
+      a.href = "javascript:void(0)";
+    }
+
+    a.appendChild(img);
+    row.appendChild(a);
+  });
+
+  return row;
+}
+
+function showIconsEarly(page){
+  extrasTop.innerHTML = "";
+  const row = buildIconRow(page);
+  if (!row) return;
+
+  extrasTop.appendChild(row);
+
+  const btns = Array.from(row.querySelectorAll(".icon-btn"));
+  const minDelay = cssNum("--post-min-delay-ms", 90);
+
+  clearTimeout(iconsRevealTimer);
+
+  iconsRevealTimer = setTimeout(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        btns.forEach(b => b.classList.add("visible"));
+      });
+    });
+  }, minDelay);
+}
+
+/* ----------------------------- EMAIL BOTTOM ----------------------------- */
+
+function buildEmailRow(page){
+  if (!page.email) return null;
+
+  const row = document.createElement("div");
+  row.className = "email-row";
+
+  const a = document.createElement("a");
+  a.href = `mailto:${page.email}`;
+  a.textContent = page.email;
+
+  row.appendChild(a);
+  return row;
+}
+
+function showEmailAfterTyping(page, token){
+  if (token !== typingToken) return;
+
+  extrasBottom.innerHTML = "";
+  const row = buildEmailRow(page);
+  if (!row) return;
+
+  extrasBottom.appendChild(row);
+
+  const minDelay = cssNum("--email-min-delay-ms", 140);
+
+  clearTimeout(emailRevealTimer);
+  emailRevealTimer = setTimeout(() => {
+    requestAnimationFrame(() => row.classList.add("visible"));
+  }, minDelay);
+}
+
+/* ----------------------------- PAGE SHOW ----------------------------- */
+
+function typePage(page){
+  clearTyping();
+  titleEl.textContent = "";
+  extrasTop.innerHTML = "";
+  extrasBottom.innerHTML = "";
+  bodyEl.innerHTML = "";
+
+  showIconsEarly(page);
+
+  const segs = buildSegments(page);
+  if (!segs.length) return;
+
+  const nodes = buildLinesDOMFromSegments(segs);
+  const token = ++typingToken;
+
+  const base = cssNum("--type-char-ms", 17);
+  const jitter = cssNum("--type-jitter-ms", 14);
+
+  let lineIndex = 0;
+  let charIndex = 0;
+
+  const step = () => {
+    if (token !== typingToken) return;
+
+    const current = nodes[lineIndex];
+    if (!current){
+      typingTimer = null;
+      showEmailAfterTyping(page, token);
+      return;
+    }
+
+    const fullLen = current.fullPlain.length;
+
+    if (fullLen === 0){
+      renderLinePartial(current, 0);
+      lineIndex++;
+      charIndex = 0;
+
+      if (lineIndex >= nodes.length){
+        typingTimer = null;
+        showEmailAfterTyping(page, token);
+        return;
+      }
+    } else {
+      charIndex++;
+      renderLinePartial(current, Math.min(charIndex, fullLen));
+
+      if (charIndex >= fullLen){
+        lineIndex++;
+        charIndex = 0;
+
+        if (lineIndex >= nodes.length){
+          typingTimer = null;
+          showEmailAfterTyping(page, token);
+          return;
+        }
+      }
+    }
+
+    const rand = jitter ? (Math.random()*2 - 1) * jitter : 0;
+    const delay = Math.max(10, base + rand);
+    typingTimer = setTimeout(step, delay);
+  };
+
+  step();
+}
+
+function showPage(page){
+  out.classList.add("fading");
+  clearTyping();
+
+  const fadeMs = cssNum("--fade-out-ms", 120);
+
+  setTimeout(() => {
+    out.classList.remove("fading");
+    typePage(page);
+  }, fadeMs);
+}
+
+/* ----------------------------- ACTIVE UPDATE ----------------------------- */
+
+function updateActive(){
+  Array.from(list.children).forEach(n => n.classList.remove("active"));
+
+  const center = list.children[1];
+  if (center) center.classList.add("active");
+
+  const pageId = center?.dataset.pageId || "";
+  showPage(resolvePageById(pageId));
+}
+
+/* ----------------------------- TRANSITION HELP ----------------------------- */
+
+function withTransitionEnd(el, fn){
+  const done = () => {
+    el.removeEventListener("transitionend", done);
+    el.removeEventListener("transitioncancel", done);
+    fn();
+  };
+  el.addEventListener("transitionend", done, { once:true });
+  el.addEventListener("transitioncancel", done, { once:true });
+}
+
+/* ----------------------------- MOVE LOGIC ----------------------------- */
+
+function moveDown(){
+  if (busy) return;
+  setBusy();
+
+  list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
+
+  withTransitionEnd(list, () => {
+    const first = list.firstElementChild;
+    if (first) list.appendChild(first);
+
+    list.style.transition = "none";
+    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+
+    requestAnimationFrame(() => {
+      updateActive();
+      clearBusy();
+    });
+  });
+}
+
+function moveUp(){
+  if (busy) return;
+  setBusy();
+
+  const last = list.lastElementChild;
+  if (last) list.insertBefore(last, list.firstElementChild);
+
+  list.style.transition = "none";
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
+  void list.offsetHeight;
+
+  requestAnimationFrame(() => {
+    list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
+    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+
+    withTransitionEnd(list, () => {
+      updateActive();
+      clearBusy();
+    });
+  });
+}
+
+/* ----------------------------- INPUT MODES ----------------------------- */
+
+function applyInputMode(){
+  const isMobile = matchMedia("(max-width: 768px)").matches;
+  arrowUp.onclick = isMobile ? null : moveUp;
+  arrowDown.onclick = isMobile ? null : moveDown;
+}
+
+/* ----------------------------- TOUCH SWIPE ----------------------------- */
+
+let startY = 0;
+let startX = 0;
+
+frame.addEventListener("touchstart", e => {
+  const t = e.touches[0];
+  startY = t.clientY;
+  startX = t.clientX;
+}, { passive:true });
+
+frame.addEventListener("touchend", e => {
+  if (busy) return;
+
+  const t = e.changedTouches[0];
+  const dy = t.clientY - startY;
+  const dx = t.clientX - startX;
+
+  if (Math.abs(dx) > Math.abs(dy)) return;
+
+  if (dy > 50) moveUp();
+  if (dy < -50) moveDown();
+}, { passive:true });
+
+/* ----------------------------- WHEEL ----------------------------- */
+
+frame.addEventListener("wheel", e => {
+  e.preventDefault();
+  if (busy) { wheelAcc = 0; return; }
+
+  wheelAcc += e.deltaY;
+  wheelAcc = Math.max(-WHEEL_CLAMP, Math.min(WHEEL_CLAMP, wheelAcc));
+
+  if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD){
+    const dir = wheelAcc > 0 ? 1 : -1;
+    wheelAcc = 0;
+    dir > 0 ? moveDown() : moveUp();
+  }
+}, { passive:false });
+
+/* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
+
+function preloadIcons(){
+  const files = new Set();
+
+  PAGES.forEach(p => {
+    (p.icons || []).forEach(ic => ic?.file && files.add(ic.file));
+  });
+
+  const loads = [];
+  files.forEach(file => {
+    loads.push(new Promise(res => {
+      const img = new Image();
+      img.onload = () => res(true);
+      img.onerror = () => {
+        const base = iconBaseName(file);
+        if (base){
+          img.src = `Grafiken/${base}.svg`;
+          img.onload = () => res(true);
+          img.onerror = () => res(false);
+        } else {
+          res(false);
+        }
+      };
+      img.src = iconSrc(file);
+    }));
+  });
+
+  return Promise.all(loads);
+}
+
+/* ----------------------------- INIT ----------------------------- */
+
+calcGeometry();
+buildSlotItems("klang");
+applyInputMode();
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  applyInputMode();
+  calcGeometry();
+
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    updateActive();
+  }, 120);
+});
+
+/* Preload zuerst anstoßen, dann initiale Seite zeigen */
+preloadIcons().finally(() => {
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+  updateActive();
+});
+</script>
 </body>
 </html>
