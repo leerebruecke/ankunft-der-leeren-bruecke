@@ -27,7 +27,7 @@
   --slot-w-pref:62%;
   --slot-w-max:600px;
 
-  /* typewriter */
+  /* typewriter (letter-based) */
   --type-char-ms:17;
   --type-jitter-ms:14;
   --fade-out-ms:120;
@@ -237,7 +237,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Per-icon button */
+/* Per-icon button (stable reveal) */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -252,6 +252,7 @@ body{
   transition:
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
+  transition-delay: var(--ic-delay, 0ms);
 }
 
 .icon-btn.visible{
@@ -282,18 +283,19 @@ body{
   opacity:1;
 }
 
+/* HARD VISIBILITY LOCK FOR ICONS */
 .icon-btn img{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
 
-  opacity:1;
-  filter:none;
-  transform:none;
-  animation:none;
+  opacity:1 !important;
+  transform:none !important;
+  animation:none !important;
+  filter:none !important;
 }
 
-/* Email row */
+/* Email row (bottom; after typing) */
 .email-row{
   width:100%;
   display:flex;
@@ -393,8 +395,11 @@ body{
 
     <div class="section-area" id="section-area">
       <div class="section-title" id="section-title"></div>
+
       <div class="section-extras-top" id="section-extras-top"></div>
+
       <div class="section-body" id="section-body"></div>
+
       <div class="section-extras-bottom" id="section-extras-bottom"></div>
     </div>
   </div>
@@ -414,11 +419,7 @@ const PAGES = [
   { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
 
   { id:"ellipsis-2", label:"…", text:"…" },
-  {
-    id:"wrong-dir",
-    label:"Falsche Richtung",
-    text:"Hier lang geht es nicht! Auf, auf und davon!"
-  },
+  { id:"wrong-dir", label:"Falsche Richtung", text:"Hier lang geht es nicht! Auf, auf und davon!" },
   { id:"ellipsis-3", label:"…", text:"…" },
 
   {
@@ -459,9 +460,9 @@ das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
     attrib:"Goethe (abgewandelt)",
     icons:[
-      { file:"Spotify.svg" },
-      { file:"Apple_Music.svg" },
-      { file:"YouTube_Music.svg" }
+      { file:"Spotify.png" },
+      { file:"Apple_Music.png" },
+      { file:"YouTube_Music.png" }
     ]
   },
 
@@ -472,8 +473,8 @@ und Schein bleibt, solange Winter ist.`,
     attrib:"Kafka",
     aside:"*hust* Wir brauchen Munition für eine ernsthafte Erneuerung der deutschen Kunst. *hust*",
     icons:[
-      { file:"PayPal.svg" },
-      { file:"Patreon.svg" }
+      { file:"PayPal.png" },
+      { file:"Patreon.png" }
     ]
   },
 
@@ -500,10 +501,10 @@ Es bleibt der Tiefe Bürde,
 wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
     attrib:"Nietzsche (abgewandelt)",
     icons:[
-      { file:"TikTok.svg" },
-      { file:"Instagram.svg" },
-      { file:"YouTube.svg" },
-      { file:"Twitch.svg" }
+      { file:"TikTok.png" },
+      { file:"Instagram.png" },
+      { file:"YouTube.png" },
+      { file:"Twitch.png" }
     ]
   },
 
@@ -629,15 +630,29 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG-only, no conversion */
+/* Robust icon resolver:
+   - tolerates .png in data
+   - prefers .svg in repo */
 function iconSrc(file){
-  const s = String(file || "");
+  const s = String(file || "").trim();
   if (!s) return "";
+
+  const lower = s.toLowerCase();
+  if (lower.endsWith(".png")){
+    return `Grafiken/${s.slice(0, -4)}.svg`;
+  }
+  if (lower.endsWith(".svg")){
+    return `Grafiken/${s}`;
+  }
   return `Grafiken/${s}`;
 }
 
+function iconBaseName(file){
+  return String(file || "").trim().replace(/\.(png|svg)$/i,"");
+}
+
 function iconLabelFromFile(file){
-  const base = String(file || "").replace(/\.(png|svg)$/i,"");
+  const base = iconBaseName(file);
   return base.replace(/[_\-]+/g," ");
 }
 
@@ -904,7 +919,7 @@ function renderLinePartial(node, count){
   }
 }
 
-/* ----------------------------- ICONS TOP (REVEAL) ----------------------------- */
+/* ----------------------------- ICONS TOP ----------------------------- */
 
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
@@ -919,13 +934,22 @@ function buildIconRow(page){
     img.decoding = "async";
     img.loading = "eager";
 
+    /* If path/ending is wrong, force basename.svg */
+    img.addEventListener("error", () => {
+      const base = iconBaseName(file);
+      const fallback = base ? `Grafiken/${base}.svg` : "";
+      if (fallback && img.src !== fallback){
+        img.src = fallback;
+      }
+    }, { once:true });
+
     const a = document.createElement("a");
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
 
     const span = cssNum("--icon-rand-span-ms", 180);
     const rand = Math.floor(Math.random() * span);
-    a.style.transitionDelay = `${rand}ms`;
+    a.style.setProperty("--ic-delay", `${rand}ms`);
 
     if (href){
       a.href = href;
@@ -953,6 +977,7 @@ function showIconsEarly(page){
   const minDelay = cssNum("--post-min-delay-ms", 90);
 
   clearTimeout(iconsRevealTimer);
+
   iconsRevealTimer = setTimeout(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -1219,7 +1244,16 @@ function preloadIcons(){
     loads.push(new Promise(res => {
       const img = new Image();
       img.onload = () => res(true);
-      img.onerror = () => res(false);
+      img.onerror = () => {
+        const base = iconBaseName(file);
+        if (base){
+          img.src = `Grafiken/${base}.svg`;
+          img.onload = () => res(true);
+          img.onerror = () => res(false);
+        } else {
+          res(false);
+        }
+      };
       img.src = iconSrc(file);
     }));
   });
