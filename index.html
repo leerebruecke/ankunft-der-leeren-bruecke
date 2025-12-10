@@ -27,7 +27,7 @@
   --slot-w-pref:62%;
   --slot-w-max:600px;
 
-  /* typewriter (letter-based) */
+  /* typewriter */
   --type-char-ms:17;
   --type-jitter-ms:14;
   --fade-out-ms:120;
@@ -219,7 +219,7 @@ body{
   text-align:center;
 }
 
-/* Centered typewriter lines */
+/* Centered LTR typewriter lines */
 .tw-line{
   display:block;
   margin-inline:auto;
@@ -282,17 +282,15 @@ body{
   opacity:1;
 }
 
-/* CRITICAL: Icon image must be visually static */
 .icon-btn img{
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
 
-  opacity:1;                 /* hard lock */
-  transform:none !important; /* hard lock */
-  animation:none !important; /* hard lock */
-  filter: drop-shadow(0 0 8px rgba(245,240,232,0.14))
-          drop-shadow(0 0 16px rgba(245,240,232,0.08)); /* static mild glow */
+  opacity:1;
+  filter:none;
+  transform:none;
+  animation:none;
 }
 
 /* Email row */
@@ -461,9 +459,9 @@ das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
     attrib:"Goethe (abgewandelt)",
     icons:[
-      { file:"Spotify.png" },
-      { file:"Apple_Music.png" },
-      { file:"YouTube_Music.png" }
+      { file:"Spotify.svg" },
+      { file:"Apple_Music.svg" },
+      { file:"YouTube_Music.svg" }
     ]
   },
 
@@ -474,8 +472,8 @@ und Schein bleibt, solange Winter ist.`,
     attrib:"Kafka",
     aside:"*hust* Wir brauchen Munition für eine ernsthafte Erneuerung der deutschen Kunst. *hust*",
     icons:[
-      { file:"PayPal.png" },
-      { file:"Patreon.png" }
+      { file:"PayPal.svg" },
+      { file:"Patreon.svg" }
     ]
   },
 
@@ -502,10 +500,10 @@ Es bleibt der Tiefe Bürde,
 wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
     attrib:"Nietzsche (abgewandelt)",
     icons:[
-      { file:"TikTok.png" },
-      { file:"Instagram.png" },
-      { file:"YouTube.png" },
-      { file:"Twitch.png" }
+      { file:"TikTok.svg" },
+      { file:"Instagram.svg" },
+      { file:"YouTube.svg" },
+      { file:"Twitch.svg" }
     ]
   },
 
@@ -631,27 +629,11 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG-first + PNG fallback */
+/* SVG-only, no conversion */
 function iconSrc(file){
   const s = String(file || "");
-  if (s.toLowerCase().endsWith(".png")){
-    return `Grafiken/${s.slice(0, -4)}.svg`;
-  }
-  if (s.toLowerCase().endsWith(".svg")){
-    return `Grafiken/${s}`;
-  }
+  if (!s) return "";
   return `Grafiken/${s}`;
-}
-
-function pngFallbackSrc(file){
-  const s = String(file || "");
-  if (s.toLowerCase().endsWith(".png")){
-    return `Grafiken/${s}`;
-  }
-  if (s.toLowerCase().endsWith(".svg")){
-    return `Grafiken/${s.replace(/\.svg$/i,".png")}`;
-  }
-  return `Grafiken/${s}.png`;
 }
 
 function iconLabelFromFile(file){
@@ -922,7 +904,7 @@ function renderLinePartial(node, count){
   }
 }
 
-/* ----------------------------- ICONS TOP ----------------------------- */
+/* ----------------------------- ICONS TOP (REVEAL) ----------------------------- */
 
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
@@ -936,13 +918,6 @@ function buildIconRow(page){
     img.alt = iconLabelFromFile(file);
     img.decoding = "async";
     img.loading = "eager";
-
-    img.addEventListener("error", () => {
-      const fallback = pngFallbackSrc(file);
-      if (img.src !== fallback){
-        img.src = fallback;
-      }
-    }, { once:true });
 
     const a = document.createElement("a");
     a.className = "icon-btn";
@@ -1243,18 +1218,8 @@ function preloadIcons(){
   files.forEach(file => {
     loads.push(new Promise(res => {
       const img = new Image();
-      let triedPng = false;
-
       img.onload = () => res(true);
-      img.onerror = () => {
-        if (!triedPng){
-          triedPng = true;
-          img.src = pngFallbackSrc(file);
-        } else {
-          res(false);
-        }
-      };
-
+      img.onerror = () => res(false);
       img.src = iconSrc(file);
     }));
   });
