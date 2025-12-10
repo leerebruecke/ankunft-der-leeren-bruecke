@@ -38,9 +38,9 @@
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
 
-  /* white backing under icons */
-  --icon-pad-radius:12px;
-  --icon-back-opacity:1;
+  /* icon pad (underlay) */
+  --icon-pad-color: var(--text-main);
+  --icon-pad-radius: 12px;
 
   /* email */
   --email-min-delay-ms:140;
@@ -259,17 +259,17 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* WHITE BACKING LAYER */
+/* 50% x 50% pad, centered */
 .icon-btn::before{
   content:"";
   position:absolute;
-  inset:0;
-  background:rgba(255,255,255,var(--icon-back-opacity));
-  border-radius:var(--icon-pad-radius);
+  inset:25%;
+  background: var(--icon-pad-color);
+  border-radius: var(--icon-pad-radius);
   z-index:0;
 }
 
-/* ensure the img sits above the white pad */
+/* Icon above pad */
 .icon-btn img{
   position:relative;
   z-index:1;
@@ -413,11 +413,8 @@ body{
 
     <div class="section-area" id="section-area">
       <div class="section-title" id="section-title"></div>
-
       <div class="section-extras-top" id="section-extras-top"></div>
-
       <div class="section-body" id="section-body"></div>
-
       <div class="section-extras-bottom" id="section-extras-bottom"></div>
     </div>
   </div>
@@ -425,6 +422,7 @@ body{
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
+/* Reihenfolge exakt nach deiner Liste */
 
 const PAGES = [
   { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
@@ -433,35 +431,13 @@ const PAGES = [
 
   { id:"ellipsis-1", label:"…", text:"…" },
   { id:"leere", label:"…", text:"Es bleibt Leere…" },
-  { id:"keine-worte", label:"…", text:"Es bleiben keine Worte mehr…" },
-  { id:"kein-weg", label:"…", text:"Es bleibt kein Weg mehr…" },
+  { id:"keine-worte", label:"…", text:"Keine Worte mehr…" },
+  { id:"keine-wege", label:"…", text:"Keine Wege mehr…" },
 
   { id:"ellipsis-2", label:"…", text:"…" },
-  {
-    id:"wrong-dir",
-    label:"Falsche Richtung",
-    text:"Hier lang geht es nicht! Auf, auf und davon!"
-  },
   { id:"ellipsis-3", label:"…", text:"…" },
-
-  {
-    id:"no-up",
-    label:"Man kann nicht so zur anderen Seite…",
-    text:"Du musst in die andere Richtung gehen. So funktioniert das Spiel eben, frag mich nicht."
-  },
-  {
-    id:"why-here",
-    label:"Warum bist du noch hier?",
-    text:
-`Es scheint, als wärst du weiter in die falsche Richtung gelaufen.
-Hier gibt es nichts für dich.`
-  },
-
   { id:"ellipsis-4", label:"…", text:"…" },
   { id:"ellipsis-5", label:"…", text:"…" },
-  { id:"nichts", label:"…", text:"Leere…" },
-  { id:"ellipsis-6", label:"…", text:"…" },
-  { id:"ellipsis-7", label:"…", text:"…" },
 
   {
     id:"hohl",
@@ -470,9 +446,33 @@ Hier gibt es nichts für dich.`
     aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
   },
 
+  {
+    id:"no-side",
+    label:"Man kann so nicht zur anderen Seite",
+    text:"Dafür musst du in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht."
+  },
+
+  {
+    id:"why-here",
+    label:"Warum bist du noch hier?",
+    text:
+`Es scheint, als wärst du weiter in die falsche Richtung gelaufen.
+Hier gibt es nichts für dich.`
+  },
+
+  { id:"ellipsis-6", label:"…", text:"…" },
+  { id:"ellipsis-7", label:"…", text:"…" },
+
+  {
+    id:"stop",
+    label:"Stop!",
+    text:"Hier lang geht es nicht! Zurück! Sofort! Auf, auf und davon!"
+  },
+
+  { id:"ellipsis-8", label:"…", text:"…" },
+
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
-  /* Klang (jetzt inkl. SoundCloud) */
   {
     id:"klang",
     label:"Klang",
@@ -485,8 +485,7 @@ und Schein bleibt, solange Winter ist.`,
     icons:[
       { file:"Spotify.png" },
       { file:"Apple_Music.png" },
-      { file:"YouTube_Music.png" },
-      { file:"SoundCloud.png" }
+      { file:"YouTube_Music.png" }
     ]
   },
 
@@ -495,7 +494,7 @@ und Schein bleibt, solange Winter ist.`,
     label:"Spendenbox",
     text:"Geben ist ein Selbstverlust, aber kein Verlust an sich.",
     attrib:"Kafka",
-    aside:"*hust* Wir brauchen Munition für eine ernsthafte Erneuerung der deutschen Kunst. *hust*",
+    aside:"Für Klingen und Rüstung.",
     icons:[
       { file:"PayPal.png" },
       { file:"Patreon.png" }
@@ -554,14 +553,14 @@ blickt der Abgrund auch in dich hinein.`,
     email:"Kuumitori@gmail.com"
   },
 
-  { id:"unter", label:"Unter", text:"Unter dir der Grund." },
-
   {
     id:"orden",
     label:"Leerebrücke",
     italicAll:true,
     text:"Ein Orden mythopoetischer Geisterjäger."
-  }
+  },
+
+  { id:"unter", label:"Unter", text:"Unter dir der Grund." }
 ];
 
 /* ----------------------------- ELEMENTS ----------------------------- */
@@ -650,14 +649,12 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG swap helper (tolerant):
-   data may still say .png
-   repo may only contain .svg */
+/* tolerant SVG resolver */
 function iconSrc(file){
   const s = String(file || "").trim();
   if (!s) return "";
-
   const lower = s.toLowerCase();
+
   if (lower.endsWith(".png")){
     return `Grafiken/${s.slice(0, -4)}.svg`;
   }
@@ -951,7 +948,6 @@ function buildIconRow(page){
     img.decoding = "async";
     img.loading = "eager";
 
-    /* If a path is wrong, force basename.svg */
     img.addEventListener("error", () => {
       const base = iconBaseName(file);
       const fallback = base ? `Grafiken/${base}.svg` : "";
@@ -1235,7 +1231,7 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
+/* ----------------------------- ICON PRELOAD ----------------------------- */
 
 function preloadIcons(){
   const files = new Set();
@@ -1283,7 +1279,6 @@ window.addEventListener("resize", () => {
   }, 120);
 });
 
-/* Preload zuerst anstoßen, dann initiale Seite zeigen */
 preloadIcons().finally(() => {
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
   updateActive();
