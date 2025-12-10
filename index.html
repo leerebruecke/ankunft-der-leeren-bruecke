@@ -38,14 +38,6 @@
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
 
-  /* glow */
-  --glow-pulse-ms:620ms;
-  --glow-idle-ms:2600ms;
-  --glow-idle-delay-ms:700ms;
-  --glow-strength-1:0.24;
-  --glow-strength-2:0.14;
-  --glow-layer-opacity:0.38;
-
   /* email */
   --email-min-delay-ms:140;
 
@@ -227,7 +219,7 @@ body{
   text-align:center;
 }
 
-/* Centered LTR typewriter lines */
+/* Centered typewriter lines */
 .tw-line{
   display:block;
   margin-inline:auto;
@@ -245,7 +237,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Icon button */
+/* Per-icon button */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -290,74 +282,17 @@ body{
   opacity:1;
 }
 
-/* Two-layer icon system */
-.icon-stack{
-  position:relative;
+/* CRITICAL: Icon image must be visually static */
+.icon-btn img{
   width:var(--icon-size);
   height:var(--icon-size);
-  display:inline-block;
-}
-
-.icon-img,
-.icon-glow{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
   object-fit:contain;
-}
 
-/* The real icon must be fully stable */
-.icon-img{
-  opacity:1;
-  filter:none;
-  transform:none;
-  z-index:2;
-}
-
-/* The glow layer lives behind */
-.icon-glow{
-  z-index:1;
-  opacity:var(--glow-layer-opacity);
-  pointer-events:none;
-  will-change:filter;
-}
-
-/* Pulse on reveal, then idle glow */
-@keyframes glowPulse{
-  0%{
-    filter: drop-shadow(0 0 0 rgba(245,240,232,0))
-            drop-shadow(0 0 0 rgba(245,240,232,0));
-  }
-  45%{
-    filter: drop-shadow(0 0 10px rgba(245,240,232,var(--glow-strength-1)))
-            drop-shadow(0 0 18px rgba(245,240,232,var(--glow-strength-2)));
-  }
-  100%{
-    filter: drop-shadow(0 0 0 rgba(245,240,232,0))
-            drop-shadow(0 0 0 rgba(245,240,232,0));
-  }
-}
-
-@keyframes glowIdle{
-  0%{
-    filter: drop-shadow(0 0 4px rgba(245,240,232,0.08))
-            drop-shadow(0 0 8px rgba(245,240,232,0.05));
-  }
-  50%{
-    filter: drop-shadow(0 0 10px rgba(245,240,232,var(--glow-strength-1)))
-            drop-shadow(0 0 16px rgba(245,240,232,var(--glow-strength-2)));
-  }
-  100%{
-    filter: drop-shadow(0 0 4px rgba(245,240,232,0.08))
-            drop-shadow(0 0 8px rgba(245,240,232,0.05));
-  }
-}
-
-.icon-btn.visible .icon-glow{
-  animation:
-    glowPulse var(--glow-pulse-ms) ease-out 1,
-    glowIdle var(--glow-idle-ms) ease-in-out var(--glow-idle-delay-ms) infinite;
+  opacity:1;                 /* hard lock */
+  transform:none !important; /* hard lock */
+  animation:none !important; /* hard lock */
+  filter: drop-shadow(0 0 8px rgba(245,240,232,0.14))
+          drop-shadow(0 0 16px rgba(245,240,232,0.08)); /* static mild glow */
 }
 
 /* Email row */
@@ -696,6 +631,7 @@ function orderedPages(centerId){
   return order;
 }
 
+/* SVG-first + PNG fallback */
 function iconSrc(file){
   const s = String(file || "");
   if (s.toLowerCase().endsWith(".png")){
@@ -988,41 +924,6 @@ function renderLinePartial(node, count){
 
 /* ----------------------------- ICONS TOP ----------------------------- */
 
-function createIconStack(file){
-  const stack = document.createElement("span");
-  stack.className = "icon-stack";
-
-  const src = iconSrc(file);
-  const fallback = pngFallbackSrc(file);
-
-  const imgMain = document.createElement("img");
-  imgMain.className = "icon-img";
-  imgMain.src = src;
-  imgMain.alt = iconLabelFromFile(file);
-  imgMain.decoding = "async";
-  imgMain.loading = "eager";
-
-  const imgGlow = document.createElement("img");
-  imgGlow.className = "icon-glow";
-  imgGlow.src = src;
-  imgGlow.alt = "";
-  imgGlow.decoding = "async";
-  imgGlow.loading = "eager";
-
-  const applyFallback = () => {
-    if (imgMain.src !== fallback) imgMain.src = fallback;
-    if (imgGlow.src !== fallback) imgGlow.src = fallback;
-  };
-
-  imgMain.addEventListener("error", applyFallback, { once:true });
-  imgGlow.addEventListener("error", applyFallback, { once:true });
-
-  stack.appendChild(imgGlow);
-  stack.appendChild(imgMain);
-
-  return stack;
-}
-
 function buildIconRow(page){
   if (!Array.isArray(page.icons) || !page.icons.length) return null;
 
@@ -1030,6 +931,19 @@ function buildIconRow(page){
   row.className = "post-block";
 
   page.icons.forEach(({file, href}) => {
+    const img = document.createElement("img");
+    img.src = iconSrc(file);
+    img.alt = iconLabelFromFile(file);
+    img.decoding = "async";
+    img.loading = "eager";
+
+    img.addEventListener("error", () => {
+      const fallback = pngFallbackSrc(file);
+      if (img.src !== fallback){
+        img.src = fallback;
+      }
+    }, { once:true });
+
     const a = document.createElement("a");
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
@@ -1046,7 +960,7 @@ function buildIconRow(page){
       a.href = "javascript:void(0)";
     }
 
-    a.appendChild(createIconStack(file));
+    a.appendChild(img);
     row.appendChild(a);
   });
 
