@@ -29,8 +29,9 @@
   --slot-font:calc(var(--slot-font-base) * var(--ui-scale));
   --text-font:calc(var(--text-font-base) * var(--ui-scale));
 
-  /* positioning */
-  --roll-lift:-40px;
+  /* positioning (scaled) */
+  --roll-lift-base:-40px;
+  --roll-lift:calc(var(--roll-lift-base) * var(--ui-scale));
 
   /* slot width */
   --slot-w-min:240px;
@@ -246,7 +247,7 @@ body{
 .post-block{
   margin-top:0.25rem;
   display:flex;
-  gap:1rem;
+  gap:calc(1rem * var(--ui-scale)); /* Abstand skaliert mit */
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
