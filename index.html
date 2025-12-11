@@ -10,14 +10,24 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  /* geometry */
-  --item-h:42px;
-  --window-h:65px;
+  /* global UI scale */
+  --ui-scale:1;
 
-  /* sizes */
-  --arrow-size:14px;
-  --slot-font:0.86rem;
-  --text-font:0.86rem;
+  /* geometry base */
+  --item-h-base:42px;
+  --window-h-base:65px;
+
+  /* size base */
+  --arrow-size-base:14px;
+  --slot-font-base:0.86rem;
+  --text-font-base:0.86rem;
+
+  /* derived with scale */
+  --item-h:calc(var(--item-h-base) * var(--ui-scale));
+  --window-h:calc(var(--window-h-base) * var(--ui-scale));
+  --arrow-size:calc(var(--arrow-size-base) * var(--ui-scale));
+  --slot-font:calc(var(--slot-font-base) * var(--ui-scale));
+  --text-font:calc(var(--text-font-base) * var(--ui-scale));
 
   /* positioning */
   --roll-lift:-40px;
@@ -32,8 +42,9 @@
   --type-jitter-ms:14;
   --fade-out-ms:120;
 
-  /* icons */
-  --icon-size:70px;
+  /* icons base */
+  --icon-size-base:70px;
+  --icon-size:calc(var(--icon-size-base) * var(--ui-scale));
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
@@ -259,11 +270,11 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* 50% x 50% pad, centered */
+/* slightly > 50% pad, centered */
 .icon-btn::before{
   content:"";
   position:absolute;
-  inset:25%;
+  inset:23%; /* ~54% Breite/Höhe */
   background: var(--icon-pad-color);
   border-radius: var(--icon-pad-radius);
   z-index:0;
@@ -349,15 +360,15 @@ body{
 /* MOBILE */
 @media (max-width: 768px){
   :root{
-    --arrow-size:10px;
-    --slot-font:0.74rem;
-    --text-font:0.74rem;
+    --arrow-size-base:10px;
+    --slot-font-base:0.74rem;
+    --text-font-base:0.74rem;
 
     --slot-w-min:190px;
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
-    --icon-size:56px;
+    --icon-size-base:56px;
   }
 
   .logo-img{
@@ -422,7 +433,6 @@ body{
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
-/* Reihenfolge exakt nach deiner Liste */
 
 const PAGES = [
   { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
@@ -483,9 +493,22 @@ das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
     attrib:"Goethe (abgewandelt)",
     icons:[
-      { file:"Spotify.png" },
-      { file:"Apple_Music.png" },
-      { file:"YouTube_Music.png" }
+      {
+        file:"Spotify.png",
+        href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ"
+      },
+      {
+        file:"Apple_Music.png",
+        href:"https://music.apple.com/us/artist/leerebruecke/1830878673"
+      },
+      {
+        file:"YouTube_Music.png",
+        href:"https://music.youtube.com/channel/UC9lKwSQ-gNTG1FM5K64ZHQA?si=IIzIUMERgRlcYp4l"
+      },
+      {
+        file:"SoundCloud.png",
+        href:"https://soundcloud.com/leerebruecke-0"
+      }
     ]
   },
 
@@ -496,8 +519,14 @@ und Schein bleibt, solange Winter ist.`,
     attrib:"Kafka",
     aside:"Für Klingen und Rüstung.",
     icons:[
-      { file:"PayPal.png" },
-      { file:"Patreon.png" }
+      {
+        file:"PayPal.png",
+        href:"https://www.paypal.com/paypalme/leerebruecke"
+      },
+      {
+        file:"Patreon.png",
+        href:"https://www.patreon.com/cw/leerebruecke"
+      }
     ]
   },
 
@@ -524,10 +553,22 @@ Es bleibt der Tiefe Bürde,
 wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
     attrib:"Nietzsche (abgewandelt)",
     icons:[
-      { file:"TikTok.png" },
-      { file:"Instagram.png" },
-      { file:"YouTube.png" },
-      { file:"Twitch.png" }
+      {
+        file:"TikTok.png",
+        href:"https://www.tiktok.com/@leerebruecke"
+      },
+      {
+        file:"Instagram.png",
+        href:"https://www.instagram.com/leerebruecke/"
+      },
+      {
+        file:"YouTube.png",
+        href:"https://www.youtube.com/@leerebruecke"
+      },
+      {
+        file:"Twitch.png",
+        href:"https://www.twitch.tv/leerebruecke"
+      }
     ]
   },
 
@@ -597,6 +638,23 @@ function calcGeometry(){
 
   list.style.transition = "none";
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+}
+
+/* ----------------------------- SCALE ----------------------------- */
+
+function updateScale(){
+  const rect = frame.getBoundingClientRect();
+  if (!rect.height) return;
+
+  if (!updateScale.baseHeight){
+    updateScale.baseHeight = rect.height;
+  }
+
+  let scale = rect.height / updateScale.baseHeight;
+  scale = Math.max(0.6, Math.min(1.4, scale));
+  document.documentElement.style.setProperty("--ui-scale", scale.toFixed(3));
+
+  calcGeometry();
 }
 
 /* ----------------------------- TIMING/STATE ----------------------------- */
@@ -1231,7 +1289,7 @@ frame.addEventListener("wheel", e => {
   }
 }, { passive:false });
 
-/* ----------------------------- ICON PRELOAD ----------------------------- */
+/* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
 
 function preloadIcons(){
   const files = new Set();
@@ -1264,17 +1322,17 @@ function preloadIcons(){
 
 /* ----------------------------- INIT ----------------------------- */
 
-calcGeometry();
+updateScale();
 buildSlotItems("klang");
 applyInputMode();
 
 let resizeTimer = null;
 window.addEventListener("resize", () => {
   applyInputMode();
-  calcGeometry();
 
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
+    updateScale();
     updateActive();
   }, 120);
 });
