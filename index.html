@@ -247,13 +247,13 @@ body{
 .post-block{
   margin-top:0.25rem;
   display:flex;
-  gap:calc(1rem * var(--ui-scale)); /* skaliert mit */
+  gap:calc(1rem * var(--ui-scale));
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
 }
 
-/* Per-icon button (stable reveal) */
+/* Per-icon button */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -271,7 +271,7 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* leicht > 50% Pad, zentriert */
+/* Unterlage leicht > 50% der Fläche */
 .icon-btn::before{
   content:"";
   position:absolute;
@@ -281,7 +281,6 @@ body{
   z-index:0;
 }
 
-/* Icon über Pad */
 .icon-btn img{
   position:relative;
   z-index:1;
@@ -351,7 +350,7 @@ body{
   color:var(--text-main);
 }
 
-/* Inline link style */
+/* Inline link */
 .inline-link{
   color:#7aa8ff;
   text-decoration:underline;
@@ -618,7 +617,6 @@ const extrasBottom = $("#section-extras-bottom");
 const arrowUp = $("#arrow-up");
 const arrowDown = $("#arrow-down");
 const frame = $(".page-frame");
-const slotWindow = $(".slot-window");
 
 /* ----------------------------- CSS HELPERS ----------------------------- */
 
@@ -632,19 +630,12 @@ const cssNum = (name, fallback=0) => {
 
 let ITEM_HEIGHT, WINDOW_HEIGHT, CENTER_OFFSET, BASE_Y;
 
-/* misst echte Pixelhöhen und zentriert hart */
+/* zurück zu CSS-Werten – unabhängig von scale() */
 function calcGeometry(){
-  if (!slotWindow) return;
-
-  const winRect  = slotWindow.getBoundingClientRect();
-  const first    = list.firstElementChild;
-  const itemRect = first ? first.getBoundingClientRect() : null;
-
-  ITEM_HEIGHT   = (itemRect && itemRect.height) || cssNum("--item-h", 42);
-  WINDOW_HEIGHT = winRect.height || cssNum("--window-h", 65);
-
+  ITEM_HEIGHT = cssNum("--item-h", 42);
+  WINDOW_HEIGHT = cssNum("--window-h", 65);
   CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
-  BASE_Y        = -ITEM_HEIGHT + CENTER_OFFSET;
+  BASE_Y = -ITEM_HEIGHT + CENTER_OFFSET;
 
   list.style.transition = "none";
   list.style.transform  = `translateX(-50%) translateY(${BASE_Y}px)`;
@@ -715,7 +706,7 @@ function orderedPages(centerId){
   return order;
 }
 
-/* tolerant SVG resolver */
+/* SVG helper */
 function iconSrc(file){
   const s = String(file || "").trim();
   if (!s) return "";
