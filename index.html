@@ -10,7 +10,7 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  --ui-scale:1; /* bleibt 1, weil wir jetzt das ganze Blatt skalieren */
+  --ui-scale:1; /* bleibt 1, wir skalieren das Blatt separat */
 
   /* geometry base */
   --item-h-base:42px;
@@ -21,7 +21,7 @@
   --slot-font-base:0.86rem;
   --text-font-base:0.86rem;
 
-  /* abgeleitet, aber effektiv konstant (ui-scale = 1) */
+  /* abgeleitet */
   --item-h:calc(var(--item-h-base) * var(--ui-scale));
   --window-h:calc(var(--window-h-base) * var(--ui-scale));
   --arrow-size:calc(var(--arrow-size-base) * var(--ui-scale));
@@ -46,10 +46,9 @@
   --icon-size:calc(var(--icon-size-base) * var(--ui-scale));
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
-  --icon-rand-span-ms:180;
 
-  /* icon pad (unterlage) */
-  --icon-pad-color:var(--text-main);
+  /* icon pad: leicht dunkler, aber nah am Textton */
+  --icon-pad-color:#e6ddcf;
   --icon-pad-radius:12px;
 
   /* email */
@@ -77,14 +76,14 @@ html,body{
   overflow:hidden;
 }
 
-/* Wir zentrieren horizontal, oben am Bildschirm */
+/* Blatt oben zentriert */
 body{
   display:flex;
   align-items:flex-start;
   justify-content:center;
 }
 
-/* Neues: fester „Blatt“-Rahmen, der skaliert wird */
+/* Fixierte Hülle, Blatt wird skaliert */
 .scale-wrap{
   position:fixed;
   inset:0;
@@ -101,7 +100,7 @@ body{
   transform:scale(var(--card-scale,1));
 }
 
-/* FRAME – füllt das Blatt komplett */
+/* FRAME – füllt das Blatt */
 .page-frame{
   position:relative;
   width:810px;
@@ -283,10 +282,9 @@ body{
   transition:
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
-  transition-delay: var(--ic-delay, 0ms);
 }
 
-/* weiße/gelbliche Unterlage, etwas > 50% Fläche */
+/* Untergrund */
 .icon-btn::before{
   content:"";
   position:absolute;
@@ -296,6 +294,7 @@ body{
   z-index:0;
 }
 
+/* leichte Unschärfe am Anfang */
 .icon-btn img{
   position:relative;
   z-index:1;
@@ -306,13 +305,23 @@ body{
 
   opacity:1;
   transform:none;
-  animation:none;
-  filter:none;
+  filter:blur(0.45px);
 }
 
+/* Fade-in des Buttons */
 .icon-btn.visible{
   opacity:1;
   transform:translateY(0);
+}
+
+/* weicher Fokus-Übergang für das Icon */
+@keyframes iconFocus{
+  0%{ filter:blur(0.45px); }
+  100%{ filter:blur(0); }
+}
+
+.icon-btn.visible img{
+  animation:iconFocus var(--icon-fade-ms) ease-out forwards;
 }
 
 /* Tooltip */
@@ -372,9 +381,7 @@ body{
   text-underline-offset:2px;
 }
 
-/* MOBILE – hier lasse ich deine alten Anpassungen stehen,
-   sie greifen innerhalb des Blattes (das Blatt selbst wird dann zusätzlich skaliert).
-*/
+/* MOBILE – Feinheiten innerhalb des Blattes */
 @media (max-width: 768px){
   :root{
     --arrow-size-base:10px;
@@ -411,7 +418,7 @@ body{
 
   .arrow{pointer-events:none;}
 
-  .icon-btn[data-label]::after{display:none;}
+  .icon-btn[data-label]:hover::after{display:none;}
 }
 
 @media (max-width: 420px){
@@ -451,6 +458,11 @@ body{
     </div>
   </div>
 </div>
+
+<!-- Hintergrundmusik: lege deine mp3 unter diesem Pfad ab oder passe src an -->
+<audio id="bg-audio" loop preload="auto">
+  <source src="audio/leerebruecke_bg.mp3" type="audio/mpeg"/>
+</audio>
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
@@ -640,6 +652,7 @@ const arrowDown = $("#arrow-down");
 const frame = $(".page-frame");
 const slotWindow = $(".slot-window");
 const scaleInner = $(".scale-inner");
+const audioEl = $("#bg-audio");
 
 /* ----------------------------- CSS HELPERS ----------------------------- */
 
@@ -655,19 +668,21 @@ let BASE_Y = 0;
 let STEP_Y = cssNum("--item-h", 42);
 let CARD_SCALE = 1;
 
-/* Ganzes Blatt skalieren */
+/* Ganzes Blatt skalieren, minimale Größe beibehalten */
 function updateCardScale(){
   if (!scaleInner) return;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const baseW = 810;
   const baseH = 1440;
-  const s = Math.min(vw / baseW, vh / baseH);
-  CARD_SCALE = s || 1;
+  let s = Math.min(vw / baseW, vh / baseH);
+  const minScale = 0.7;  // kleiner als das wird das Blatt nicht mehr
+  if (!s || !Number.isFinite(s)) s = 1;
+  CARD_SCALE = Math.max(minScale, s);
   scaleInner.style.setProperty("--card-scale", CARD_SCALE.toFixed(3));
 }
 
-/* Slot mittig verriegeln – in lokalen Koordinaten (Skalierung wird rausgerechnet) */
+/* Slot mittig verriegeln – skalierungsunabhängig */
 function calcGeometry(){
   if (!slotWindow || !list.children.length) return;
 
@@ -723,6 +738,11 @@ let typingToken = 0;
 
 let iconsRevealTimer = null;
 let emailRevealTimer = null;
+
+/* Typewriter-Turbo beim Mausklick */
+let fastTyping = false;
+
+/* ----------------------------- BUSY ----------------------------- */
 
 function setBusy(){
   busy = true;
@@ -1058,10 +1078,6 @@ function buildIconRow(page){
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
 
-    const span = cssNum("--icon-rand-span-ms", 180);
-    const rand = Math.floor(Math.random() * span);
-    a.style.setProperty("--ic-delay", `${rand}ms`);
-
     if (href){
       a.href = href;
       a.target = "_blank";
@@ -1193,7 +1209,8 @@ function typePage(page){
     }
 
     const rand = jitter ? (Math.random()*2 - 1) * jitter : 0;
-    const delay = Math.max(10, base + rand);
+    const speedFactor = fastTyping ? 0.5 : 1; // gedrückte Maustaste → doppelte Geschwindigkeit
+    const delay = Math.max(10, (base + rand) * speedFactor);
     typingTimer = setTimeout(step, delay);
   };
 
@@ -1359,6 +1376,69 @@ function preloadIcons(){
 
   return Promise.all(loads);
 }
+
+/* ----------------------------- AUDIO (MP3) ----------------------------- */
+
+let audioStarted = false;
+
+function startAudioOnce(){
+  if (audioStarted) return;
+  if (!audioEl) { audioStarted = true; return; }
+
+  audioStarted = true;
+  audioEl.volume = 0;
+  const targetVolume = 0.35;
+  const fadeMs = 5000;
+  const steps = 40;
+  const stepTime = fadeMs / steps;
+
+  const playPromise = audioEl.play();
+  if (playPromise && typeof playPromise.then === "function"){
+    playPromise.then(() => {
+      let step = 0;
+      const id = setInterval(() => {
+        step++;
+        const v = Math.min(targetVolume, (step / steps) * targetVolume);
+        audioEl.volume = v;
+        if (step >= steps || audioEl.paused){
+          clearInterval(id);
+        }
+      }, stepTime);
+    }).catch(() => {
+      /* Autoplay verweigert – dann bleibt es still */
+    });
+  } else {
+    audioEl.volume = targetVolume;
+  }
+}
+
+function onFirstUserEvent(){
+  startAudioOnce();
+  ["pointerdown","keydown","wheel","touchstart"].forEach(ev => {
+    document.removeEventListener(ev, onFirstUserEvent);
+  });
+}
+
+["pointerdown","keydown","wheel","touchstart"].forEach(ev => {
+  document.addEventListener(ev, onFirstUserEvent, { passive:true });
+});
+
+/* ----------------------------- TYPEWRITER-TURBO INPUT ----------------------------- */
+
+/* Linksklick auf „toten“ Bereichen → fastTyping = true */
+document.addEventListener("mousedown", e => {
+  const t = e.target;
+  const interactive = t.closest("a, .arrow, .slot-window, .slot-list, .icon-btn");
+  fastTyping = !interactive;
+});
+
+window.addEventListener("mouseup", () => {
+  fastTyping = false;
+});
+
+window.addEventListener("blur", () => {
+  fastTyping = false;
+});
 
 /* ----------------------------- INIT ----------------------------- */
 
