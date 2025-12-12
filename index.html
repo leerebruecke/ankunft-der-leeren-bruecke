@@ -51,8 +51,8 @@
   --icon-rand-span-ms:180;
 
   /* icon pad (underlay) */
-  --icon-pad-color: var(--text-main);
-  --icon-pad-radius: 12px;
+  --icon-pad-color:var(--text-main);
+  --icon-pad-radius:12px;
 
   /* email */
   --email-min-delay-ms:140;
@@ -253,7 +253,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Per-icon button */
+/* Icon button + Unterlage */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -271,13 +271,13 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* Unterlage leicht > 50% der Fläche */
+/* Untergrund (leicht > 50% Fläche) */
 .icon-btn::before{
   content:"";
   position:absolute;
   inset:23%;
-  background: var(--icon-pad-color);
-  border-radius: var(--icon-pad-radius);
+  background:var(--icon-pad-color);
+  border-radius:var(--icon-pad-radius);
   z-index:0;
 }
 
@@ -617,6 +617,7 @@ const extrasBottom = $("#section-extras-bottom");
 const arrowUp = $("#arrow-up");
 const arrowDown = $("#arrow-down");
 const frame = $(".page-frame");
+const slotWindow = $(".slot-window");
 
 /* ----------------------------- CSS HELPERS ----------------------------- */
 
@@ -628,17 +629,46 @@ const cssNum = (name, fallback=0) => {
 
 /* ----------------------------- GEOMETRY ----------------------------- */
 
-let ITEM_HEIGHT, WINDOW_HEIGHT, CENTER_OFFSET, BASE_Y;
+let BASE_Y = 0;
+let STEP_Y = cssNum("--item-h", 42);
 
-/* zurück zu CSS-Werten – unabhängig von scale() */
+/* harter Lock: richtet die mittlere Zeile exakt im Fensterzentrum aus
+   und bestimmt den realen Abstand zwischen den Zeilen (Center-to-Center) */
 function calcGeometry(){
-  ITEM_HEIGHT = cssNum("--item-h", 42);
-  WINDOW_HEIGHT = cssNum("--window-h", 65);
-  CENTER_OFFSET = (WINDOW_HEIGHT - ITEM_HEIGHT) / 2;
-  BASE_Y = -ITEM_HEIGHT + CENTER_OFFSET;
+  if (!slotWindow || !list.children.length) return;
 
+  const items = list.children;
+  if (items.length < 2) return;
+
+  // Ausgangszustand: keine vertikale Verschiebung
   list.style.transition = "none";
-  list.style.transform  = `translateX(-50%) translateY(${BASE_Y}px)`;
+  list.style.transform = "translateX(-50%) translateY(0px)";
+
+  const centerItem = items[1];
+  const belowItem  = items[2] || items[0];
+
+  const winRect    = slotWindow.getBoundingClientRect();
+  const centerRect = centerItem.getBoundingClientRect();
+  const belowRect  = belowItem.getBoundingClientRect();
+
+  const windowCenter = winRect.top + winRect.height / 2;
+  const centerCenter = centerRect.top + centerRect.height / 2;
+  const belowCenter  = belowRect.top + belowRect.height / 2;
+
+  BASE_Y = windowCenter - centerCenter;
+  STEP_Y = belowCenter - centerCenter;
+
+  if (!Number.isFinite(STEP_Y) || Math.abs(STEP_Y) < 1){
+    STEP_Y = cssNum("--item-h", 42);
+  }
+  if (!Number.isFinite(BASE_Y)){
+    const itemH = cssNum("--item-h", 42);
+    const winH  = cssNum("--window-h", 65);
+    const centerOffset = (winH - itemH) / 2;
+    BASE_Y = winH/2 - 1.5*itemH || (-itemH + centerOffset);
+  }
+
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
 
 /* ----------------------------- SCALE ----------------------------- */
@@ -1202,7 +1232,7 @@ function moveDown(){
   setBusy();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
 
   withTransitionEnd(list, () => {
     const first = list.firstElementChild;
@@ -1226,7 +1256,7 @@ function moveUp(){
   if (last) list.insertBefore(last, list.firstElementChild);
 
   list.style.transition = "none";
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - ITEM_HEIGHT}px)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
   void list.offsetHeight;
 
   requestAnimationFrame(() => {
@@ -1333,7 +1363,7 @@ window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     updateScale();
-    calcGeometry();
+    calcGeometry();   // neu zentrieren nach Skalierung
     updateActive();
   }, 120);
 });
