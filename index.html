@@ -127,6 +127,7 @@ body{
 
 .slot-list{
   position:absolute;
+  top:0; /* FIX: stabilisiert absolute Position über Browser hinweg */
   left:50%;
   transform:translateX(-50%) translateY(0);
   display:flex;
@@ -647,7 +648,7 @@ function calcGeometry(){
   list.style.transition = "none";
   list.style.transform = "translateX(-50%) translateY(0px)";
 
-  /* iOS/Safari: Layout-Commit erzwingen, damit Rects nicht „alt“ sind */
+  /* FIX: Safari/iOS – Rects stabilisieren */
   void list.offsetHeight;
 
   const winRect    = slotWindow.getBoundingClientRect();
@@ -1192,12 +1193,14 @@ function updateActive(){
   const pageId = center?.dataset.pageId || "";
   showPage(resolvePageById(pageId));
 
-  /* Minimal-Fix: nach active-Apply nochmals sauber messen (iOS/Safari timing) */
-  requestAnimationFrame(() => {
+  /* FIX (nur mobil): Safari/iOS braucht oft 1–2 Frames nach active/scale */
+  if (matchMedia("(max-width: 768px)").matches){
     requestAnimationFrame(() => {
-      calcGeometry();
+      requestAnimationFrame(() => {
+        calcGeometry();
+      });
     });
-  });
+  }
 }
 
 /* ----------------------------- TRANSITION HELP ----------------------------- */
