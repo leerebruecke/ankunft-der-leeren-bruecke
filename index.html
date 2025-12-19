@@ -155,8 +155,9 @@ body{
 
 .slot-list{
   position:absolute;
+  top:0;              /* FIX: eindeutiger Nullpunkt im Window */
   left:50%;
-  transform:translateX(-50%) translateY(0);
+  transform:translate3d(-50%, 0px, 0); /* FIX: stabilere Subpixel-Behandlung */
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -165,6 +166,7 @@ body{
 
 .slot-item{
   height:var(--item-h);
+  line-height:var(--item-h);          /* FIX: optische Vertikalzentrierung stabilisieren */
   font-size:var(--slot-font);
   letter-spacing:0.1em;
   display:flex;
@@ -172,6 +174,7 @@ body{
   justify-content:center;
   opacity:0.20;
   transform:scale(0.85);
+  transform-origin:center center;
   transition:opacity 150ms, transform 150ms;
   white-space:nowrap;
   padding:0 0.2rem;
@@ -372,9 +375,7 @@ body{
   text-underline-offset:2px;
 }
 
-/* MOBILE – hier lasse ich deine alten Anpassungen stehen,
-   sie greifen innerhalb des Blattes (das Blatt selbst wird dann zusätzlich skaliert).
-*/
+/* MOBILE – Anpassungen bleiben, aber: keine zusätzliche Slot-Group-Skalierung mehr */
 @media (max-width: 768px){
   :root{
     --arrow-size-base:10px;
@@ -395,7 +396,7 @@ body{
   }
 
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.82);
+    transform:translateY(var(--roll-lift)); /* FIX: kein scale() -> keine doppelte Transform-Rundung */
   }
 
   .section-area{
@@ -416,7 +417,7 @@ body{
 
 @media (max-width: 420px){
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.78);
+    transform:translateY(var(--roll-lift)); /* FIX: kein scale() */
   }
 }
 </style>
@@ -675,7 +676,10 @@ function calcGeometry(){
   if (items.length < 2) return;
 
   list.style.transition = "none";
-  list.style.transform = "translateX(-50%) translateY(0px)";
+  list.style.transform = "translate3d(-50%, 0px, 0)";
+
+  /* FIX: Safari/Chromium zu einem sauberen Layout-Commit zwingen */
+  void list.offsetHeight;
 
   const centerItem = items[1];
   const belowItem  = items[2] || items[0];
@@ -704,7 +708,7 @@ function calcGeometry(){
     BASE_Y = -itemH + centerOffset;
   }
 
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+  list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
 }
 
 /* ----------------------------- TIMING/STATE ----------------------------- */
@@ -1243,14 +1247,14 @@ function moveDown(){
   setBusy();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
+  list.style.transform = `translate3d(-50%, ${BASE_Y - STEP_Y}px, 0)`;
 
   withTransitionEnd(list, () => {
     const first = list.firstElementChild;
     if (first) list.appendChild(first);
 
     list.style.transition = "none";
-    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+    list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
 
     requestAnimationFrame(() => {
       updateActive();
@@ -1267,12 +1271,12 @@ function moveUp(){
   if (last) list.insertBefore(last, list.firstElementChild);
 
   list.style.transition = "none";
-  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
+  list.style.transform = `translate3d(-50%, ${BASE_Y - STEP_Y}px, 0)`;
   void list.offsetHeight;
 
   requestAnimationFrame(() => {
     list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
+    list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
 
     withTransitionEnd(list, () => {
       updateActive();
