@@ -10,36 +10,47 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  /* geometry */
-  --item-h:42px;
-  --window-h:65px;
+  --ui-scale:1; /* bleibt 1, weil wir jetzt das ganze Blatt skalieren */
 
-  /* sizes */
-  --arrow-size:14px;
-  --slot-font:0.86rem;
-  --text-font:0.86rem;
+  /* geometry base */
+  --item-h-base:42px;
+  --window-h-base:65px;
 
-  /* positioning */
-  --roll-lift:-40px;
+  /* size base */
+  --arrow-size-base:14px;
+  --slot-font-base:0.86rem;
+  --text-font-base:0.86rem;
+
+  /* abgeleitet, aber effektiv konstant (ui-scale = 1) */
+  --item-h:calc(var(--item-h-base) * var(--ui-scale));
+  --window-h:calc(var(--window-h-base) * var(--ui-scale));
+  --arrow-size:calc(var(--arrow-size-base) * var(--ui-scale));
+  --slot-font:calc(var(--slot-font-base) * var(--ui-scale));
+  --text-font:calc(var(--text-font-base) * var(--ui-scale));
+
+  --roll-lift-base:-40px;
+  --roll-lift:calc(var(--roll-lift-base) * var(--ui-scale));
 
   /* slot width */
   --slot-w-min:240px;
   --slot-w-pref:62%;
   --slot-w-max:600px;
 
-  /* typewriter (letter-based) */
+  /* typewriter */
   --type-char-ms:17;
   --type-jitter-ms:14;
   --fade-out-ms:120;
 
   /* icons */
-  --icon-size:70px;
+  --icon-size-base:70px;
+  --icon-size:calc(var(--icon-size-base) * var(--ui-scale));
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
-  --glow-pulse-ms:620ms;
+  --icon-rand-span-ms:180;
 
-  /* leicht dunklere Unterlage, nah an der Schrift */
-  --icon-pad-color:#e6ddcf;
+  /* icon pad (unterlage) */
+  --icon-pad-color:var(--text-main);
+  --icon-pad-radius:12px;
 
   /* email */
   --email-min-delay-ms:140;
@@ -66,18 +77,35 @@ html,body{
   overflow:hidden;
 }
 
+/* Wir zentrieren horizontal, oben am Bildschirm */
 body{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:center;
 }
 
-/* FRAME */
+/* Neues: fester „Blatt“-Rahmen, der skaliert wird */
+.scale-wrap{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:hidden;
+}
+
+.scale-inner{
+  width:810px;   /* Basisgröße des Blattes */
+  height:1440px; /* 9:16-Verhältnis */
+  transform-origin:top center;
+  transform:scale(var(--card-scale,1));
+}
+
+/* FRAME – füllt das Blatt komplett */
 .page-frame{
   position:relative;
-  --base:min(100svh,1200px);
-  height:calc(var(--base)*1.20);
-  width:calc(var(--base)*1.20*9/16);
+  width:810px;
+  height:1440px;
   overflow:hidden;
 }
 
@@ -127,7 +155,6 @@ body{
 
 .slot-list{
   position:absolute;
-  top:0; /* FIX: stabilisiert absolute Position über Browser hinweg */
   left:50%;
   transform:translateX(-50%) translateY(0);
   display:flex;
@@ -235,13 +262,13 @@ body{
 .post-block{
   margin-top:0.25rem;
   display:flex;
-  gap:1rem;
+  gap:calc(1rem * var(--ui-scale));
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
 }
 
-/* Icon-Button mit Unterlage */
+/* Icon button + Unterlage */
 .icon-btn{
   position:relative;
   display:inline-flex;
@@ -256,41 +283,36 @@ body{
   transition:
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
+  transition-delay: var(--ic-delay, 0ms);
 }
 
-/* leicht abgesetzter Hintergrund */
+/* weiße/gelbliche Unterlage, etwas > 50% Fläche */
 .icon-btn::before{
   content:"";
   position:absolute;
   inset:23%;
   background:var(--icon-pad-color);
-  border-radius:12px;
+  border-radius:var(--icon-pad-radius);
   z-index:0;
 }
 
-/* SVG selbst – startet leicht unscharf */
 .icon-btn img{
   position:relative;
   z-index:1;
+
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
-  filter:blur(0.45px);
+
+  opacity:1;
+  transform:none;
+  animation:none;
+  filter:none;
 }
 
-/* Fade-in + Schärfen */
 .icon-btn.visible{
   opacity:1;
   transform:translateY(0);
-}
-
-@keyframes iconFocus{
-  0%{filter:blur(0.45px);}
-  100%{filter:blur(0);}
-}
-
-.icon-btn.visible img{
-  animation:iconFocus var(--icon-fade-ms) ease-out forwards;
 }
 
 /* Tooltip */
@@ -310,13 +332,14 @@ body{
   opacity:0;
   pointer-events:none;
   transition:opacity 140ms ease-out;
+  z-index:2;
 }
 
 .icon-btn[data-label]:hover::after{
   opacity:1;
 }
 
-/* Email row (bottom; after typing) */
+/* Email row */
 .email-row{
   width:100%;
   display:flex;
@@ -342,25 +365,27 @@ body{
   color:var(--text-main);
 }
 
-/* Inline link test styling */
+/* Inline link */
 .inline-link{
   color:#7aa8ff;
   text-decoration:underline;
   text-underline-offset:2px;
 }
 
-/* MOBILE */
+/* MOBILE – hier lasse ich deine alten Anpassungen stehen,
+   sie greifen innerhalb des Blattes (das Blatt selbst wird dann zusätzlich skaliert).
+*/
 @media (max-width: 768px){
   :root{
-    --arrow-size:10px;
-    --slot-font:0.74rem;
-    --text-font:0.74rem;
+    --arrow-size-base:10px;
+    --slot-font-base:0.74rem;
+    --text-font-base:0.74rem;
 
     --slot-w-min:190px;
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
-    --icon-size:56px;
+    --icon-size-base:56px;
   }
 
   .logo-img{
@@ -398,38 +423,34 @@ body{
 </head>
 
 <body>
-<div class="page-frame">
-  <div class="page-background"></div>
+<div class="scale-wrap">
+  <div class="scale-inner">
+    <div class="page-frame">
+      <div class="page-background"></div>
 
-  <div class="page-content">
-    <img src="Grafiken/leerebruecke.png" class="logo-img" alt="leerebruecke"/>
+      <div class="page-content">
+        <img src="Grafiken/leerebruecke.png" class="logo-img" alt="leerebruecke"/>
 
-    <div class="slot-group">
-      <div class="arrow arrow-up" id="arrow-up"></div>
+        <div class="slot-group">
+          <div class="arrow arrow-up" id="arrow-up"></div>
 
-      <div class="slot-window">
-        <div class="slot-list" id="slot-list"></div>
+          <div class="slot-window">
+            <div class="slot-list" id="slot-list"></div>
+          </div>
+
+          <div class="arrow arrow-down" id="arrow-down"></div>
+        </div>
+
+        <div class="section-area" id="section-area">
+          <div class="section-title" id="section-title"></div>
+          <div class="section-extras-top" id="section-extras-top"></div>
+          <div class="section-body" id="section-body"></div>
+          <div class="section-extras-bottom" id="section-extras-bottom"></div>
+        </div>
       </div>
-
-      <div class="arrow arrow-down" id="arrow-down"></div>
-    </div>
-
-    <div class="section-area" id="section-area">
-      <div class="section-title" id="section-title"></div>
-
-      <div class="section-extras-top" id="section-extras-top"></div>
-
-      <div class="section-body" id="section-body"></div>
-
-      <div class="section-extras-bottom" id="section-extras-bottom"></div>
     </div>
   </div>
 </div>
-
-<!-- Hintergrundmusik (MP3) -->
-<audio id="bg-audio" loop preload="auto">
-  <source src="audio/leerebruecke_bg.mp3" type="audio/mpeg"/>
-</audio>
 
 <script>
 /* ----------------------------- PAGE DATA ----------------------------- */
@@ -618,7 +639,7 @@ const arrowUp = $("#arrow-up");
 const arrowDown = $("#arrow-down");
 const frame = $(".page-frame");
 const slotWindow = $(".slot-window");
-const audioEl = $("#bg-audio");
+const scaleInner = $(".scale-inner");
 
 /* ----------------------------- CSS HELPERS ----------------------------- */
 
@@ -628,28 +649,36 @@ const cssNum = (name, fallback=0) => {
   return Number.isFinite(v) ? v : fallback;
 };
 
-/* ----------------------------- GEOMETRY ----------------------------- */
+/* ----------------------------- GEOMETRY / SCALE ----------------------------- */
 
-let ITEM_HEIGHT = 42;
-let STEP_Y = 42;
 let BASE_Y = 0;
+let STEP_Y = cssNum("--item-h", 42);
+let CARD_SCALE = 1;
 
-/* Slot-Geometrie: immer mittig zwischen den Pfeilen, auch im kleinen Fenster */
+/* Ganzes Blatt skalieren */
+function updateCardScale(){
+  if (!scaleInner) return;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const baseW = 810;
+  const baseH = 1440;
+  const s = Math.min(vw / baseW, vh / baseH);
+  CARD_SCALE = s || 1;
+  scaleInner.style.setProperty("--card-scale", CARD_SCALE.toFixed(3));
+}
+
+/* Slot mittig verriegeln – in lokalen Koordinaten (Skalierung wird rausgerechnet) */
 function calcGeometry(){
   if (!slotWindow || !list.children.length) return;
 
   const items = list.children;
   if (items.length < 2) return;
 
-  const centerItem = items[1];
-  const belowItem  = items[2] || items[0];
-
-  /* zum Messen alle Y-Verschiebung kurz neutralisieren */
   list.style.transition = "none";
   list.style.transform = "translateX(-50%) translateY(0px)";
 
-  /* FIX: Safari/iOS – Rects stabilisieren */
-  void list.offsetHeight;
+  const centerItem = items[1];
+  const belowItem  = items[2] || items[0];
 
   const winRect    = slotWindow.getBoundingClientRect();
   const centerRect = centerItem.getBoundingClientRect();
@@ -659,14 +688,21 @@ function calcGeometry(){
   const centerCenter = centerRect.top + centerRect.height / 2;
   const belowCenter  = belowRect.top + belowRect.height / 2;
 
-  BASE_Y = windowCenter - centerCenter;
-  STEP_Y = belowCenter - centerCenter;
+  const s = CARD_SCALE || 1;
+
+  BASE_Y = (windowCenter - centerCenter) / s;
+  STEP_Y = (belowCenter - centerCenter) / s;
 
   if (!Number.isFinite(STEP_Y) || Math.abs(STEP_Y) < 1){
     STEP_Y = cssNum("--item-h", 42);
   }
 
-  ITEM_HEIGHT = STEP_Y;
+  if (!Number.isFinite(BASE_Y)){
+    const itemH = cssNum("--item-h", 42);
+    const winH  = cssNum("--window-h", 65);
+    const centerOffset = (winH - itemH) / 2;
+    BASE_Y = -itemH + centerOffset;
+  }
 
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
@@ -687,8 +723,6 @@ let typingToken = 0;
 
 let iconsRevealTimer = null;
 let emailRevealTimer = null;
-
-/* ----------------------------- BUSY ----------------------------- */
 
 function setBusy(){
   busy = true;
@@ -721,7 +755,7 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG swap helper */
+/* SVG helper */
 function iconSrc(file){
   const s = String(file || "").trim();
   if (!s) return "";
@@ -778,7 +812,7 @@ function clearTyping(){
   emailRevealTimer = null;
 }
 
-/* ----------------------------- SEGMENTS ----------------------------- */
+/* ----------------------------- SEGMENTS / TEXT ----------------------------- */
 
 function buildSegments(page){
   const segs = [];
@@ -808,8 +842,6 @@ function buildSegments(page){
   return segs;
 }
 
-/* ----------------------------- MEASURE MAX CHARS ----------------------------- */
-
 function measureCharWidthPx(){
   const probe = document.createElement("span");
   probe.style.position = "absolute";
@@ -831,8 +863,6 @@ function computeMaxCharsPerLine(){
   return Math.max(12, max);
 }
 
-/* ----------------------------- INLINE TOKEN PARSER ----------------------------- */
-
 function extractInlineParts(text){
   const s = String(text || "");
   const parts = [];
@@ -849,8 +879,6 @@ function extractInlineParts(text){
   if (i < s.length) parts.push({ type:"text", value:s.slice(i) });
   return parts;
 }
-
-/* ----------------------------- WRAP TEXT INTO LINES ----------------------------- */
 
 function wrapParagraphToLines(paragraph, maxChars){
   const words = paragraph.split(/\s+/).filter(Boolean);
@@ -930,8 +958,6 @@ function segmentToLineObjects(seg, maxChars){
 
   return outLines;
 }
-
-/* ----------------------------- BUILD LINE DOM ----------------------------- */
 
 function buildLinesDOMFromSegments(segs){
   bodyEl.innerHTML = "";
@@ -1031,6 +1057,10 @@ function buildIconRow(page){
     const a = document.createElement("a");
     a.className = "icon-btn";
     a.dataset.label = iconLabelFromFile(file);
+
+    const span = cssNum("--icon-rand-span-ms", 180);
+    const rand = Math.floor(Math.random() * span);
+    a.style.setProperty("--ic-delay", `${rand}ms`);
 
     if (href){
       a.href = href;
@@ -1192,15 +1222,6 @@ function updateActive(){
 
   const pageId = center?.dataset.pageId || "";
   showPage(resolvePageById(pageId));
-
-  /* FIX (nur mobil): Safari/iOS braucht oft 1–2 Frames nach active/scale */
-  if (matchMedia("(max-width: 768px)").matches){
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        calcGeometry();
-      });
-    });
-  }
 }
 
 /* ----------------------------- TRANSITION HELP ----------------------------- */
@@ -1339,64 +1360,20 @@ function preloadIcons(){
   return Promise.all(loads);
 }
 
-/* ----------------------------- AUDIO (MP3) ----------------------------- */
-
-let audioStarted = false;
-
-function startAudioOnce(){
-  if (audioStarted) return;
-  if (!audioEl) { audioStarted = true; return; }
-
-  audioStarted = true;
-  audioEl.volume = 0;
-  const targetVolume = 0.35;
-  const fadeMs = 5000;
-  const steps = 40;
-  const stepTime = fadeMs / steps;
-
-  const playPromise = audioEl.play();
-  if (playPromise && typeof playPromise.then === "function"){
-    playPromise.then(() => {
-      let step = 0;
-      const id = setInterval(() => {
-        step++;
-        const v = Math.min(targetVolume, (step / steps) * targetVolume);
-        audioEl.volume = v;
-        if (step >= steps || audioEl.paused){
-          clearInterval(id);
-        }
-      }, stepTime);
-    }).catch(() => {
-      /* Autoplay blockiert – dann bleibt es still */
-    });
-  } else {
-    audioEl.volume = targetVolume;
-  }
-}
-
-function onFirstUserEvent(){
-  startAudioOnce();
-  ["pointerdown","keydown","wheel","touchstart"].forEach(ev => {
-    document.removeEventListener(ev, onFirstUserEvent);
-  });
-}
-
-["pointerdown","keydown","wheel","touchstart"].forEach(ev => {
-  document.addEventListener(ev, onFirstUserEvent, { passive:true });
-});
-
 /* ----------------------------- INIT ----------------------------- */
 
-/* Reihenfolge wichtig: erst Slot füllen, dann Geometrie messen */
 buildSlotItems("klang");
+updateCardScale();
 calcGeometry();
 applyInputMode();
 
 let resizeTimer = null;
 window.addEventListener("resize", () => {
   applyInputMode();
+
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
+    updateCardScale();
     calcGeometry();
     updateActive();
   }, 120);
