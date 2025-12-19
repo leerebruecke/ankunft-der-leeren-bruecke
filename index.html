@@ -537,7 +537,7 @@ und Schein bleibt, solange Winter ist.`,
 sie zeigen meine Arbeit in ihrem Anfang.“`,
     attrib:"Vincent",
     aside:
-`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und
+`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
 zuschlagen.`,
     testLinkWord:"zuschlagen",
     testLinkHref:"https://www.vangoghmuseum.nl/"
@@ -633,9 +633,9 @@ let ITEM_HEIGHT = 42;
 let STEP_Y = 42;
 let BASE_Y = 0;
 
-/* Slot-Geometrie: robust gegen Mobile-Scaling/Subpixel & aktives Item-Scaling */
+/* Slot-Geometrie: immer mittig zwischen den Pfeilen, auch im kleinen Fenster */
 function calcGeometry(){
-  if (!slotWindow || !list || !list.children.length) return;
+  if (!slotWindow || !list.children.length) return;
 
   const items = list.children;
   if (items.length < 2) return;
@@ -643,19 +643,11 @@ function calcGeometry(){
   const centerItem = items[1];
   const belowItem  = items[2] || items[0];
 
-  // Zustand sichern
-  const prevTransition = list.style.transition;
-  const prevTransform  = list.style.transform;
-
-  // Aktivzustand fürs Messen stabilisieren (active skaliert anders)
-  const hadActive = centerItem.classList.contains("active");
-  centerItem.classList.add("active");
-
-  // Zum Messen: Transition aus, Y neutralisieren
+  /* zum Messen alle Y-Verschiebung kurz neutralisieren */
   list.style.transition = "none";
   list.style.transform = "translateX(-50%) translateY(0px)";
 
-  // iOS/Safari: Layout commit erzwingen, sonst werden teils alte Rects geliefert
+  /* iOS/Safari: Layout-Commit erzwingen, damit Rects nicht „alt“ sind */
   void list.offsetHeight;
 
   const winRect    = slotWindow.getBoundingClientRect();
@@ -666,27 +658,16 @@ function calcGeometry(){
   const centerCenter = centerRect.top + centerRect.height / 2;
   const belowCenter  = belowRect.top + belowRect.height / 2;
 
-  let baseY = windowCenter - centerCenter;
-  let stepY = belowCenter - centerCenter;
+  BASE_Y = windowCenter - centerCenter;
+  STEP_Y = belowCenter - centerCenter;
 
-  if (!Number.isFinite(stepY) || Math.abs(stepY) < 1){
-    stepY = cssNum("--item-h", 42);
+  if (!Number.isFinite(STEP_Y) || Math.abs(STEP_Y) < 1){
+    STEP_Y = cssNum("--item-h", 42);
   }
 
-  // Subpixel-Drift killen (mobile scaling macht sonst sichtbare 0.xpx Offsets)
-  BASE_Y = Math.round(baseY);
-  STEP_Y = Math.round(stepY);
   ITEM_HEIGHT = STEP_Y;
 
-  // Ergebnis setzen
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
-
-  // Zustand zurück
-  list.style.transition = prevTransition;
-  if (!hadActive) centerItem.classList.remove("active");
-
-  // prevTransform nicht wiederherstellen, weil wir bewusst auf BASE_Y landen.
-  // (prevTransform war im Normalfall sowieso schon BASE_Y oder 0 in Messphase)
 }
 
 /* ----------------------------- TIMING/STATE ----------------------------- */
@@ -958,8 +939,8 @@ function buildLinesDOMFromSegments(segs){
   const lineObjs = [];
   segs.forEach(seg => lineObjs.push(...segmentToLineObjects(seg, maxChars)));
 
-  const frag = document.createDocumentFragment();
   const nodes = [];
+  const frag = document.createDocumentFragment();
 
   lineObjs.forEach(lo => {
     const div = document.createElement("div");
@@ -1210,6 +1191,13 @@ function updateActive(){
 
   const pageId = center?.dataset.pageId || "";
   showPage(resolvePageById(pageId));
+
+  /* Minimal-Fix: nach active-Apply nochmals sauber messen (iOS/Safari timing) */
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      calcGeometry();
+    });
+  });
 }
 
 /* ----------------------------- TRANSITION HELP ----------------------------- */
