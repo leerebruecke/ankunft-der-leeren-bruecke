@@ -10,7 +10,7 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  --ui-scale:1; /* bleibt 1, weil wir jetzt das ganze Blatt skalieren */
+  --ui-scale:1;
 
   /* geometry base */
   --item-h-base:42px;
@@ -31,9 +31,6 @@
   --roll-lift-base:-40px;
   --roll-lift:calc(var(--roll-lift-base) * var(--ui-scale));
 
-  /* Slot-Nudge: visueller Pixel-Offset für die Slot-Zentrierung (Default 0) */
-  --slot-nudge:0px;
-
   /* slot width */
   --slot-w-min:240px;
   --slot-w-pref:62%;
@@ -51,7 +48,7 @@
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
 
-  /* icon pad (unterlage) */
+  /* icon pad */
   --icon-pad-color:var(--text-main);
   --icon-pad-radius:12px;
 
@@ -66,6 +63,9 @@
     rgba(0,0,0,0.85) 78%,
     transparent 100%
   );
+
+  /* NEU: Slot-Nudge (lokale Slot-Pixel, wirkt nur über calcGeometry) */
+  --slot-nudge:0px;
 }
 
 /* RESET */
@@ -80,14 +80,13 @@ html,body{
   overflow:hidden;
 }
 
-/* Wir zentrieren horizontal, oben am Bildschirm */
 body{
   display:flex;
   align-items:flex-start;
   justify-content:center;
 }
 
-/* Neues: fester „Blatt“-Rahmen, der skaliert wird */
+/* Blatt */
 .scale-wrap{
   position:fixed;
   inset:0;
@@ -98,13 +97,13 @@ body{
 }
 
 .scale-inner{
-  width:810px;   /* Basisgröße des Blattes */
-  height:1440px; /* 9:16-Verhältnis */
+  width:810px;
+  height:1440px;
   transform-origin:top center;
   transform:scale(var(--card-scale,1));
 }
 
-/* FRAME – füllt das Blatt komplett */
+/* FRAME */
 .page-frame{
   position:relative;
   width:810px;
@@ -289,7 +288,6 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* weiße/gelbliche Unterlage, etwas > 50% Fläche */
 .icon-btn::before{
   content:"";
   position:absolute;
@@ -318,7 +316,6 @@ body{
   transform:translateY(0);
 }
 
-/* Tooltip */
 .icon-btn[data-label]::after{
   content:attr(data-label);
   position:absolute;
@@ -368,14 +365,13 @@ body{
   color:var(--text-main);
 }
 
-/* Inline link */
 .inline-link{
   color:#7aa8ff;
   text-decoration:underline;
   text-underline-offset:2px;
 }
 
-/* MOBILE – deine alten Anpassungen bleiben, plus Slot-Nudge */
+/* MOBILE */
 @media (max-width: 768px){
   :root{
     --arrow-size-base:10px;
@@ -386,10 +382,10 @@ body{
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
-    /* deine mobile Icon-Größe */
+    /* wenn du Icons schon auf 80 gesetzt hattest: */
     --icon-size-base:80px;
 
-    /* dein Slot-Text-Offset (visuelle px): + nach unten, - nach oben */
+    /* NEU: hier stellst du die Slot-Zentrierung ein (z.B. 16px runter) */
     --slot-nudge:16px;
   }
 
@@ -412,7 +408,8 @@ body{
   }
 
   .arrow-up{margin-bottom:0;}
-  .arrow-down{margin-top:20px;} /* dein Wert */
+  /* wenn du Arrow-Down bewusst tiefer wolltest: */
+  .arrow-down{margin-top:20px;}
 
   .arrow{pointer-events:none;}
 
@@ -420,11 +417,6 @@ body{
 }
 
 @media (max-width: 420px){
-  :root{
-    /* damit es auf sehr kleinen Geräten nicht wieder überschrieben wird */
-    --slot-nudge:16px;
-  }
-
   .slot-group{
     transform:translateY(var(--roll-lift)) scale(0.78);
   }
@@ -524,22 +516,10 @@ das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
     attrib:"Goethe (abgewandelt)",
     icons:[
-      {
-        file:"Spotify.png",
-        href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ"
-      },
-      {
-        file:"Apple_Music.png",
-        href:"https://music.apple.com/us/artist/leerebruecke/1830878673"
-      },
-      {
-        file:"YouTube_Music.png",
-        href:"https://music.youtube.com/channel/UC9lKwSQ-gNTG1FM5K64ZHQA?si=IIzIUMERgRlcYp4l"
-      },
-      {
-        file:"SoundCloud.png",
-        href:"https://soundcloud.com/leerebruecke-0"
-      }
+      { file:"Spotify.png", href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ" },
+      { file:"Apple_Music.png", href:"https://music.apple.com/us/artist/leerebruecke/1830878673" },
+      { file:"YouTube_Music.png", href:"https://music.youtube.com/channel/UC9lKwSQ-gNTG1FM5K64ZHQA?si=IIzIUMERgRlcYp4l" },
+      { file:"SoundCloud.png", href:"https://soundcloud.com/leerebruecke-0" }
     ]
   },
 
@@ -550,14 +530,8 @@ und Schein bleibt, solange Winter ist.`,
     attrib:"Kafka",
     aside:"Für Klingen und Rüstung.",
     icons:[
-      {
-        file:"PayPal.png",
-        href:"https://www.paypal.com/paypalme/leerebruecke"
-      },
-      {
-        file:"Patreon.png",
-        href:"https://www.patreon.com/cw/leerebruecke"
-      }
+      { file:"PayPal.png", href:"https://www.paypal.com/paypalme/leerebruecke" },
+      { file:"Patreon.png", href:"https://www.patreon.com/cw/leerebruecke" }
     ]
   },
 
@@ -584,22 +558,10 @@ Es bleibt der Tiefe Bürde,
 wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
     attrib:"Nietzsche (abgewandelt)",
     icons:[
-      {
-        file:"TikTok.png",
-        href:"https://www.tiktok.com/@leerebruecke"
-      },
-      {
-        file:"Instagram.png",
-        href:"https://www.instagram.com/leerebruecke/"
-      },
-      {
-        file:"YouTube.png",
-        href:"https://www.youtube.com/@leerebruecke"
-      },
-      {
-        file:"Twitch.png",
-        href:"https://www.twitch.tv/leerebruecke"
-      }
+      { file:"TikTok.png", href:"https://www.tiktok.com/@leerebruecke" },
+      { file:"Instagram.png", href:"https://www.instagram.com/leerebruecke/" },
+      { file:"YouTube.png", href:"https://www.youtube.com/@leerebruecke" },
+      { file:"Twitch.png", href:"https://www.twitch.tv/leerebruecke" }
     ]
   },
 
@@ -665,7 +627,6 @@ let BASE_Y = 0;
 let STEP_Y = cssNum("--item-h", 42);
 let CARD_SCALE = 1;
 
-/* Ganzes Blatt skalieren */
 function updateCardScale(){
   if (!scaleInner) return;
   const vw = window.innerWidth;
@@ -677,7 +638,7 @@ function updateCardScale(){
   scaleInner.style.setProperty("--card-scale", CARD_SCALE.toFixed(3));
 }
 
-/* Slot mittig verriegeln – in lokalen Koordinaten (Skalierung wird rausgerechnet) */
+/* Slot mittig verriegeln – robust gegen Mehrfach-Scaling */
 function calcGeometry(){
   if (!slotWindow || !list.children.length) return;
 
@@ -698,7 +659,10 @@ function calcGeometry(){
   const centerCenter = centerRect.top + centerRect.height / 2;
   const belowCenter  = belowRect.top + belowRect.height / 2;
 
-  const s = CARD_SCALE || 1;
+  /* NEU: Gesamt-Skalierung aus realer Slot-Höhe vs. CSS-Var (enthält card-scale UND slot-group-scale) */
+  const winHcss = cssNum("--window-h", 65);
+  let s = winHcss > 0 ? (winRect.height / winHcss) : (CARD_SCALE || 1);
+  if (!Number.isFinite(s) || s <= 0.001) s = (CARD_SCALE || 1);
 
   BASE_Y = (windowCenter - centerCenter) / s;
   STEP_Y = (belowCenter - centerCenter) / s;
@@ -714,9 +678,8 @@ function calcGeometry(){
     BASE_Y = -itemH + centerOffset;
   }
 
-  /* Nudge: in visuell gedachten Pixeln; wir rechnen auf lokale Koordinaten um */
-  const nudgePx = cssNum("--slot-nudge", 0);
-  BASE_Y += (nudgePx / s);
+  /* NEU: Nudge in lokalen Slot-Pixeln */
+  BASE_Y += cssNum("--slot-nudge", 0);
 
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
@@ -769,18 +732,12 @@ function orderedPages(centerId){
   return order;
 }
 
-/* SVG helper */
 function iconSrc(file){
   const s = String(file || "").trim();
   if (!s) return "";
   const lower = s.toLowerCase();
-
-  if (lower.endsWith(".png")){
-    return `Grafiken/${s.slice(0, -4)}.svg`;
-  }
-  if (lower.endsWith(".svg")){
-    return `Grafiken/${s}`;
-  }
+  if (lower.endsWith(".png")) return `Grafiken/${s.slice(0, -4)}.svg`;
+  if (lower.endsWith(".svg")) return `Grafiken/${s}`;
   return `Grafiken/${s}`;
 }
 
