@@ -10,8 +10,7 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  /* Nur für Mobile leicht hochdrehen (siehe Media Query) */
-  --ui-scale:1;
+  --ui-scale:1; /* bleibt 1, weil wir jetzt das ganze Blatt skalieren */
 
   /* geometry base */
   --item-h-base:42px;
@@ -32,6 +31,9 @@
   --roll-lift-base:-40px;
   --roll-lift:calc(var(--roll-lift-base) * var(--ui-scale));
 
+  /* Slot-Nudge: visueller Pixel-Offset für die Slot-Zentrierung (Default 0) */
+  --slot-nudge:0px;
+
   /* slot width */
   --slot-w-min:240px;
   --slot-w-pref:62%;
@@ -48,10 +50,6 @@
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
-
-  /* Icon spacing (damit 4 nebeneinander eher passen) */
-  --post-gap-base:1rem;
-  --post-gap:calc(var(--post-gap-base) * var(--ui-scale));
 
   /* icon pad (unterlage) */
   --icon-pad-color:var(--text-main);
@@ -80,7 +78,6 @@ html,body{
   font-family:'Lucida Console',monospace;
   user-select:none;
   overflow:hidden;
-  touch-action:manipulation;
 }
 
 /* Wir zentrieren horizontal, oben am Bildschirm */
@@ -90,7 +87,7 @@ body{
   justify-content:center;
 }
 
-/* fester „Blatt“-Rahmen, der skaliert wird */
+/* Neues: fester „Blatt“-Rahmen, der skaliert wird */
 .scale-wrap{
   position:fixed;
   inset:0;
@@ -102,7 +99,7 @@ body{
 
 .scale-inner{
   width:810px;   /* Basisgröße des Blattes */
-  height:1440px; /* 9:16 */
+  height:1440px; /* 9:16-Verhältnis */
   transform-origin:top center;
   transform:scale(var(--card-scale,1));
 }
@@ -268,7 +265,7 @@ body{
 .post-block{
   margin-top:0.25rem;
   display:flex;
-  gap:var(--post-gap);
+  gap:calc(1rem * var(--ui-scale));
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
@@ -292,7 +289,7 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* Unterlage */
+/* weiße/gelbliche Unterlage, etwas > 50% Fläche */
 .icon-btn::before{
   content:"";
   position:absolute;
@@ -378,48 +375,44 @@ body{
   text-underline-offset:2px;
 }
 
-/* MOBILE – nur hier größer machen, Layout bleibt gleich */
+/* MOBILE – deine alten Anpassungen bleiben, plus Slot-Nudge */
 @media (max-width: 768px){
   :root{
-    /* der Hebel: alles (außer Hintergrund/Logo-Prozentlogik) wird größer */
-    --ui-scale:1.16;
-
-    --arrow-size-base:16px;
-    --slot-font-base:1.2rem;
-    --text-font-base:1.2rem;
+    --arrow-size-base:10px;
+    --slot-font-base:0.74rem;
+    --text-font-base:0.74rem;
 
     --slot-w-min:190px;
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
+    /* deine mobile Icon-Größe */
     --icon-size-base:80px;
 
-    /* damit 4 Icons eher nebeneinander bleiben */
-    --post-gap-base:0.75rem;
+    /* dein Slot-Text-Offset (visuelle px): + nach unten, - nach oben */
+    --slot-nudge:16px;
   }
 
   .logo-img{
     width:62%;
-    margin-top:1%;
+    margin-top:8%;
     margin-bottom:0.8rem;
   }
 
-  /* vorher 0.82 war zu klein – jetzt nur leicht kleiner, damit die Proportionen bleiben */
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.92);
+    transform:translateY(var(--roll-lift)) scale(0.82);
   }
 
   .section-area{
-    margin-top:0.85rem;
-    width:min(92%,36rem);
+    margin-top:0.9rem;
   }
 
   .page-background{
     background-size:contain;
   }
 
-  .arrow-up{margin-bottom:-20px;}
-  .arrow-down{margin-top:20px;}
+  .arrow-up{margin-bottom:0;}
+  .arrow-down{margin-top:20px;} /* dein Wert */
 
   .arrow{pointer-events:none;}
 
@@ -428,10 +421,12 @@ body{
 
 @media (max-width: 420px){
   :root{
-    --ui-scale:1.16;
+    /* damit es auf sehr kleinen Geräten nicht wieder überschrieben wird */
+    --slot-nudge:16px;
   }
+
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.90);
+    transform:translateY(var(--roll-lift)) scale(0.78);
   }
 }
 </style>
@@ -718,6 +713,10 @@ function calcGeometry(){
     const centerOffset = (winH - itemH) / 2;
     BASE_Y = -itemH + centerOffset;
   }
+
+  /* Nudge: in visuell gedachten Pixeln; wir rechnen auf lokale Koordinaten um */
+  const nudgePx = cssNum("--slot-nudge", 0);
+  BASE_Y += (nudgePx / s);
 
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
@@ -1343,12 +1342,6 @@ frame.addEventListener("wheel", e => {
     dir > 0 ? moveDown() : moveUp();
   }
 }, { passive:false });
-
-/* ----------------------------- ZOOM BLOCK (iOS) ----------------------------- */
-
-["gesturestart","gesturechange","gestureend"].forEach(ev => {
-  document.addEventListener(ev, e => e.preventDefault(), { passive:false });
-});
 
 /* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
 
