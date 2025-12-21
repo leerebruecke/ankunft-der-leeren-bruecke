@@ -12,7 +12,8 @@
 
   --ui-scale:1;
 
-  --slot-nudge 0px;
+  /* FIX: korrekte Custom-Property-Syntax */
+  --slot-nudge: 0px;
 
   /* geometry base */
   --item-h-base:42px;
@@ -57,7 +58,7 @@
   /* email */
   --email-min-delay-ms:140;
 
-  /* restore stable mask */
+  /* stable mask */
   --mask-grad:linear-gradient(
     to bottom,
     transparent 0%,
@@ -78,6 +79,9 @@ html,body{
   font-family:'Lucida Console',monospace;
   user-select:none;
   overflow:hidden;
+
+  /* iOS: keine automatische Textskalierung */
+  -webkit-text-size-adjust:100%;
 }
 
 body{
@@ -225,20 +229,13 @@ body{
 .section-title{display:none;}
 
 /* TOP EXTRAS */
-.section-extras-top{
-  margin-bottom:0.65rem;
-}
+.section-extras-top{ margin-bottom:0.65rem; }
 
 /* BODY */
-.section-body{
-  line-height:1.45;
-  opacity:0.92;
-}
+.section-body{ line-height:1.45; opacity:0.92; }
 
 /* BOTTOM EXTRAS */
-.section-extras-bottom{
-  margin-top:0.7rem;
-}
+.section-extras-bottom{ margin-top:0.7rem; }
 
 /* Seg base */
 .seg{display:block;margin:0;padding:0;}
@@ -309,10 +306,7 @@ body{
   filter:none;
 }
 
-.icon-btn.visible{
-  opacity:1;
-  transform:translateY(0);
-}
+.icon-btn.visible{ opacity:1; transform:translateY(0); }
 
 .icon-btn[data-label]::after{
   content:attr(data-label);
@@ -332,10 +326,7 @@ body{
   transition:opacity 140ms ease-out;
   z-index:2;
 }
-
-.icon-btn[data-label]:hover::after{
-  opacity:1;
-}
+.icon-btn[data-label]:hover::after{ opacity:1; }
 
 /* Email row */
 .email-row{
@@ -349,11 +340,7 @@ body{
     opacity var(--icon-fade-ms) ease-out,
     transform var(--icon-fade-ms) ease-out;
 }
-
-.email-row.visible{
-  opacity:1;
-  transform:translateY(0);
-}
+.email-row.visible{ opacity:1; transform:translateY(0); }
 
 .email-row a{
   font-style:italic;
@@ -372,8 +359,9 @@ body{
 /* MOBILE */
 @media (max-width: 768px){
   :root{
-     --slot-nudge 100px;
-    /* keep your bigger text */
+    /* FIX: wieder korrekt gesetzt */
+    --slot-nudge: 16px;
+
     --arrow-size-base:14px;
     --slot-font-base:1.35rem;
     --text-font-base:1.35rem;
@@ -382,40 +370,37 @@ body{
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
-    /* your current icon size choice */
     --icon-size-base:120px;
 
-    /* KEY: bigger step + tighter window so the upper word is clipped */
+    /* Ziel: Nachbarwörter wegschneiden durch größere Schrittweite,
+       aber ohne aktives Item zu clippen -> aktives Scale auf Mobile runter */
     --item-h-base:56px;
     --window-h-base:56px;
   }
 
-  /* move headline slightly up (only the logo) */
   .logo-img{
     width:62%;
     margin-top:-0.25rem;
     margin-bottom:0.8rem;
   }
 
-  /* keep layout rigid; mild scale (not tiny) */
   .slot-group{
     transform:translateY(var(--roll-lift)) scale(0.92);
   }
 
-  .section-area{
-    margin-top:0.9rem;
+  /* FIX: aktives Item nicht mehr auf 1.05 aufblasen -> kein “Reinragen” */
+  .slot-item.active{
+    transform:scale(1);
   }
 
-  .page-background{
-    background-size:contain;
-  }
+  .section-area{ margin-top:0.9rem; }
+  .page-background{ background-size:contain; }
 
-  /* keep your arrow spacing choices */
-  .arrow-up{margin-bottom:-8px;}
-  .arrow-down{margin-top:20px;}
+  .arrow-up{ margin-bottom:-8px; }
+  .arrow-down{ margin-top:20px; }
 
-  .arrow{pointer-events:none;}
-  .icon-btn[data-label]::after{display:none;}
+  .arrow{ pointer-events:none; }
+  .icon-btn[data-label]::after{ display:none; }
 }
 
 @media (max-width: 420px){
@@ -545,7 +530,7 @@ und Schein bleibt, solange Winter ist.`,
 sie zeigen meine Arbeit in ihrem Anfang.“`,
     attrib:"Vincent",
     aside:
-`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und 
+`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und
 zuschlagen.`,
     testLinkWord:"zuschlagen",
     testLinkHref:"https://www.vangoghmuseum.nl/"
@@ -589,13 +574,7 @@ blickt der Abgrund auch in dich hinein.`,
     email:"Kuumitori@gmail.com"
   },
 
-  {
-    id:"orden",
-    label:"Leerebrücke",
-    italicAll:true,
-    text:"Ein Orden mythopoetischer Geisterjäger."
-  },
-
+  { id:"orden", label:"Leerebrücke", italicAll:true, text:"Ein Orden mythopoetischer Geisterjäger." },
   { id:"unter", label:"Unter", text:"Unter dir der Grund." }
 ];
 
@@ -661,7 +640,6 @@ function calcGeometry(){
   const centerCenter = centerRect.top + centerRect.height / 2;
   const belowCenter  = belowRect.top + belowRect.height / 2;
 
-  /* Gesamt-Skalierung aus realer Slot-Höhe vs. CSS-Var (enthält card-scale UND slot-group-scale) */
   const winHcss = cssNum("--window-h", 65);
   let s = winHcss > 0 ? (winRect.height / winHcss) : (CARD_SCALE || 1);
   if (!Number.isFinite(s) || s <= 0.001) s = (CARD_SCALE || 1);
@@ -679,6 +657,9 @@ function calcGeometry(){
     const centerOffset = (winH - itemH) / 2;
     BASE_Y = -itemH + centerOffset;
   }
+
+  /* FIX: Nudge wirklich anwenden */
+  BASE_Y += cssNum("--slot-nudge", 0);
 
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
@@ -1282,6 +1263,17 @@ frame.addEventListener("touchend", e => {
   if (dy > 50) moveUp();
   if (dy < -50) moveDown();
 }, { passive:true });
+
+/* iOS: Multi-Touch (Pinch) so gut wie möglich unterbinden */
+frame.addEventListener("touchstart", e => {
+  if (e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive:false });
+frame.addEventListener("touchmove", e => {
+  if (e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive:false });
+document.addEventListener("gesturestart", e => e.preventDefault(), { passive:false });
+document.addEventListener("gesturechange", e => e.preventDefault(), { passive:false });
+document.addEventListener("gestureend", e => e.preventDefault(), { passive:false });
 
 /* ----------------------------- WHEEL ----------------------------- */
 
