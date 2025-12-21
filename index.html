@@ -10,7 +10,8 @@
   --bg-root:#1a1218;
   --text-main:#f5f0e8;
 
-  --ui-scale:1; /* bleibt 1, weil wir jetzt das ganze Blatt skalieren */
+  /* Nur für Mobile leicht hochdrehen (siehe Media Query) */
+  --ui-scale:1;
 
   /* geometry base */
   --item-h-base:42px;
@@ -21,7 +22,7 @@
   --slot-font-base:0.86rem;
   --text-font-base:0.86rem;
 
-  /* abgeleitet, aber effektiv konstant (ui-scale = 1) */
+  /* abgeleitet */
   --item-h:calc(var(--item-h-base) * var(--ui-scale));
   --window-h:calc(var(--window-h-base) * var(--ui-scale));
   --arrow-size:calc(var(--arrow-size-base) * var(--ui-scale));
@@ -47,6 +48,10 @@
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
   --icon-rand-span-ms:180;
+
+  /* Icon spacing (damit 4 nebeneinander eher passen) */
+  --post-gap-base:1rem;
+  --post-gap:calc(var(--post-gap-base) * var(--ui-scale));
 
   /* icon pad (unterlage) */
   --icon-pad-color:var(--text-main);
@@ -75,6 +80,7 @@ html,body{
   font-family:'Lucida Console',monospace;
   user-select:none;
   overflow:hidden;
+  touch-action:manipulation;
 }
 
 /* Wir zentrieren horizontal, oben am Bildschirm */
@@ -84,7 +90,7 @@ body{
   justify-content:center;
 }
 
-/* Neues: fester „Blatt“-Rahmen, der skaliert wird */
+/* fester „Blatt“-Rahmen, der skaliert wird */
 .scale-wrap{
   position:fixed;
   inset:0;
@@ -96,7 +102,7 @@ body{
 
 .scale-inner{
   width:810px;   /* Basisgröße des Blattes */
-  height:1440px; /* 9:16-Verhältnis */
+  height:1440px; /* 9:16 */
   transform-origin:top center;
   transform:scale(var(--card-scale,1));
 }
@@ -155,9 +161,8 @@ body{
 
 .slot-list{
   position:absolute;
-  top:0;              /* FIX: eindeutiger Nullpunkt im Window */
   left:50%;
-  transform:translate3d(-50%, 0px, 0); /* FIX: stabilere Subpixel-Behandlung */
+  transform:translateX(-50%) translateY(0);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -166,7 +171,6 @@ body{
 
 .slot-item{
   height:var(--item-h);
-  line-height:var(--item-h);          /* FIX: optische Vertikalzentrierung stabilisieren */
   font-size:var(--slot-font);
   letter-spacing:0.1em;
   display:flex;
@@ -174,7 +178,6 @@ body{
   justify-content:center;
   opacity:0.20;
   transform:scale(0.85);
-  transform-origin:center center;
   transition:opacity 150ms, transform 150ms;
   white-space:nowrap;
   padding:0 0.2rem;
@@ -265,7 +268,7 @@ body{
 .post-block{
   margin-top:0.25rem;
   display:flex;
-  gap:calc(1rem * var(--ui-scale));
+  gap:var(--post-gap);
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
@@ -289,7 +292,7 @@ body{
   transition-delay: var(--ic-delay, 0ms);
 }
 
-/* weiße/gelbliche Unterlage, etwas > 50% Fläche */
+/* Unterlage */
 .icon-btn::before{
   content:"";
   position:absolute;
@@ -375,9 +378,12 @@ body{
   text-underline-offset:2px;
 }
 
-/* MOBILE – Anpassungen bleiben, aber: keine zusätzliche Slot-Group-Skalierung mehr */
+/* MOBILE – nur hier größer machen, Layout bleibt gleich */
 @media (max-width: 768px){
   :root{
+    /* der Hebel: alles (außer Hintergrund/Logo-Prozentlogik) wird größer */
+    --ui-scale:1.22;
+
     --arrow-size-base:10px;
     --slot-font-base:0.74rem;
     --text-font-base:0.74rem;
@@ -387,20 +393,25 @@ body{
     --slot-w-max:400px;
 
     --icon-size-base:56px;
+
+    /* damit 4 Icons eher nebeneinander bleiben */
+    --post-gap-base:0.75rem;
   }
 
   .logo-img{
     width:62%;
-    margin-top:8%;
+    margin-top:6%;
     margin-bottom:0.8rem;
   }
 
+  /* vorher 0.82 war zu klein – jetzt nur leicht kleiner, damit die Proportionen bleiben */
   .slot-group{
-    transform:translateY(var(--roll-lift)); /* FIX: kein scale() -> keine doppelte Transform-Rundung */
+    transform:translateY(var(--roll-lift)) scale(0.92);
   }
 
   .section-area{
-    margin-top:0.9rem;
+    margin-top:0.85rem;
+    width:min(92%,36rem);
   }
 
   .page-background{
@@ -416,8 +427,11 @@ body{
 }
 
 @media (max-width: 420px){
+  :root{
+    --ui-scale:1.16;
+  }
   .slot-group{
-    transform:translateY(var(--roll-lift)); /* FIX: kein scale() */
+    transform:translateY(var(--roll-lift)) scale(0.90);
   }
 }
 </style>
@@ -676,10 +690,7 @@ function calcGeometry(){
   if (items.length < 2) return;
 
   list.style.transition = "none";
-  list.style.transform = "translate3d(-50%, 0px, 0)";
-
-  /* FIX: Safari/Chromium zu einem sauberen Layout-Commit zwingen */
-  void list.offsetHeight;
+  list.style.transform = "translateX(-50%) translateY(0px)";
 
   const centerItem = items[1];
   const belowItem  = items[2] || items[0];
@@ -708,7 +719,7 @@ function calcGeometry(){
     BASE_Y = -itemH + centerOffset;
   }
 
-  list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
 
 /* ----------------------------- TIMING/STATE ----------------------------- */
@@ -1247,14 +1258,14 @@ function moveDown(){
   setBusy();
 
   list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-  list.style.transform = `translate3d(-50%, ${BASE_Y - STEP_Y}px, 0)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
 
   withTransitionEnd(list, () => {
     const first = list.firstElementChild;
     if (first) list.appendChild(first);
 
     list.style.transition = "none";
-    list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
+    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     requestAnimationFrame(() => {
       updateActive();
@@ -1271,12 +1282,12 @@ function moveUp(){
   if (last) list.insertBefore(last, list.firstElementChild);
 
   list.style.transition = "none";
-  list.style.transform = `translate3d(-50%, ${BASE_Y - STEP_Y}px, 0)`;
+  list.style.transform = `translateX(-50%) translateY(${BASE_Y - STEP_Y}px)`;
   void list.offsetHeight;
 
   requestAnimationFrame(() => {
     list.style.transition = `transform ${ANIM_MS}ms cubic-bezier(.32,.72,.23,1)`;
-    list.style.transform = `translate3d(-50%, ${BASE_Y}px, 0)`;
+    list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 
     withTransitionEnd(list, () => {
       updateActive();
@@ -1332,6 +1343,12 @@ frame.addEventListener("wheel", e => {
     dir > 0 ? moveDown() : moveUp();
   }
 }, { passive:false });
+
+/* ----------------------------- ZOOM BLOCK (iOS) ----------------------------- */
+
+["gesturestart","gesturechange","gestureend"].forEach(ev => {
+  document.addEventListener(ev, e => e.preventDefault(), { passive:false });
+});
 
 /* ----------------------------- ICON PRELOAD (SVG) ----------------------------- */
 
