@@ -1,4 +1,4 @@
-ü<!doctype html>
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8"/>
@@ -21,7 +21,7 @@
   --slot-font-base:0.86rem;
   --text-font-base:0.86rem;
 
-  /* abgeleitet */
+  /* derived */
   --item-h:calc(var(--item-h-base) * var(--ui-scale));
   --window-h:calc(var(--window-h-base) * var(--ui-scale));
   --arrow-size:calc(var(--arrow-size-base) * var(--ui-scale));
@@ -55,18 +55,15 @@
   /* email */
   --email-min-delay-ms:140;
 
+  /* restore stable mask */
   --mask-grad:linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 10%
-    rgba(0,0,0,0.85) 44%,
-    rgba(0,0,0,0.85) 54%,
-    transparent 10%,
+    rgba(0,0,0,0.85) 22%,
+    black 50%,
+    rgba(0,0,0,0.85) 78%,
     transparent 100%
   );
-
-  /* NEU: Slot-Nudge (lokale Slot-Pixel, wirkt nur über calcGeometry) */
-  --slot-nudge:0px;
 }
 
 /* RESET */
@@ -301,11 +298,9 @@ body{
 .icon-btn img{
   position:relative;
   z-index:1;
-
   width:var(--icon-size);
   height:var(--icon-size);
   object-fit:contain;
-
   opacity:1;
   transform:none;
   animation:none;
@@ -375,6 +370,7 @@ body{
 /* MOBILE */
 @media (max-width: 768px){
   :root{
+    /* keep your bigger text */
     --arrow-size-base:14px;
     --slot-font-base:1.35rem;
     --text-font-base:1.35rem;
@@ -383,21 +379,24 @@ body{
     --slot-w-pref:70%;
     --slot-w-max:400px;
 
-    /* wenn du Icons schon auf 80 gesetzt hattest: */
+    /* your current icon size choice */
     --icon-size-base:120px;
 
-    /* NEU: hier stellst du die Slot-Zentrierung ein (z.B. 16px runter) */
-    --slot-nudge:12px;
+    /* KEY: bigger step + tighter window so the upper word is clipped */
+    --item-h-base:56px;
+    --window-h-base:56px;
   }
 
+  /* move headline slightly up (only the logo) */
   .logo-img{
     width:62%;
-    margin-top:0%;
+    margin-top:-0.25rem;
     margin-bottom:0.8rem;
   }
 
+  /* keep layout rigid; mild scale (not tiny) */
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.82);
+    transform:translateY(var(--roll-lift)) scale(0.92);
   }
 
   .section-area{
@@ -408,18 +407,17 @@ body{
     background-size:contain;
   }
 
+  /* keep your arrow spacing choices */
   .arrow-up{margin-bottom:-8px;}
-  /* wenn du Arrow-Down bewusst tiefer wolltest: */
   .arrow-down{margin-top:20px;}
 
   .arrow{pointer-events:none;}
-
   .icon-btn[data-label]::after{display:none;}
 }
 
 @media (max-width: 420px){
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(1);
+    transform:translateY(var(--roll-lift)) scale(0.92);
   }
 }
 </style>
@@ -660,7 +658,7 @@ function calcGeometry(){
   const centerCenter = centerRect.top + centerRect.height / 2;
   const belowCenter  = belowRect.top + belowRect.height / 2;
 
-  /* NEU: Gesamt-Skalierung aus realer Slot-Höhe vs. CSS-Var (enthält card-scale UND slot-group-scale) */
+  /* Gesamt-Skalierung aus realer Slot-Höhe vs. CSS-Var (enthält card-scale UND slot-group-scale) */
   const winHcss = cssNum("--window-h", 65);
   let s = winHcss > 0 ? (winRect.height / winHcss) : (CARD_SCALE || 1);
   if (!Number.isFinite(s) || s <= 0.001) s = (CARD_SCALE || 1);
@@ -678,9 +676,6 @@ function calcGeometry(){
     const centerOffset = (winH - itemH) / 2;
     BASE_Y = -itemH + centerOffset;
   }
-
-  /* NEU: Nudge in lokalen Slot-Pixeln */
-  BASE_Y += cssNum("--slot-nudge", 0);
 
   list.style.transform = `translateX(-50%) translateY(${BASE_Y}px)`;
 }
