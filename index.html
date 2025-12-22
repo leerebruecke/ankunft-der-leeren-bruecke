@@ -7,18 +7,15 @@
 
 <style>
 :root{
-  --bg-root:#191813;
+  --bg-root:#191813;              /* UPDATE */
   --text-main:#f5f0e8;
 
   --ui-scale:1;
 
-  --slot-nudge: 0px;
-
-  /* NEW: move the whole slot mechanism down (arrows + window + word-list) */
-  --slot-group-shift: 15px;
-
-  /* NEW: slot animation duration (ms) – slowed ~30% */
-  --slot-anim-ms:220;
+  /* Slot tuning */
+  --slot-nudge: 0px;              /* bleibt als Feintrimm */
+  --slot-drop: 15px;              /* UPDATE: ganzer Slot-Block 15px nach unten */
+  --slot-anim-ms: 215;            /* UPDATE: ~+25% langsamer */
 
   /* geometry base */
   --item-h-base:42px;
@@ -43,6 +40,9 @@
   --slot-w-min:240px;
   --slot-w-pref:62%;
   --slot-w-max:600px;
+
+  /* section spacing */
+  --section-gap:1.2rem;
 
   /* typewriter */
   --type-char-ms:17;
@@ -84,6 +84,8 @@ html,body{
   font-family:'Lucida Console',monospace;
   user-select:none;
   overflow:hidden;
+
+  /* iOS: keine automatische Textskalierung */
   -webkit-text-size-adjust:100%;
 }
 
@@ -116,13 +118,11 @@ body{
   width:810px;
   height:1440px;
   overflow:hidden;
-  background:var(--bg-root);
 }
 
 .page-background{
   position:absolute;
   inset:0;
-  background-color:var(--bg-root);
   background:url("Grafiken/Br%C3%BCcke.png") center/100% 100% no-repeat;
   image-rendering:pixelated;
 }
@@ -151,9 +151,7 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-
-  /* shifted down by 15px via --slot-group-shift */
-  transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift)));
+  transform:translateY(calc(var(--roll-lift) + var(--slot-drop))); /* UPDATE */
 }
 
 .slot-window{
@@ -188,6 +186,11 @@ body{
   transition:opacity 150ms, transform 150ms;
   white-space:nowrap;
   padding:0 0.2rem;
+
+  /* hilft gegen hartes Abschneiden bei langen Labels */
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .slot-item.active{
@@ -219,7 +222,7 @@ body{
 
 /* SECTION AREA */
 .section-area{
-  margin-top:1.2rem;
+  margin-top:var(--section-gap);
   font-size:var(--text-font);
   opacity:1;
   transition:opacity 260ms ease-out;
@@ -262,6 +265,12 @@ body{
   margin-inline:auto;
   text-align:left;
   white-space:pre;
+}
+
+/* CTA line: zentriert */
+.tw-line.cta{
+  text-align:center;
+  opacity:1;
 }
 
 /* ICON ROW CONTAINER */
@@ -368,21 +377,24 @@ body{
   :root{
     --slot-nudge: 20px;
 
-    /* slowed further on mobile too */
-    --slot-anim-ms:300;
+    --slot-anim-ms: 230;            /* mobile: noch einen Tick ruhiger */
 
     --arrow-size-base:14px;
-    --slot-font-base:1.4rem;
-    --text-font-base:1.4rem;
+    --slot-font-base:1.35rem;
+    --text-font-base:1.35rem;
 
-    --slot-w-min:240px;
-    --slot-w-pref:84%;
-    --slot-w-max:560px;
+    /* mehr Slot-Breite gegen Abschneiden */
+    --slot-w-min:210px;
+    --slot-w-pref:78%;
+    --slot-w-max:460px;
 
     --icon-size-base:120px;
 
     --item-h-base:56px;
     --window-h-base:56px;
+
+    /* text/icons etwas höher */
+    --section-gap: calc(0.9rem - 10px);
   }
 
   .logo-img{
@@ -392,20 +404,17 @@ body{
   }
 
   .slot-group{
-    transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift))) scale(0.92);
-  }
-
-  .slot-item.active{
-    transform:scale(1);
+    transform:translateY(calc(var(--roll-lift) + var(--slot-drop))) scale(0.92);
   }
 
   .slot-item{
-    letter-spacing:0.07em;
-    padding:0 0.1rem;
+    letter-spacing:0.06em;
+    padding:0 0.12rem;
   }
 
-  .section-area{
-    margin-top:calc(0.9rem - 10px);
+  /* aktives Item nicht aufblasen (gegen Clip) */
+  .slot-item.active{
+    transform:scale(1);
   }
 
   .page-background{ background-size:contain; }
@@ -419,7 +428,7 @@ body{
 
 @media (max-width: 420px){
   .slot-group{
-    transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift))) scale(0.92);
+    transform:translateY(calc(var(--roll-lift) + var(--slot-drop))) scale(0.92);
   }
 }
 </style>
@@ -459,31 +468,33 @@ body{
 /* ----------------------------- PAGE DATA ----------------------------- */
 
 const PAGES = [
-  { id:"prelude-1", label:"…", text:"Du ziehst an einer einigenden Kraft vorbei…" },
-  { id:"prelude-2", label:"…", text:"Du spürst den Geist, aus dem alles stammt…" },
-  { id:"prelude-3", label:"…", text:"Raum umgibt dich…" },
-
   { id:"ellipsis-1", label:"…", text:"…" },
+
+  { id:"ellipsis-2", label:"…", text:"Du verlierst dich…" },
+  { id:"ellipsis-3", label:"…", text:"Du fällst durch den Geist, aus dem alles stammt…" },
+  { id:"ellipsis-4", label:"…", text:"Raum umgibt dich…" },
+
+  { id:"ellipsis-5", label:"…", text:"…" },
+
   { id:"leere", label:"…", text:"Es bleibt Leere…" },
   { id:"keine-worte", label:"…", text:"Keine Worte mehr…" },
   { id:"keine-wege", label:"…", text:"Keine Wege mehr…" },
 
-  { id:"ellipsis-2", label:"…", text:"…" },
-  { id:"ellipsis-3", label:"…", text:"…" },
-  { id:"ellipsis-4", label:"…", text:"…" },
-  { id:"ellipsis-5", label:"…", text:"…" },
+  { id:"ellipsis-6", label:"…", text:"…" },
+  { id:"ellipsis-7", label:"…", text:"…" },
+  { id:"ellipsis-8", label:"…", text:"…" },
 
   {
     id:"hohl",
     label:"Du bist ziemlich hohl, oder?",
     text:"Die, die für diesen Seitenabschnitt zuständig sind, haben bereits alles gesagt…",
-    aside:"Murmelnd: Zum Glück muss ich es nicht mehr tun."
+    aside:"(murmelnd) Zum Glück muss ich es nicht mehr tun."
   },
 
   {
     id:"no-side",
     label:"Man kann so nicht zur anderen Seite",
-    text:"Dafür musst du in die andere Richtung. So funktioniert das Spiel eben, frag mich nicht."
+    text:"Dafür musst du in die andere Richtung. So funktioniert das Spiel eben – frag mich nicht."
   },
 
   {
@@ -494,8 +505,8 @@ const PAGES = [
 Hier gibt es nichts für dich.`
   },
 
-  { id:"ellipsis-6", label:"…", text:"…" },
-  { id:"ellipsis-7", label:"…", text:"…" },
+  { id:"ellipsis-9", label:"…", text:"…" },
+  { id:"ellipsis-10", label:"…", text:"…" },
 
   {
     id:"stop",
@@ -503,10 +514,11 @@ Hier gibt es nichts für dich.`
     text:"Hier lang geht es nicht! Zurück! Sofort! Auf, auf und davon!"
   },
 
-  { id:"ellipsis-8", label:"…", text:"…" },
+  { id:"ellipsis-11", label:"…", text:"…" },
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
+  /* Der Anfang */
   {
     id:"klang",
     label:"Klang",
@@ -515,39 +527,13 @@ Hier gibt es nichts für dich.`
 Dunkelheit, die Licht gebar,
 das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
-    attrib:"Goethe (abgewandelt)",
+    attrib:"frei nach Goethe",
     icons:[
-      { file:"Spotify.png", href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ" },
-      { file:"Apple_Music.png", href:"https://music.apple.com/us/artist/leerebruecke/1830878673" },
-      { file:"YouTube_Music.png", href:"https://music.youtube.com/channel/UC9lKwSQ-gNTG1FM5K64ZHQA?si=IIzIUMERgRlcYp4l" },
-      { file:"SoundCloud.png", href:"https://soundcloud.com/leerebruecke-0" }
+      { file:"Spotify.svg", href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ" },
+      { file:"Apple_Music.svg", href:"https://music.apple.com/us/artist/leerebruecke/1830878673" },
+      { file:"YouTube_Music.svg", href:"https://music.youtube.com/channel/UC9lKwSQ-gNTG1FM5K64ZHQA?si=IIzIUMERgRlcYp4l" },
+      { file:"SoundCloud.svg", href:"https://soundcloud.com/leerebruecke-0" }
     ]
-  },
-
-  {
-    id:"spenden",
-    label:"Spendenbox",
-    text:"Geben ist ein Selbstverlust, aber kein Verlust an sich.",
-    attrib:"Kafka",
-    aside:"Für Klingen und Rüstung.",
-    icons:[
-      { file:"PayPal.png", href:"https://www.paypal.com/paypalme/leerebruecke" },
-      { file:"Patreon.png", href:"https://www.patreon.com/cw/leerebruecke" }
-    ]
-  },
-
-  {
-    id:"skizzen",
-    label:"Skizzen",
-    text:
-`„Ich glaube, man könnte die Skizzen verkaufen,
-sie zeigen meine Arbeit in ihrem Anfang.“`,
-    attrib:"Vincent",
-    aside:
-`100 € für eine Skizze der Leerebrücke? Menschen aus der Zukunft würden sich am Arm zwicken und
-zuschlagen.`,
-    testLinkWord:"zuschlagen",
-    testLinkHref:"https://www.vangoghmuseum.nl/"
   },
 
   {
@@ -556,14 +542,38 @@ zuschlagen.`,
     text:
 `Alles, was tief ist, liebt Masken; Bild und Erscheinung hasst es jedoch.
 Es bleibt der Tiefe Bürde,
-wie das, was im Grunde widerstrebend ist, dennoch kundgeben und mitteilen kann.“`,
-    attrib:"Nietzsche (abgewandelt)",
+wie sich das, was widerstrebend ist, dennoch kundgeben und mitteilen kann.`,
+    attrib:"nach Nietzsche",
     icons:[
-      { file:"TikTok.png", href:"https://www.tiktok.com/@leerebruecke" },
-      { file:"Instagram.png", href:"https://www.instagram.com/leerebruecke/" },
-      { file:"YouTube.png", href:"https://www.youtube.com/@leerebruecke" },
-      { file:"Twitch.png", href:"https://www.twitch.tv/leerebruecke" }
+      { file:"TikTok.svg", href:"https://www.tiktok.com/@leerebruecke" },
+      { file:"Instagram.svg", href:"https://www.instagram.com/leerebruecke/" },
+      { file:"YouTube.svg", href:"https://www.youtube.com/@leerebruecke" },
+      { file:"Twitch.svg", href:"https://www.twitch.tv/leerebruecke" }
     ]
+  },
+
+  {
+    id:"spenden",
+    label:"Spendenbox",
+    text:"",
+    aside:"Für Klingen und Rüstungen.",
+    icons:[
+      { file:"PayPal.svg", href:"https://www.paypal.com/paypalme/leerebruecke" },
+      { file:"Patreon.svg", href:"https://www.patreon.com/cw/leerebruecke" }
+    ]
+  },
+
+  {
+    id:"grafiken-1",
+    label:"Grafiken I",
+    text:
+`Die ersten Grafiken stammen aus alten Notizbüchern.
+Sie sind Anzeichen von Arbeit und Leben, Leid und Hoffnung.
+
+Sie unterscheiden sich in Verdichtung, Reife und Intention.
+Allesamt tragen sie meine Handschrift, die von jedem Stück eigenständig ausgeht.`,
+    ctaText:"Grafik erwerben",
+    ctaHref:"https://leerebruecke.lemonsqueezy.com"
   },
 
   {
@@ -588,8 +598,14 @@ blickt der Abgrund auch in dich hinein.`,
     email:"Kuumitori@gmail.com"
   },
 
-  { id:"orden", label:"Leerebrücke", italicAll:true, text:"Ein Orden mythopoetischer Geisterjäger." },
-  { id:"unter", label:"Unter", text:"Unter dir der Grund." }
+  {
+    id:"orden",
+    label:"Leerebrücke",
+    italicAll:true,
+    text:"Ein Geisterjägerorden."
+  },
+
+  { id:"unter", label:"Unter", text:"Unter dir der Abgrund." }
 ];
 
 /* ----------------------------- ELEMENTS ----------------------------- */
@@ -621,13 +637,7 @@ const cssNum = (name, fallback=0) => {
 let BASE_Y = 0;
 let STEP_Y = cssNum("--item-h", 42);
 let CARD_SCALE = 1;
-
-/* animation duration pulled from CSS */
-let ANIM_MS = 220;
-function updateAnimMs(){
-  const v = cssNum("--slot-anim-ms", 220);
-  ANIM_MS = Math.max(80, Math.min(900, v || 220));
-}
+let ANIM_MS = cssNum("--slot-anim-ms", 215); /* UPDATE */
 
 function updateCardScale(){
   if (!scaleInner) return;
@@ -794,18 +804,15 @@ function buildSegments(page){
     segs.push({ cls:"seg-attrib", text:`— ${page.attrib}`, preBlank:0, allowInline:false });
   }
   if (page.aside){
-    let asideText = page.aside;
-
-    if (page.testLinkWord && page.testLinkHref && typeof asideText === "string"){
-      const word = page.testLinkWord;
-      const href = page.testLinkHref;
-      asideText = asideText.replace(
-        new RegExp(`\\b${word}\\b`),
-        `[[LINK:${word}|${href}]]`
-      );
-    }
-
-    segs.push({ cls:"seg-aside", text: asideText, preBlank:1, allowInline:true });
+    segs.push({ cls:"seg-aside", text: page.aside, preBlank:1, allowInline:true });
+  }
+  if (page.ctaText && page.ctaHref){
+    segs.push({
+      cls:"seg-normal cta",
+      text:`[[LINK:${page.ctaText}|${page.ctaHref}]]`,
+      preBlank:1,
+      allowInline:true
+    });
   }
 
   return segs;
@@ -1343,7 +1350,6 @@ function preloadIcons(){
 /* ----------------------------- INIT ----------------------------- */
 
 buildSlotItems("klang");
-updateAnimMs();
 updateCardScale();
 calcGeometry();
 applyInputMode();
@@ -1354,7 +1360,7 @@ window.addEventListener("resize", () => {
 
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    updateAnimMs();
+    ANIM_MS = cssNum("--slot-anim-ms", 215); /* UPDATE: neu einlesen */
     updateCardScale();
     calcGeometry();
     updateActive();
@@ -1362,7 +1368,7 @@ window.addEventListener("resize", () => {
 });
 
 preloadIcons().finally(() => {
-  updateAnimMs();
+  ANIM_MS = cssNum("--slot-anim-ms", 215);
   calcGeometry();
   updateActive();
 });
