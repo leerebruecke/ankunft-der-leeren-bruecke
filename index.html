@@ -7,7 +7,6 @@
 
 <style>
 :root{
-  /* COLOR: match the “side bars” to your observed tone */
   --bg-root:#181818;
   --text-main:#f5f0e8;
 
@@ -15,8 +14,11 @@
 
   --slot-nudge: 0px;
 
-  /* NEW: slot animation duration (number = ms) */
-  --slot-anim-ms:170;
+  /* NEW: move the whole slot mechanism down (arrows + window + word-list) */
+  --slot-group-shift: 15px;
+
+  /* NEW: slot animation duration (ms) – slowed ~30% */
+  --slot-anim-ms:220;
 
   /* geometry base */
   --item-h-base:42px;
@@ -82,7 +84,6 @@ html,body{
   font-family:'Lucida Console',monospace;
   user-select:none;
   overflow:hidden;
-
   -webkit-text-size-adjust:100%;
 }
 
@@ -115,13 +116,13 @@ body{
   width:810px;
   height:1440px;
   overflow:hidden;
-  background:var(--bg-root); /* fill behind png */
+  background:var(--bg-root);
 }
 
 .page-background{
   position:absolute;
   inset:0;
-  background-color:var(--bg-root); /* fill behind png */
+  background-color:var(--bg-root);
   background:url("Grafiken/Br%C3%BCcke.png") center/100% 100% no-repeat;
   image-rendering:pixelated;
 }
@@ -150,7 +151,9 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  transform:translateY(var(--roll-lift));
+
+  /* shifted down by 15px via --slot-group-shift */
+  transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift)));
 }
 
 .slot-window{
@@ -365,14 +368,13 @@ body{
   :root{
     --slot-nudge: 20px;
 
-    /* slower slot animation only on mobile */
-    --slot-anim-ms:240;
+    /* slowed further on mobile too */
+    --slot-anim-ms:300;
 
     --arrow-size-base:14px;
     --slot-font-base:1.35rem;
     --text-font-base:1.35rem;
 
-    /* WIDEN slot window so headings don’t clip */
     --slot-w-min:240px;
     --slot-w-pref:84%;
     --slot-w-max:560px;
@@ -390,21 +392,18 @@ body{
   }
 
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.92);
+    transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift))) scale(0.92);
   }
 
-  /* active item: keep it calm on mobile (no extra blow-up) */
   .slot-item.active{
     transform:scale(1);
   }
 
-  /* Slightly tighter tracking on mobile to fit long headings */
   .slot-item{
     letter-spacing:0.07em;
     padding:0 0.1rem;
   }
 
-  /* Move icons + text up a bit (gap between arrow-down and content) */
   .section-area{
     margin-top:calc(0.9rem - 10px);
   }
@@ -420,7 +419,7 @@ body{
 
 @media (max-width: 420px){
   .slot-group{
-    transform:translateY(var(--roll-lift)) scale(0.92);
+    transform:translateY(calc(var(--roll-lift) + var(--slot-group-shift))) scale(0.92);
   }
 }
 </style>
@@ -623,11 +622,11 @@ let BASE_Y = 0;
 let STEP_Y = cssNum("--item-h", 42);
 let CARD_SCALE = 1;
 
-/* NEW: animation duration pulled from CSS (mobile override) */
-let ANIM_MS = 170;
+/* animation duration pulled from CSS */
+let ANIM_MS = 220;
 function updateAnimMs(){
-  const v = cssNum("--slot-anim-ms", 170);
-  ANIM_MS = Math.max(80, Math.min(600, v || 170));
+  const v = cssNum("--slot-anim-ms", 220);
+  ANIM_MS = Math.max(80, Math.min(900, v || 220));
 }
 
 function updateCardScale(){
