@@ -23,8 +23,8 @@
 
   /* size base */
   --arrow-size-base:14px;
-  --slot-font-base:0.86rem;
-  --text-font-base:0.86rem;
+  --slot-font-base:0.92rem;
+  --text-font-base:0.92rem;
 
   /* derived */
   --item-h:calc(var(--item-h-base) * var(--ui-scale));
@@ -50,7 +50,7 @@
   --fade-out-ms:120;
 
   /* icons */
-  --icon-size-base:70px;
+  --icon-size-base:76px;
   --icon-size:calc(var(--icon-size-base) * var(--ui-scale));
   --icon-fade-ms:900ms;
   --post-min-delay-ms:90;
@@ -167,6 +167,7 @@ body{
 .slot-list{
   position:absolute;
   left:50%;
+  width:100%;
   transform:translateX(-50%) translateY(0);
   display:flex;
   flex-direction:column;
@@ -187,10 +188,11 @@ body{
   white-space:nowrap;
   padding:0 0.2rem;
 
-  /* hilft gegen hartes Abschneiden bei langen Labels */
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  /* Lange Labels dürfen ihre volle Breite behalten. */
+  min-width:100%;
+  max-width:none;
+  overflow:visible;
+  text-overflow:clip;
 }
 
 .slot-item.active{
@@ -380,15 +382,15 @@ body{
     --slot-anim-ms: 230;            /* mobile: noch einen Tick ruhiger */
 
     --arrow-size-base:14px;
-    --slot-font-base:1.35rem;
-    --text-font-base:1.35rem;
+    --slot-font-base:1.41rem;
+    --text-font-base:1.41rem;
 
-    /* mehr Slot-Breite gegen Abschneiden */
-    --slot-w-min:210px;
-    --slot-w-pref:78%;
-    --slot-w-max:460px;
+    /* Volle Textfläche für lange Walzenüberschriften. */
+    --slot-w-min:420px;
+    --slot-w-pref:92%;
+    --slot-w-max:720px;
 
-    --icon-size-base:120px;
+    --icon-size-base:131px;
 
     --item-h-base:56px;
     --window-h-base:56px;
@@ -515,6 +517,7 @@ Hier gibt es nichts für dich.`
   },
 
   { id:"ellipsis-11", label:"…", text:"…" },
+  { id:"ellipsis-12", label:"…", text:"…" },
 
   { id:"ueber", label:"Über", text:"Über dir die Unendlichkeit." },
 
@@ -527,7 +530,6 @@ Hier gibt es nichts für dich.`
 Dunkelheit, die Licht gebar,
 das stolze Licht, das nachts erlischt,
 und Schein bleibt, solange Winter ist.`,
-    attrib:"frei nach Goethe",
     icons:[
       { file:"Spotify.svg", href:"https://open.spotify.com/intl-de/artist/1ZyrXFZ3Wpf7Moh037UqF8?si=_LtmoSoJTgKtMeu5vCqjJQ" },
       { file:"Apple_Music.svg", href:"https://music.apple.com/us/artist/leerebruecke/1830878673" },
@@ -543,7 +545,6 @@ und Schein bleibt, solange Winter ist.`,
 `Alles, was tief ist, liebt Masken; Bild und Erscheinung hasst es jedoch.
 Es bleibt der Tiefe Bürde,
 wie sich das, was widerstrebend ist, dennoch kundgeben und mitteilen kann.`,
-    attrib:"nach Nietzsche",
     icons:[
       { file:"TikTok.svg", href:"https://www.tiktok.com/@leerebruecke" },
       { file:"Instagram.svg", href:"https://www.instagram.com/leerebruecke/" },
@@ -564,19 +565,6 @@ wie sich das, was widerstrebend ist, dennoch kundgeben und mitteilen kann.`,
   },
 
   {
-    id:"grafiken-1",
-    label:"Grafiken I",
-    text:
-`Die ersten Grafiken stammen aus alten Notizbüchern.
-Sie sind Anzeichen von Arbeit und Leben, Leid und Hoffnung.
-
-Sie unterscheiden sich in Verdichtung, Reife und Intention.
-Allesamt tragen sie meine Handschrift, die von jedem Stück eigenständig ausgeht.`,
-    ctaText:"Grafik erwerben",
-    ctaHref:"https://leerebruecke.lemonsqueezy.com"
-  },
-
-  {
     id:"museum",
     label:"Museum",
     italicAll:true,
@@ -594,7 +582,6 @@ Die Spendenbox scheint jedoch einwandfrei zu funktionieren.`
 daß er nicht dabei zum Ungeheuer wird.
 Und wenn du lange in einen Abgrund blickst,
 blickt der Abgrund auch in dich hinein.`,
-    attrib:"Nietzsche",
     email:"Kuumitori@gmail.com"
   },
 
@@ -760,7 +747,7 @@ function iconLabelFromFile(file){
 
 /* ----------------------------- BUILD SLOT ----------------------------- */
 
-function buildSlotItems(centerId="klang"){
+function buildSlotItems(centerId="erscheinungsorte"){
   list.innerHTML = "";
   const frag = document.createDocumentFragment();
 
@@ -1202,14 +1189,24 @@ function updateActive(){
 
 /* ----------------------------- TRANSITION HELP ----------------------------- */
 
-function withTransitionEnd(el, fn){
-  const done = () => {
+function withTransitionEnd(el, fn, timeoutMs = ANIM_MS + 100){
+  let settled = false;
+  let timer = null;
+
+  const done = event => {
+    if (event && event.target !== el) return;
+    if (settled) return;
+    settled = true;
+
+    clearTimeout(timer);
     el.removeEventListener("transitionend", done);
     el.removeEventListener("transitioncancel", done);
     fn();
   };
-  el.addEventListener("transitionend", done, { once:true });
-  el.addEventListener("transitioncancel", done, { once:true });
+
+  el.addEventListener("transitionend", done);
+  el.addEventListener("transitioncancel", done);
+  timer = setTimeout(done, timeoutMs);
 }
 
 /* ----------------------------- MOVE LOGIC ----------------------------- */
@@ -1349,7 +1346,7 @@ function preloadIcons(){
 
 /* ----------------------------- INIT ----------------------------- */
 
-buildSlotItems("klang");
+buildSlotItems("erscheinungsorte");
 updateCardScale();
 calcGeometry();
 applyInputMode();
